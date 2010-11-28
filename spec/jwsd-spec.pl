@@ -65,7 +65,7 @@ my $ref = {
         reference is resolved and how are an implemention
         detail and out of the scope of this spec.
     ],
-    type        => "object",
+    type        => "schema",
     properties  => {
         '$ref' => { type => "string", format => "uri" }
     }
@@ -85,7 +85,7 @@ my $link = {
         This is the 'link' type for the hyper schema
         which represents links for resources.
     ],
-    type        => "object",
+    type        => "schema",
     properties  => {
         relation => {
             type        => "string",
@@ -189,7 +189,7 @@ my $any = {
         base elements that are in all schemas, both
         required and optional.
     ],
-    type        => "object",
+    type        => "schema",
     properties  => {
         type => { type => "string", enum => [ "any" ] }
     },
@@ -228,7 +228,7 @@ my $null = {
         so much the absence of a value, but a value that
         explicity represents no value.
     ],
-    type        => "object",
+    type        => "schema",
     extends     => { '$ref' => "schema/types/any" },
     properties  => {
         type => { type => "string", enum => [ "null" ] }
@@ -249,7 +249,7 @@ my $boolean = {
         provide a canonical representation of true/false
         so as to remove those language specific quirks.
     ],
-    type        => "object",
+    type        => "schema",
     extends     => { '$ref' => "schema/types/any" },
     properties  => {
         type => { type => "string", enum => [ "boolean" ] }
@@ -269,7 +269,7 @@ my $number = {
         to possibly put a cap on this at a later date
         to help improve interoperability.
     ],
-    type        => "object",
+    type        => "schema",
     extends     => { '$ref' => "schema/types/any" },
     properties  => {
         type => { type => "string", enum => [ "number" ] },
@@ -299,7 +299,7 @@ my $integer = {
         such that they will only operate on valid integer
         values.
     ],
-    type        => "object",
+    type        => "schema",
     extends     => { '$ref' => "schema/types/number" },
     properties  => {
         type => { type => "string", enum => [ "integer" ] },
@@ -332,7 +332,7 @@ my $string = {
         cast a given value as a given type so as to make
         for better interoperability.
     ],
-    type        => "object",
+    type        => "schema",
     extends     => { '$ref' => "schema/types/any" },
     properties  => {
         type => { type => "string", enum => [ "string" ] },
@@ -365,7 +365,7 @@ my $array = {
         optional 'items' property it is possible to
         constrain the list to be more homogenous.
     ],
-    type        => "object",
+    type        => "schema",
     extends     => { '$ref' => "schema/types/any" },
     properties  => {
         type => { type => "string", enum => [ "array" ] },
@@ -396,7 +396,7 @@ my $object = {
         associative array in PHP, a Hashtable, a Map,
         all of which are essentially the same thing.
     ],
-    type        => "object",
+    type        => "schema",
     extends     => { '$ref' => "schema/types/any" },
     properties  => {
         type => { type => "string", enum => [ "object" ] },
@@ -437,6 +437,10 @@ my $object = {
     }
 };
 
+## ------------------------------------------------------------------
+## The Bootstrap type
+## ------------------------------------------------------------------
+
 my $schema = {
     id          => "schema/types/schema",
     title       => "The 'Schema' type schema",
@@ -444,7 +448,7 @@ my $schema = {
         This is a schema for the 'schema' type, it is
         composed entirely of turtles.
     ],
-    type        => "object",
+    type        => "schema",
     extends     => { '$ref' => "schema/types/object" }
 };
 
