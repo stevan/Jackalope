@@ -5,6 +5,7 @@
 ## This is the spec for a Jackalope Web Service description, it is
 ## written itself as a Jackalope Web Service description and so
 ## should be able to parse and validate itself.
+##
 ## It is best to read this entire document from top to bottom, and
 ## then to re-read it again, in order to fully understand the spec.
 ## ------------------------------------------------------------------
@@ -27,6 +28,7 @@ my $ref = {
         Additionally the value of '#' is also
         acceptable to indicate a reference to
         the containing schema.
+
         When a reference is encountered, it should
         be resolved and replaced by the value it
         references. There are no explict dereferencing
@@ -61,9 +63,11 @@ my $link = {
             description => q[
                 The relation of the link to the resource described
                 by the schema. Typical values for this are:
+
                     self        - relating to an instance of the schema
                     describedby - a link the schema itself
                     create      - a link used to create instances
+
                 Currently other values are also acceptable, but
                 the spec reserves the right to tighten this up at
                 some point.
@@ -77,9 +81,13 @@ my $link = {
                 case of these templates the variables should be
                 resolved in the context of the object instance.
                 This means that a template like so:
+
                     /procuct/{id}/view
+
                 should be resolved to be this:
+
                     /product/1234/view
+
                 given an object with an 'id' property of 1234.
             ]
         },
