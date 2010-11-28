@@ -10,6 +10,35 @@
 ## then to re-read it again, in order to fully understand the spec.
 ## ------------------------------------------------------------------
 
+# for readability
+sub true  () { 1 }
+sub false () { 1 }
+
+## formatters needed for bootstrap
+my @valid_formatters = qw(
+    uri
+    url_template
+    regex
+);
+
+my @valid_hyperlink_relation = qw(
+    self
+    described_by
+    create
+);
+
+my @valid_types = qw(
+    any
+        null
+        boolean
+        number
+            integer
+        string
+        array
+        object
+            schema
+);
+
 ## ------------------------------------------------------------------
 ## Reference Schema
 ## ------------------------------------------------------------------
@@ -38,7 +67,7 @@ my $ref = {
     ],
     type        => "object",
     properties  => {
-        '$ref' => { type => "string" }
+        '$ref' => { type => "string", format => "uri" }
     }
 };
 
@@ -58,23 +87,20 @@ my $link = {
     ],
     type        => "object",
     properties  => {
-        rel  => {
+        relation => {
             type        => "string",
+            enum        => [ @valid_hyperlink_relation ],
             description => q[
                 The relation of the link to the resource described
-                by the schema. Typical values for this are:
-
-                    self        - relating to an instance of the schema
-                    describedby - a link the schema itself
-                    create      - a link used to create instances
-
-                Currently other values are also acceptable, but
-                the spec reserves the right to tighten this up at
-                some point.
+                by the schema. Currently available values are:
+                    self         - relating to an instance of the schema
+                    described_by - a link the schema itself
+                    create       - a link used to create instances
             ]
         },
         href => {
             type        => "string",
+            format      => "url_template",
             description => q[
                 This is a URI for the resource, it may also
                 be a URI template containing variables. In the
@@ -82,7 +108,7 @@ my $link = {
                 resolved in the context of the object instance.
                 This means that a template like so:
 
-                    /procuct/{id}/view
+                    /product/{id}/view
 
                 should be resolved to be this:
 
@@ -92,9 +118,9 @@ my $link = {
             ]
         },
     },
-    additionalProperties => {
-        targetSchema => {
-            type        => "object",
+    additional_properties => {
+        target_schema => {
+            type        => "schema",
             description => q[
                 This is a schema (or a reference to a schema),
                 of the resource being linked to. Typically this
@@ -103,7 +129,7 @@ my $link = {
             ]
         },
         schema       => {
-            type        => "object",
+            type        => "schema",
             description => q[
                 This is a schema (or a reference to a schema)
                 of the submission data that will be accepted
@@ -167,12 +193,12 @@ my $any = {
     properties  => {
         type => { type => "string", enum => [ "any" ] }
     },
-    additionalProperties => {
-        id          => { type => "string", description => "This should be a URI like string, but can be any kind of unique identifier" },
+    additional_properties => {
+        id          => { type => "string", format => "uri", description => "This should be a URI" },
         title       => { type => "string", description => "The human readable title of a given schema" },
         description => { type => "string", description => "A short human readable description of the schema" },
         extends     => {
-            type        => "object",
+            type        => "schema",
             description => q[
                 This is a schema (or a reference to a schema)
                 represented as an 'object' instance. The exact
@@ -182,7 +208,7 @@ my $any = {
         links => {
             type        => "array",
             items       => { '$ref' => "schema/core/hyperlink" },
-            uniqueItems => "true",
+            is_unique   => true,
             description => q[
                 This is an array of 'link' objects, the purpose
                 of which is to provide a way to map services
@@ -248,15 +274,15 @@ my $number = {
     properties  => {
         type => { type => "string", enum => [ "number" ] },
     },
-    additionalProperties => {
-        minimum          => { type => "number", description => "The minimum value that will be accepted" },
-        maximum          => { type => "number", description => "The maximum value that will be accepted" },
-        exclusiveMinimum => { type => "boolean", description => "Boolean to indicate if the minimum number should include itself" },
-        exclusiveMaximum => { type => "boolean", description => "Boolean to indicate if the maximum number should include itself" },
+    additional_properties => {
+        less_than             => { type => "number", description => "A number must be less than this value" },
+        less_than_or_equal    => { type => "number", description => "A number must be less than or equal to this value" },
+        greater_than          => { type => "number", description => "A number must be greater than this value" },
+        greater_than_or_equal => { type => "number", description => "A number must be greater than or equal to this value" }
         enum             => {
             type        => "array",
             items       => { type => "number" },
-            uniqueItems => "true",
+            is_unique   => true,
             description => "This is an array of possible acceptable values, it should contain no duplicates"
         }
     }
@@ -278,13 +304,15 @@ my $integer = {
     properties  => {
         type => { type => "string", enum => [ "integer" ] },
     },
-    additionalProperties => {
-        minimum => { type => "integer", description => "The minimum value that will be accepted" },
-        maximum => { type => "integer", description => "The maximum value that will be accepted" }
+    additional_properties => {
+        less_than             => { type => "integer", description => "A integer must be less than this value" },
+        less_than_or_equal    => { type => "integer", description => "A integer must be less than or equal to this value" },
+        greater_than          => { type => "integer", description => "A integer must be greater than this value" },
+        greater_than_or_equal => { type => "integer", description => "A integer must be greater than or equal to this value" }
         enum    => {
             type        => "array",
             items       => { type => "integer" },
-            uniqueItems => "true",
+            is_unique   => true,
             description => "This is an array of possible acceptable values, it should contain no duplicates"
         },
     }
@@ -309,14 +337,19 @@ my $string = {
     properties  => {
         type => { type => "string", enum => [ "string" ] },
     },
-    additionalProperties => {
-        minLength => { type => "number", description => "The minimum length of the string given" },
-        maxLength => { type => "number", description => "The maximum length of the string given" },
-        pattern   => { type => "string", description => "A regular expression that can be checked against the string" },
-        enum      => {
+    additional_properties => {
+        min_length => { type => "number", description => "The minimum length of the string given" },
+        max_length => { type => "number", description => "The maximum length of the string given" },
+        pattern    => { type => "string", format => "regex", description => "A regular expression that can be checked against the string" },
+        format     => {
+            type        => "string",
+            enum        => [ @valid_formatters ]
+            description => "This is one of a set of built-in formatters",
+        },
+        enum       => {
             type        => "array",
             items       => { type => "string" },
-            uniqueItems => "true",
+            is_unique   => true,
             description => "This is an array of possible acceptable values, it should contain no duplicates"
         },
     }
@@ -337,12 +370,12 @@ my $array = {
     properties  => {
         type => { type => "string", enum => [ "array" ] },
     },
-    additionalProperties => {
-        minItems    => { type => "integer", description => "The minimum number of items in the array" },
-        maxItems    => { type => "integer", description => "The maximum number of items in the array" },
-        uniqueItems => { type => "boolean", description => "A boolean to indicate of the list should contain no duplicates" },
-        items       => {
-            type        => "object",
+    additional_properties => {
+        min_items => { type => "integer", description => "The minimum number of items in the array" },
+        max_items => { type => "integer", description => "The maximum number of items in the array" },
+        is_unique => { type => "boolean", description => "A boolean to indicate of the list should contain no duplicates" },
+        items     => {
+            type        => "schema",
             description => q[
                 This is a schema (or a reference to a schema)
                 represented as an 'object' instance, which will
@@ -368,9 +401,18 @@ my $object = {
     properties  => {
         type => { type => "string", enum => [ "object" ] },
     },
-    additionalProperties => {
-        properties           => {
+    additional_properties => {
+        items      => {
+            type        => "schema",
+            description => q[
+                This is a schema (or a reference to a schema)
+                represented as an 'object' instance, which will
+                be used to validate all the values in the object.
+            ]
+        },
+        properties => {
             type        => "object",
+            items       => { type => "schema" },
             description => q[
                 This is a set of key/value pairs where the
                 key is a property name and the value is
@@ -380,8 +422,9 @@ my $object = {
                 present in order to pass validation.
             ]
         },
-        additionalProperties => {
+        additional_properties => {
             type        => "object",
+            items       => { type => "schema" },
             description => q[
                 This is a set of key/value pairs where the
                 key is a property name and the value is
@@ -392,6 +435,17 @@ my $object = {
             ]
         }
     }
+};
+
+my $schema = {
+    id          => "schema/types/schema",
+    title       => "The 'Schema' type schema",
+    description => q[
+        This is a schema for the 'schema' type, it is
+        composed entirely of turtles.
+    ],
+    type        => "object",
+    extends     => { '$ref' => "schema/types/object" }
 };
 
 ## ------------------------------------------------------------------
