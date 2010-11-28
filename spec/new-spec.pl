@@ -1,49 +1,200 @@
+
+## ------------------------------------------------------------------
+## Jackalope Web Service Framework Description Spec
+## ------------------------------------------------------------------
+## This is the spec for a Jackalope Web Service description, it is
+## written itself as a Jackalope Web Service description and so
+## should be able to parse and validate itself.
+## It is best to read this entire document from top to bottom, and
+## then to re-read it again, in order to fully understand the spec.
+## ------------------------------------------------------------------
+
+
 ## ------------------------------------------------------------------
 ## Reference Schema
+## ------------------------------------------------------------------
+## The reference schema is needed in order to improve the
+## re-usability of schemas, so therefore is added as a
+## core element of the spec.
 ## ------------------------------------------------------------------
 
 my $ref = {
     id          => "schema/core/ref",
-    title       => "Reference Schema",
-    description => "This is the 'reference' type for JSON",
+    title       => "The reference schema",
+    description => q[
+        This is an object to represent a 'reference'
+        to another object. By convention, the value
+        stored in $ref is the 'id' of another object.
+        Additionally the value of '#' is also
+        acceptable to indicate a reference to
+        the containing schema.
+        When a reference is encountered, it should
+        be resolved and replaced by the value it
+        references. There are no explict dereferencing
+        operations. The exact details of when a
+        reference is resolved and how are an implemention
+        detail and out of the scope of this spec.
+    ],
     type        => "object",
     properties  => {
-        '$ref'  => { type => "string" }
+        '$ref' => { type => "string" }
     }
 };
+
+## ------------------------------------------------------------------
+## Hyperlink Schema
+## ------------------------------------------------------------------
+## The Hyperlink schema is an additional schema which provides a way
+## to talk about and describe links for resources.
+## ------------------------------------------------------------------
+
+my $link = {
+    id          => "schema/core/hyperlink",
+    title       => "The 'Link' schema",
+    description => q[
+        This is the 'link' type for the hyper schema
+        which represents links for resources.
+    ],
+    type        => "object",
+    properties  => {
+        rel  => {
+            type        => "string",
+            description => q[
+                The relation of the link to the resource described
+                by the schema. Typical values for this are:
+                    self        - relating to an instance of the schema
+                    describedby - a link the schema itself
+                    create      - a link used to create instances
+                Currently other values are also acceptable, but
+                the spec reserves the right to tighten this up at
+                some point.
+            ]
+        },
+        href => {
+            type        => "string",
+            description => q[
+                This is a URI for the resource, it may also
+                be a URI template containing variables. In the
+                case of these templates the variables should be
+                resolved in the context of the object instance.
+                This means that a template like so:
+                    /procuct/{id}/view
+                should be resolved to be this:
+                    /product/1234/view
+                given an object with an 'id' property of 1234.
+            ]
+        },
+    },
+    additionalProperties => {
+        targetSchema => {
+            type        => "object",
+            description => q[
+                This is a schema (or a reference to a schema),
+                of the resource being linked to. Typically this
+                will be just { '$ref' => '#' } to indicate that
+                it refers to the schema it is contained within.
+            ]
+        },
+        schema       => {
+            type        => "object",
+            description => q[
+                This is a schema (or a reference to a schema)
+                of the submission data that will be accepted
+                by this link. In the case of a POST or PUT
+                method, the data is expected in the given
+                transport format. In the case of GET, this
+                should be an 'object' type schema and the
+                query string parameters should be checked
+                against it.
+            ]
+        }
+        method       => {
+            type        => "string",
+            enum        => [ "GET", "POST", "PUT", "DELETE" ],
+            description => "The HTTP method expected by this link"
+        },
+        title        => { type => "string", description => "The human readable title of a given link" },
+        description  => { type => "string", description => "A short human readable description of the link" },
+        metadata     => {
+            type        => "object",
+            description => q[
+                This is just a place for random additional metadata
+                that might be useful for your given implementation.
+                This is totally free form and can be anything you want.
+            ]
+        }
+    }
+};
+
 
 
 ## ------------------------------------------------------------------
 ## Core Schema Types
 ## ------------------------------------------------------------------
+## The schemas are split up into their respective types. The basic
+## types represented here are those of JSON objects, but they should
+## be compatible with any other data representation language out
+## there, and easily implemented in any host language. The basic
+## type structure is as follows:
+##   Any
+##       Null
+##       Boolean
+##       Number
+##           Integer
+##       String
+##       Array[ T ]
+##       Object[ String, T ]
+## ------------------------------------------------------------------
 
 my $any = {
     id          => "schema/types/any",
-    title       => "Any type Schema",
-    description => "This is a schema for the 'any' type",
+    title       => "The 'Any' type schema",
+    description => q[
+        This is a schema for the 'any' type, it is the
+        base schema type, all other schema types extend
+        this one. Therefore this schema defines the
+        base elements that are in all schemas, both
+        required and optional.
+    ],
     type        => "object",
     properties  => {
         type => { type => "string", enum => [ "any" ] }
     },
     additionalProperties => {
-        id          => { type => "string" }, ## might need a pattern for a URI here
-        title       => { type => "string" },
-        description => { type => "string" },
-        extends     => { type => "object" }  ## a ref is just a specially processed object
-                                             ## and a schema is just an object
-        ## The Hyper Schema ...
+        id          => { type => "string", description => "This should be a URI like string, but can be any kind of unique identifier" },
+        title       => { type => "string", description => "The human readable title of a given schema" },
+        description => { type => "string", description => "A short human readable description of the schema" },
+        extends     => {
+            type        => "object",
+            description => q[
+                This is a schema (or a reference to a schema)
+                represented as an 'object' instance. The exact
+                details of extension are described elsewhere.
+            ]
+        },
         links => {
             type        => "array",
-            items       => { '$ref' => "schema/hyper/link" },
-            uniqueItems => "true"
+            items       => { '$ref' => "schema/core/hyperlink" },
+            uniqueItems => "true",
+            description => q[
+                This is an array of 'link' objects, the purpose
+                of which is to provide a way to map services
+                to the objects described in a schema. In OOP terms,
+                you can think of them as methods, while the schema
+                describes the instance structure.
+            ]
         }
     }
 };
 
 my $null = {
     id          => "schema/types/null",
-    title       => "Null type Schema",
-    description => "This is a schema for the 'null' type",
+    title       => "The 'Null' type schema",
+    description => q[
+        This is a schema for the 'null' type, it is not
+        so much the absence of a value, but a value that
+        explicity represents no value.
+    ],
     type        => "object",
     extends     => { '$ref' => "schema/types/any" },
     properties  => {
@@ -53,8 +204,18 @@ my $null = {
 
 my $boolean = {
     id          => "schema/types/boolean",
-    title       => "Boolean type Schema",
-    description => "This is a schema for the 'boolean' type",
+    title       => "The 'Boolean' type schema",
+    description => q[
+        This is a schema for the 'boolean' type, a simple
+        true/false value. However the details of what is
+        considered true and what is considered false
+        are different for different languages and this
+        schema should take that into account based on the
+        language it is validating. It is important to note
+        that a transport format (JSON, XML, etc.) should
+        provide a canonical representation of true/false
+        so as to remove those language specific quirks.
+    ],
     type        => "object",
     extends     => { '$ref' => "schema/types/any" },
     properties  => {
@@ -64,127 +225,170 @@ my $boolean = {
 
 my $number = {
     id          => "schema/types/number",
-    title       => "Number type Schema",
-    description => "This is a schema for the 'number' type",
+    title       => "The 'Number' type schema",
+    description => q[
+        This is a schema for the 'number' type, which is
+        a numeric value that includes floating point
+        numbers as well as whole numbers. The level of
+        floating point precision and the possible size
+        of a number are platform and implementation
+        specific. However the spec reserves the right
+        to possibly put a cap on this at a later date
+        to help improve interoperability.
+    ],
     type        => "object",
     extends     => { '$ref' => "schema/types/any" },
     properties  => {
         type => { type => "string", enum => [ "number" ] },
     },
     additionalProperties => {
-        minimum          => { type => "number" },
-        maximum          => { type => "number" },
-        exclusiveMinimum => { type => "boolean" },
-        exclusiveMaximum => { type => "boolean" },
+        minimum          => { type => "number", description => "The minimum value that will be accepted" },
+        maximum          => { type => "number", description => "The maximum value that will be accepted" },
+        exclusiveMinimum => { type => "boolean", description => "Boolean to indicate if the minimum number should include itself" },
+        exclusiveMaximum => { type => "boolean", description => "Boolean to indicate if the maximum number should include itself" },
         enum             => {
             type        => "array",
             items       => { type => "number" },
-            uniqueItems => "true"
+            uniqueItems => "true",
+            description => "This is an array of possible acceptable values, it should contain no duplicates"
         }
     }
 };
 
 my $integer = {
     id          => "schema/types/integer",
-    title       => "Integer type Schema",
-    description => "This is a schema for the 'integer' type",
+    title       => "The 'Integer' type schema",
+    description => q[
+        This is a schema for the 'integer' type, which is
+        an extension of the 'number' type to not include
+        floating point numbers. It handles all the same
+        additional properties, but overrides them here
+        such that they will only operate on valid integer
+        values.
+    ],
     type        => "object",
     extends     => { '$ref' => "schema/types/number" },
     properties  => {
         type => { type => "string", enum => [ "integer" ] },
     },
     additionalProperties => {
-        minimum => { type => "integer" },
-        maximum => { type => "integer" }
+        minimum => { type => "integer", description => "The minimum value that will be accepted" },
+        maximum => { type => "integer", description => "The maximum value that will be accepted" }
         enum    => {
             type        => "array",
             items       => { type => "integer" },
-            uniqueItems => "true"
+            uniqueItems => "true",
+            description => "This is an array of possible acceptable values, it should contain no duplicates"
         },
     }
 };
 
 my $string = {
     id          => "schema/types/string",
-    title       => "String type Schema",
-    description => "This is a schema for the 'string' type",
+    title       => "The 'String' type schema",
+    description => q[
+        This is a schema for the 'string' type, which is
+        any value that is explcitly cast as a string. This
+        means that it can be an entirely numeric string,
+        as long it is cast as a string based on the details
+        of the implementation language. As with 'boolean'
+        values, any transport format (JSON, XML, etc.) is
+        expected to provide some kind of way to explicitly
+        cast a given value as a given type so as to make
+        for better interoperability.
+    ],
     type        => "object",
     extends     => { '$ref' => "schema/types/any" },
     properties  => {
         type => { type => "string", enum => [ "string" ] },
     },
     additionalProperties => {
-        minLength => { type => "number" },
-        maxLength => { type => "number" },
-        pattern   => { type => "string" },
+        minLength => { type => "number", description => "The minimum length of the string given" },
+        maxLength => { type => "number", description => "The maximum length of the string given" },
+        pattern   => { type => "string", description => "A regular expression that can be checked against the string" },
         enum      => {
             type        => "array",
             items       => { type => "string" },
-            uniqueItems => "true"
+            uniqueItems => "true",
+            description => "This is an array of possible acceptable values, it should contain no duplicates"
         },
     }
 };
 
 my $array = {
     id          => "schema/types/array",
-    title       => "Array type Schema",
-    description => "This is a schema for the 'array' type",
+    title       => "The 'Array' type schema",
+    description => q[
+        This is a schema for the 'array' type, which is
+        basically just a list of other values. The list
+        by default are heterogenous, but using the
+        optional 'items' property it is possible to
+        constrain the list to be more homogenous.
+    ],
     type        => "object",
     extends     => { '$ref' => "schema/types/any" },
     properties  => {
         type => { type => "string", enum => [ "array" ] },
     },
     additionalProperties => {
-        items       => { type => "object" },
-        minItems    => { type => "integer" },
-        maxItems    => { type => "integer" },
-        uniqueItems => { type => "boolean" }
+        minItems    => { type => "integer", description => "The minimum number of items in the array" },
+        maxItems    => { type => "integer", description => "The maximum number of items in the array" },
+        uniqueItems => { type => "boolean", description => "A boolean to indicate of the list should contain no duplicates" },
+        items       => {
+            type        => "object",
+            description => q[
+                This is a schema (or a reference to a schema)
+                represented as an 'object' instance, which will
+                be used to validate all the elements in a list.
+            ]
+        },
     }
 };
 
 my $object = {
     id          => "schema/types/object",
-    title       => "Object type Schema",
-    description => "This is a schema for the 'object' type",
+    title       => "The 'Object' type schema",
+    description => q[
+        This is a schema for the 'object' type, which is
+        a set of key/value pairs. The term 'object' is
+        derived from Javascript, but this is the same as
+        a hash in Perl, a dictionary in Python, an
+        associative array in PHP, a Hashtable, a Map,
+        all of which are essentially the same thing.
+    ],
     type        => "object",
     extends     => { '$ref' => "schema/types/any" },
     properties  => {
         type => { type => "string", enum => [ "object" ] },
     },
     additionalProperties => {
-        properties           => { type => "object" },
-        additionalProperties => { type => "object" }
+        properties           => {
+            type        => "object",
+            description => q[
+                This is a set of key/value pairs where the
+                key is a property name and the value is
+                a schema (or a reference to a schema)
+                represented as an 'object' instance. All
+                these properties are required and must be
+                present in order to pass validation.
+            ]
+        },
+        additionalProperties => {
+            type        => "object",
+            description => q[
+                This is a set of key/value pairs where the
+                key is a property name and the value is
+                a schema (or a reference to a schema)
+                represented as an 'object' instance. These
+                properties however are optional and do not
+                need to exist in order to pass validation.
+            ]
+        }
     }
 };
 
 ## ------------------------------------------------------------------
-## Hyper Schema
+## The End
 ## ------------------------------------------------------------------
-
-my $link = {
-    id          => "schema/hyper/link",
-    title       => "Link Hyper Schema",
-    description => "This is the 'link' type for the hyper schema",
-    type        => "object",
-    properties  => {
-        rel  => { type => "string" },
-        href => { type => "string" },
-    },
-    additionalProperties => {
-        # schema of the resource linked to ...
-        targetSchema => { type => "object" },
-        # submission link properties ...
-        schema       => { type => "object" },
-        method       => { type => "string", enum => [ "GET", "POST", "PUT", "DELETE" ] },
-        # additional data to support Service discoverability
-        title        => { type => "string" },
-        description  => { type => "string" },
-        metadata     => { type => "object" }
-    }
-};
-
-## ------------------------------------------------------------------
-
-
 
 
