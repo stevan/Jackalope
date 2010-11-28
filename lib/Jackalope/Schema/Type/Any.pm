@@ -23,6 +23,10 @@ has 'description' => ( is => 'ro', isa => 'Str' );
 has 'extends'     => ( traits => [ 'Clone' ], is => 'ro', isa => 'Jackalope::SchemaOrRef' );
 has 'links'       => ( traits => [ 'Clone' ], is => 'ro', isa => 'Jackalope::SchemaLinks' );
 
+# TODO
+# figure out how extends works
+# - SL
+
 has '_type_constraint' => (
     is        => 'ro',
     isa       => 'Moose::Meta::TypeConstraint',
