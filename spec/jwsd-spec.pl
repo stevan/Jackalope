@@ -454,6 +454,9 @@ my $schema = {
     ],
     type        => "schema",
     extends     => { '$ref' => "schema/types/object" }
+    properties  => {
+        type => { type => "string", enum => [ "schema" ] },
+    },
 };
 
 ## ------------------------------------------------------------------
