@@ -1,3 +1,7 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
 
 ## ------------------------------------------------------------------
 ## Jackalope Web Service Framework Description Spec
@@ -17,7 +21,7 @@ sub false () { 1 }
 ## formatters needed for bootstrap
 my @valid_formatters = qw(
     uri
-    url_template
+    uri_template
     regex
 );
 
@@ -78,7 +82,7 @@ my $ref = {
 ## to talk about and describe links for resources.
 ## ------------------------------------------------------------------
 
-my $link = {
+my $hyperlink = {
     id          => "schema/core/hyperlink",
     title       => "The 'Link' schema",
     description => q[
@@ -100,7 +104,7 @@ my $link = {
         },
         href => {
             type        => "string",
-            format      => "url_template",
+            format      => "uri_template",
             description => q[
                 This is a URI for the resource, it may also
                 be a URI template containing variables. In the
@@ -140,7 +144,7 @@ my $link = {
                 query string parameters should be checked
                 against it.
             ]
-        }
+        },
         method       => {
             type        => "string",
             enum        => [ "GET", "POST", "PUT", "DELETE" ],
@@ -278,7 +282,7 @@ my $number = {
         less_than             => { type => "number", description => "A number must be less than this value" },
         less_than_or_equal    => { type => "number", description => "A number must be less than or equal to this value" },
         greater_than          => { type => "number", description => "A number must be greater than this value" },
-        greater_than_or_equal => { type => "number", description => "A number must be greater than or equal to this value" }
+        greater_than_or_equal => { type => "number", description => "A number must be greater than or equal to this value" },
         enum             => {
             type        => "array",
             items       => { type => "number" },
@@ -308,7 +312,7 @@ my $integer = {
         less_than             => { type => "integer", description => "A integer must be less than this value" },
         less_than_or_equal    => { type => "integer", description => "A integer must be less than or equal to this value" },
         greater_than          => { type => "integer", description => "A integer must be greater than this value" },
-        greater_than_or_equal => { type => "integer", description => "A integer must be greater than or equal to this value" }
+        greater_than_or_equal => { type => "integer", description => "A integer must be greater than or equal to this value" },
         enum    => {
             type        => "array",
             items       => { type => "integer" },
@@ -343,7 +347,7 @@ my $string = {
         pattern    => { type => "string", format => "regex", description => "A regular expression that can be checked against the string" },
         format     => {
             type        => "string",
-            enum        => [ @valid_formatters ]
+            enum        => [ @valid_formatters ],
             description => "This is one of a set of built-in formatters",
         },
         enum       => {
@@ -446,7 +450,7 @@ my $schema = {
     title       => "The 'Schema' type schema",
     description => q[
         This is a schema for the 'schema' type, it is
-        composed entirely of turtles.
+        composed entirely of turtles all the way down.
     ],
     type        => "schema",
     extends     => { '$ref' => "schema/types/object" }
@@ -455,5 +459,4 @@ my $schema = {
 ## ------------------------------------------------------------------
 ## The End
 ## ------------------------------------------------------------------
-
 
