@@ -69,7 +69,7 @@ my $ref = {
         reference is resolved and how are an implemention
         detail and out of the scope of this spec.
     ],
-    type        => "schema",
+    type        => "object",
     properties  => {
         '$ref' => { type => "string", format => "uri" }
     }
@@ -89,7 +89,7 @@ my $hyperlink = {
         This is the 'link' type for the hyper schema
         which represents links for resources.
     ],
-    type        => "schema",
+    type        => "object",
     properties  => {
         relation => {
             type        => "string",
@@ -453,7 +453,7 @@ my $schema = {
         composed entirely of turtles all the way down.
     ],
     type        => "schema",
-    extends     => { '$ref' => "schema/types/object" }
+    extends     => { '$ref' => "schema/types/object" },
     properties  => {
         type => { type => "string", enum => [ "schema" ] },
     },
@@ -462,4 +462,18 @@ my $schema = {
 ## ------------------------------------------------------------------
 ## The End
 ## ------------------------------------------------------------------
+
+[
+    $ref,
+    $hyperlink,
+    $any,
+        $null,
+        $boolean,
+        $number,
+            $integer,
+        $string,
+        $array,
+        $object,
+            $schema
+];
 
