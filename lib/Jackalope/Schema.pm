@@ -34,6 +34,10 @@ sub BUILD { (shift)->compiled_schemas }
 sub validate {
     my ($self, $schema, $data) = @_;
 
+    if ($self->_is_ref( $schema )) {
+        $schema = $self->compiled_schemas->{ $schema->{'$ref'} };
+    }
+
     unless (exists $schema->{__compiled_properties} && exists $schema->{__compiled_additional_properties}) {
         $schema = $self->_flatten_extends( $schema, $self->compiled_schemas );
         $schema = $self->_resolve_refs( $schema, $self->compiled_schemas );
@@ -48,12 +52,13 @@ sub validate {
 
     if ($result->{error}) {
         require Data::Dumper;
-        die Data::Dumper::Dumper [
-            "Invalid schema",
-            $result,
-            $schema,
-            $self->compiled_schemas->{'schema/types/' . $schema_type}
-        ];
+        $Data::Dumper::Sortkeys = 1;
+        die Data::Dumper::Dumper {
+            '001error'       => "Invalid schema",
+            '002result'      => $result,
+            '003schema'      => $schema,
+            '004meta_schema' => $self->compiled_schemas->{'schema/types/' . $schema_type}
+        };
     }
 
     my $validator = $self->validators->get_validator_for_type( $schema_type );
@@ -123,7 +128,9 @@ sub _resolve_refs {
         hash => sub {
             my ($v, $data) = @_;
             if (exists $data->{'$ref'} && $self->_is_ref( $data )) {
-                return $schema_map->{ $data->{'$ref'} }
+                return $self->_is_self_ref( $data )
+                    ? $schema
+                    : $schema_map->{ $data->{'$ref'} }
             }
             return $data;
         }
@@ -132,7 +139,12 @@ sub _resolve_refs {
 
 sub _is_ref {
     my ($self, $ref) = @_;
-    return (exists $ref->{'$ref'} && ((scalar keys %$ref) == 1)) ? 1 : 0;
+    return (exists $ref->{'$ref'} && ((scalar keys %$ref) == 1) && not ref $ref->{'$ref'}) ? 1 : 0;
+}
+
+sub _is_self_ref {
+    my ($self, $ref) = @_;
+    return ($self->_is_ref( $ref ) && $ref->{'$ref'} eq '#') ? 1 : 0;
 }
 
 sub _compile_properties {
