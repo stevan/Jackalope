@@ -9,11 +9,9 @@ use Test::Jackalope;
 
 BEGIN {
     use_ok('Jackalope');
-    use_ok('Jackalope::Schema::Repository');
-    use_ok('Jackalope::Schema::Spec');
 }
 
-my $repo = Jackalope::Schema::Repository->new;
+my $repo = Jackalope->new->resolve( type => 'Jackalope::Schema::Repository' );
 isa_ok($repo, 'Jackalope::Schema::Repository');
 
 foreach my $type ( @{ $repo->spec->valid_types } ) {

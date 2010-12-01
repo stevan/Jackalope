@@ -9,10 +9,9 @@ use Test::Jackalope;
 
 BEGIN {
     use_ok('Jackalope');
-    use_ok('Jackalope::Schema::Repository');
 }
 
-my $repo = Jackalope::Schema::Repository->new;
+my $repo = Jackalope->new->resolve( type => 'Jackalope::Schema::Repository' );
 isa_ok($repo, 'Jackalope::Schema::Repository');
 
 is(exception{

@@ -4,9 +4,6 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use Jackalope::Schema::Spec;
-use Jackalope::Schema::Validator;
-
 use Data::Visitor::Callback;
 
 has 'compiled_schemas' => (
@@ -17,17 +14,15 @@ has 'compiled_schemas' => (
 );
 
 has 'validator' => (
-    is      => 'ro',
-    isa     => 'Jackalope::Schema::Validator',
-    lazy    => 1,
-    default => sub { Jackalope::Schema::Validator->new },
+    is       => 'ro',
+    isa      => 'Jackalope::Schema::Validator',
+    required => 1
 );
 
 has 'spec' => (
-    is      => 'ro',
-    isa     => 'Jackalope::Schema::Spec',
-    lazy    => 1,
-    default => sub { Jackalope::Schema::Spec->new },
+    is       => 'ro',
+    isa      => 'Jackalope::Schema::Spec',
+    required => 1
 );
 
 sub BUILD {

@@ -1,10 +1,27 @@
 package Jackalope;
 use Moose;
+use Bread::Board;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use Jackalope::Schema::Validator::Core;
+use Jackalope::Schema::Validator;
+use Jackalope::Schema::Spec;
+use Jackalope::Schema::Repository;
 
+extends 'Bread::Board::Container';
+
+has '+name' => ( default => sub { (shift)->meta->name } );
+
+sub BUILD {
+    my $self = shift;
+    container $self => as { $self->typemapping };
+}
+
+sub typemapping {
+    typemap 'Jackalope::Schema::Repository' => infer;
+}
 
 __PACKAGE__->meta->make_immutable;
 

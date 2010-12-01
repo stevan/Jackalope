@@ -5,12 +5,10 @@ use MooseX::Params::Validate;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use Jackalope::Schema::Validator::Core;
-
 has 'validator' => (
-    is      => 'ro',
-    isa     => 'Jackalope::Schema::Validator::Core',
-    default => sub { Jackalope::Schema::Validator::Core->new },
+    is       => 'ro',
+    isa      => 'Jackalope::Schema::Validator::Core',
+    required => 1,
 );
 
 sub validate {
