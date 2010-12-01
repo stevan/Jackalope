@@ -7,7 +7,7 @@ use FindBin;
 use Test::More;
 use Test::Fatal;
 use Test::Moose;
-use Data::Dumper;
+use Test::Jackalope;
 
 BEGIN {
     use_ok('Jackalope');
@@ -25,18 +25,6 @@ my $repo = Jackalope::Schema->new(
     schemas => $schemas
 );
 isa_ok($repo, 'Jackalope::Schema');
-
-sub validation_pass {
-    my ($result, $message) = @_;
-    warn Dumper $result if exists $result->{error};
-    ok( (not exists $result->{error}), $message );
-}
-
-sub validation_fail {
-    my ($result, $message) = @_;
-    #warn Dumper $result if exists $result->{error};
-    ok( (exists $result->{error}), $message );
-}
 
 validation_pass(
     $repo->validate(

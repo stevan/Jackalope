@@ -1,16 +1,23 @@
 
 = TODOS =
 
-- add enum support to Number, Integer and String
-- finish additionalProperties support in Object
-- compile type constraints into custom subtypes when possible
-- figure out how extends should work
+- Jackalope::Schema::Validators
+    - rename to Jackalope::Schema::Validator and make it just a proxy for the
+      Jackalope::Schema::Validator::Core class
+    - move the validate_<type> methods to their own class (Jackalope::Schema::Validator::Core)
+      which can be subclassed when needed
 
-== Repository ==
+- Jackalope::Schema
+    - rename to Jackalope::Schema::Repository
+    - add a resolve_ref method
+    - add a get_compiled_schema method
+        - expect a URI
+    - add a register_schema method
+        - should require 'id' URI
+    - refactor the schema compiling
 
-- store the original schema document and the inflated schema object too
-    - this removes the need for a deflator
-    - perhaps extends should be processed by the inflator?
-- support reading in from a file, a url or a directory of files
+- Test::Jackalope
+    - create this ...
 
-- ponder being able to load the entire meta-schema instead of having them hardcoded
+- Jackalope::Schema::Spec
+    - have this return the spec
