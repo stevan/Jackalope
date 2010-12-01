@@ -1,15 +1,6 @@
 
 = TODOS =
 
-- Jackalope::Serializer
-    - Jackalope::Serializer::XML (TODO - perigrin)
-
-- Jackalope::Script
-    - create a bin/ directory
-    - Jackalope::Script::GenerateSpec
-        - this should output the spec using the
-          serializer specificed on the command line
-
 - Jackalope.js
     - write it
 
@@ -24,3 +15,7 @@
 
 - Jackalope::Schema::Validator::Core
     - make it use Moose types to check against
+
+- Jackalope::Serializer
+    - Jackalope::Serializer::XML (TODO - perigrin)
+    - Jackalope::Serializer::YAML (why??)
