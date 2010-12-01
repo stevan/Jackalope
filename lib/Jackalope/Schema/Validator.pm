@@ -35,11 +35,11 @@ __END__
 
 =head1 NAME
 
-Jackalope::Schema::Validators - A Moosey solution to this problem
+Jackalope::Schema::Validator - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use Jackalope::Schema::Validators;
+  use Jackalope::Schema::Validator;
 
 =head1 DESCRIPTION
 

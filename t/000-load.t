@@ -10,7 +10,7 @@ use Test::Jackalope;
 
 BEGIN {
     use_ok('Jackalope');
-    use_ok('Jackalope::Schema');
+    use_ok('Jackalope::Schema::Repository');
 }
 
 my $schemas = do "$FindBin::Bin/../spec/jwsd-spec.pl";
@@ -20,10 +20,10 @@ unless ($schemas) {
     warn "Couldn't open for reading: $!" if $!;
 }
 
-my $repo = Jackalope::Schema->new(
+my $repo = Jackalope::Schema::Repository->new(
     schemas => $schemas
 );
-isa_ok($repo, 'Jackalope::Schema');
+isa_ok($repo, 'Jackalope::Schema::Repository');
 
 validation_pass(
     $repo->validate(

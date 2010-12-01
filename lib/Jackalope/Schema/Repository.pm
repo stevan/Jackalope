@@ -1,4 +1,4 @@
-package Jackalope::Schema;
+package Jackalope::Schema::Repository;
 use Moose;
 
 our $VERSION   = '0.01';
@@ -185,11 +185,11 @@ __END__
 
 =head1 NAME
 
-Jackalope::Schema - A Moosey solution to this problem
+Jackalope::Schema::Repository - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use Jackalope::Schema;
+  use Jackalope::Schema::Repository;
 
 =head1 DESCRIPTION
 
