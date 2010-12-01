@@ -102,7 +102,7 @@ sub _compile_schema {
 sub _compile_schemas {
     my $self = shift;
 
-    my @schemas = @{ $self->spec->meta_schemas };
+    my @schemas = @{ $self->spec->get_all_schemas };
 
     # - first we should build the basic schema map
     #   so that we can resolve uris, but this will

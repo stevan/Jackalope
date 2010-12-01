@@ -2,7 +2,6 @@
 = TODOS =
 
 - Jackalope::Serializer
-    - Jackalope::Serializer::JSON
     - Jackalope::Serializer::XML (TODO - perigrin)
 
 - Jackalope::Script

@@ -1,0 +1,367 @@
+[
+   {
+      "id" : "schema/core/ref",
+      "title" : "The reference schema",
+      "type" : "object",
+      "description" : "This is an object to represent a 'reference'\nto another object. By convention, the value\nstored in $ref is the 'id' of another object.\nAdditionally the value of '#' is also\nacceptable to indicate a reference to\nthe containing schema.\nWhen a reference is encountered, it should\nbe resolved and replaced by the value it\nreferences. There are no explict dereferencing\noperations. The exact details of when a\nreference is resolved and how are an implemention\ndetail and out of the scope of this spec.\n",
+      "properties" : {
+         "$ref" : {
+            "format" : "uri",
+            "type" : "string"
+         }
+      }
+   },
+   {
+      "additional_properties" : {
+         "target_schema" : {
+            "type" : "schema",
+            "description" : "This is a schema (or a reference to a schema),\nof the resource being linked to. Typically this\nwill be just { '$ref' => '#' } to indicate that\nit refers to the schema it is contained within.\n"
+         },
+         "method" : {
+            "enum" : [
+               "GET",
+               "POST",
+               "PUT",
+               "DELETE"
+            ],
+            "type" : "string",
+            "description" : "The HTTP method expected by this link"
+         },
+         "title" : {
+            "type" : "string",
+            "description" : "The human readable title of a given link"
+         },
+         "metadata" : {
+            "type" : "object",
+            "description" : "This is just a place for random additional metadata\nthat might be useful for your given implementation.\nThis is totally free form and can be anything you want.\n"
+         },
+         "schema" : {
+            "type" : "schema",
+            "description" : "This is a schema (or a reference to a schema)\nof the submission data that will be accepted\nby this link. In the case of a POST or PUT\nmethod, the data is expected in the given\ntransport format. In the case of GET, this\nshould be an 'object' type schema and the\nquery string parameters should be checked\nagainst it.\n"
+         },
+         "description" : {
+            "type" : "string",
+            "description" : "A short human readable description of the link"
+         }
+      },
+      "id" : "schema/core/hyperlink",
+      "title" : "The 'Link' schema",
+      "type" : "object",
+      "description" : "This is the 'link' type for the hyper schema\nwhich represents links for resources.\n",
+      "properties" : {
+         "href" : {
+            "format" : "uri_template",
+            "type" : "string",
+            "description" : "This is a URI for the resource, it may also\nbe a URI template containing variables. In the\ncase of these templates the variables should be\nresolved in the context of the object instance.\nThis means that a template like so:\n/product/{id}/view\nshould be resolved to be this:\n/product/1234/view\ngiven an object with an 'id' property of 1234.\n"
+         },
+         "relation" : {
+            "enum" : [
+               "self",
+               "described_by",
+               "create"
+            ],
+            "type" : "string",
+            "description" : "The relation of the link to the resource described\nby the schema. Currently available values are:\nself         - relating to an instance of the schema\ndescribed_by - a link the schema itself\ncreate       - a link used to create instances\n"
+         }
+      }
+   },
+   {
+      "additional_properties" : {
+         "id" : {
+            "format" : "uri",
+            "type" : "string",
+            "description" : "This should be a URI"
+         },
+         "title" : {
+            "type" : "string",
+            "description" : "The human readable title of a given schema"
+         },
+         "description" : {
+            "type" : "string",
+            "description" : "A short human readable description of the schema"
+         },
+         "extends" : {
+            "type" : "schema",
+            "description" : "This is a schema (or a reference to a schema)\nrepresented as an 'object' instance. The exact\ndetails of extension are described elsewhere.\n"
+         },
+         "links" : {
+            "is_unique" : 1,
+            "type" : "array",
+            "description" : "This is an array of 'link' objects, the purpose\nof which is to provide a way to map services\nto the objects described in a schema. In OOP terms,\nyou can think of them as methods, while the schema\ndescribes the instance structure.\n",
+            "items" : {
+               "$ref" : "schema/core/hyperlink"
+            }
+         }
+      },
+      "id" : "schema/types/any",
+      "title" : "The 'Any' type schema",
+      "type" : "schema",
+      "description" : "This is a schema for the 'any' type, it is the\nbase schema type, all other schema types extend\nthis one. Therefore this schema defines the\nbase elements that are in all schemas, both\nrequired and optional.\n",
+      "properties" : {
+         "type" : {
+            "enum" : [
+               "any"
+            ],
+            "type" : "string"
+         }
+      }
+   },
+   {
+      "id" : "schema/types/null",
+      "title" : "The 'Null' type schema",
+      "type" : "schema",
+      "description" : "This is a schema for the 'null' type, it is not\nso much the absence of a value, but a value that\nexplicity represents no value.\n",
+      "extends" : {
+         "$ref" : "schema/types/any"
+      },
+      "properties" : {
+         "type" : {
+            "enum" : [
+               "null"
+            ],
+            "type" : "string"
+         }
+      }
+   },
+   {
+      "id" : "schema/types/boolean",
+      "title" : "The 'Boolean' type schema",
+      "type" : "schema",
+      "description" : "This is a schema for the 'boolean' type, a simple\ntrue/false value. However the details of what is\nconsidered true and what is considered false\nare different for different languages and this\nschema should take that into account based on the\nlanguage it is validating. It is important to note\nthat a transport format (JSON, XML, etc.) should\nprovide a canonical representation of true/false\nso as to remove those language specific quirks.\n",
+      "extends" : {
+         "$ref" : "schema/types/any"
+      },
+      "properties" : {
+         "type" : {
+            "enum" : [
+               "boolean"
+            ],
+            "type" : "string"
+         }
+      }
+   },
+   {
+      "additional_properties" : {
+         "greater_than" : {
+            "type" : "number",
+            "description" : "A number must be greater than this value"
+         },
+         "less_than_or_equal" : {
+            "type" : "number",
+            "description" : "A number must be less than or equal to this value"
+         },
+         "enum" : {
+            "is_unique" : 1,
+            "type" : "array",
+            "description" : "This is an array of possible acceptable values, it should contain no duplicates",
+            "items" : {
+               "type" : "number"
+            }
+         },
+         "less_than" : {
+            "type" : "number",
+            "description" : "A number must be less than this value"
+         },
+         "greater_than_or_equal" : {
+            "type" : "number",
+            "description" : "A number must be greater than or equal to this value"
+         }
+      },
+      "id" : "schema/types/number",
+      "title" : "The 'Number' type schema",
+      "type" : "schema",
+      "description" : "This is a schema for the 'number' type, which is\na numeric value that includes floating point\nnumbers as well as whole numbers. The level of\nfloating point precision and the possible size\nof a number are platform and implementation\nspecific. However the spec reserves the right\nto possibly put a cap on this at a later date\nto help improve interoperability.\n",
+      "extends" : {
+         "$ref" : "schema/types/any"
+      },
+      "properties" : {
+         "type" : {
+            "enum" : [
+               "number"
+            ],
+            "type" : "string"
+         }
+      }
+   },
+   {
+      "additional_properties" : {
+         "greater_than" : {
+            "type" : "integer",
+            "description" : "A integer must be greater than this value"
+         },
+         "less_than_or_equal" : {
+            "type" : "integer",
+            "description" : "A integer must be less than or equal to this value"
+         },
+         "enum" : {
+            "is_unique" : 1,
+            "type" : "array",
+            "description" : "This is an array of possible acceptable values, it should contain no duplicates",
+            "items" : {
+               "type" : "integer"
+            }
+         },
+         "less_than" : {
+            "type" : "integer",
+            "description" : "A integer must be less than this value"
+         },
+         "greater_than_or_equal" : {
+            "type" : "integer",
+            "description" : "A integer must be greater than or equal to this value"
+         }
+      },
+      "id" : "schema/types/integer",
+      "title" : "The 'Integer' type schema",
+      "type" : "schema",
+      "description" : "This is a schema for the 'integer' type, which is\nan extension of the 'number' type to not include\nfloating point numbers. It handles all the same\nadditional properties, but overrides them here\nsuch that they will only operate on valid integer\nvalues.\n",
+      "extends" : {
+         "$ref" : "schema/types/number"
+      },
+      "properties" : {
+         "type" : {
+            "enum" : [
+               "integer"
+            ],
+            "type" : "string"
+         }
+      }
+   },
+   {
+      "additional_properties" : {
+         "pattern" : {
+            "format" : "regex",
+            "type" : "string",
+            "description" : "A regular expression that can be checked against the string"
+         },
+         "format" : {
+            "enum" : [
+               "uri",
+               "uri_template",
+               "regex"
+            ],
+            "type" : "string",
+            "description" : "This is one of a set of built-in formatters"
+         },
+         "enum" : {
+            "is_unique" : 1,
+            "type" : "array",
+            "description" : "This is an array of possible acceptable values, it should contain no duplicates",
+            "items" : {
+               "type" : "string"
+            }
+         },
+         "min_length" : {
+            "type" : "number",
+            "description" : "The minimum length of the string given"
+         },
+         "max_length" : {
+            "type" : "number",
+            "description" : "The maximum length of the string given"
+         }
+      },
+      "id" : "schema/types/string",
+      "title" : "The 'String' type schema",
+      "type" : "schema",
+      "description" : "This is a schema for the 'string' type, which is\nany value that is explcitly cast as a string. This\nmeans that it can be an entirely numeric string,\nas long it is cast as a string based on the details\nof the implementation language. As with 'boolean'\nvalues, any transport format (JSON, XML, etc.) is\nexpected to provide some kind of way to explicitly\ncast a given value as a given type so as to make\nfor better interoperability.\n",
+      "extends" : {
+         "$ref" : "schema/types/any"
+      },
+      "properties" : {
+         "type" : {
+            "enum" : [
+               "string"
+            ],
+            "type" : "string"
+         }
+      }
+   },
+   {
+      "additional_properties" : {
+         "max_items" : {
+            "type" : "integer",
+            "description" : "The maximum number of items in the array"
+         },
+         "is_unique" : {
+            "type" : "boolean",
+            "description" : "A boolean to indicate of the list should contain no duplicates"
+         },
+         "min_items" : {
+            "type" : "integer",
+            "description" : "The minimum number of items in the array"
+         },
+         "items" : {
+            "type" : "schema",
+            "description" : "This is a schema (or a reference to a schema)\nrepresented as an 'object' instance, which will\nbe used to validate all the elements in a list.\n"
+         }
+      },
+      "id" : "schema/types/array",
+      "title" : "The 'Array' type schema",
+      "type" : "schema",
+      "description" : "This is a schema for the 'array' type, which is\nbasically just a list of other values. The list\nby default are heterogenous, but using the\noptional 'items' property it is possible to\nconstrain the list to be more homogenous.\n",
+      "extends" : {
+         "$ref" : "schema/types/any"
+      },
+      "properties" : {
+         "type" : {
+            "enum" : [
+               "array"
+            ],
+            "type" : "string"
+         }
+      }
+   },
+   {
+      "additional_properties" : {
+         "additional_properties" : {
+            "type" : "object",
+            "description" : "This is a set of key/value pairs where the\nkey is a property name and the value is\na schema (or a reference to a schema)\nrepresented as an 'object' instance. These\nproperties however are optional and do not\nneed to exist in order to pass validation.\n",
+            "items" : {
+               "type" : "schema"
+            }
+         },
+         "items" : {
+            "type" : "schema",
+            "description" : "This is a schema (or a reference to a schema)\nrepresented as an 'object' instance, which will\nbe used to validate all the values in the object.\n"
+         },
+         "properties" : {
+            "type" : "object",
+            "description" : "This is a set of key/value pairs where the\nkey is a property name and the value is\na schema (or a reference to a schema)\nrepresented as an 'object' instance. All\nthese properties are required and must be\npresent in order to pass validation.\n",
+            "items" : {
+               "type" : "schema"
+            }
+         }
+      },
+      "id" : "schema/types/object",
+      "title" : "The 'Object' type schema",
+      "type" : "schema",
+      "description" : "This is a schema for the 'object' type, which is\na set of key/value pairs. The term 'object' is\nderived from Javascript, but this is the same as\na hash in Perl, a dictionary in Python, an\nassociative array in PHP, a Hashtable, a Map,\nall of which are essentially the same thing.\n",
+      "extends" : {
+         "$ref" : "schema/types/any"
+      },
+      "properties" : {
+         "type" : {
+            "enum" : [
+               "object"
+            ],
+            "type" : "string"
+         }
+      }
+   },
+   {
+      "id" : "schema/types/schema",
+      "title" : "The 'Schema' type schema",
+      "type" : "schema",
+      "description" : "This is a schema for the 'schema' type, it is\ncomposed entirely of turtles all the way down.\n",
+      "extends" : {
+         "$ref" : "schema/types/object"
+      },
+      "properties" : {
+         "type" : {
+            "enum" : [
+               "schema"
+            ],
+            "type" : "string"
+         }
+      }
+   }
+]

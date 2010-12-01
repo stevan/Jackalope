@@ -35,7 +35,7 @@ has 'valid_hyperlink_relation' => (
 
 has 'valid_types' => (
     is      => 'ro',
-    isa     => 'ArrayRef',   
+    isa     => 'ArrayRef',
     default => sub {
         [qw[
             any
@@ -46,7 +46,7 @@ has 'valid_types' => (
                 string
                 array
                 object
-                    schema        
+                    schema
         ]]
     },
 );
@@ -62,7 +62,7 @@ has 'valid_types' => (
 ## then to re-read it again, in order to fully understand the spec.
 ## ------------------------------------------------------------------
 
-sub meta_schemas {
+sub get_all_schemas {
     my $self = shift;
 
     ## ------------------------------------------------------------------
