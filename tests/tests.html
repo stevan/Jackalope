@@ -9,6 +9,25 @@
     <script type="text/javascript" src="lib/qunit.js"></script>
     <script type="text/javascript">
 
+    var validation_pass = function(result, message) {
+        if (result["error"] == undefined) {
+            ok(true, message);
+        }
+        else {
+            try { console.log( result ) } catch (e) {}
+            ok(false, message);
+        }
+    };
+
+    var validation_fail = function(result, message) {
+        if (result["error"] == undefined) {
+            ok(false, message);
+        }
+        else {
+            ok(true, message);
+        }
+    };
+
     </script>
     <script type="text/javascript" src="t/001_basic.t.js"></script>
 </head>
