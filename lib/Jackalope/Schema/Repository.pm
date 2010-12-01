@@ -39,6 +39,8 @@ sub validate {
 
 sub register_schema {
     my ($self, $schema) = @_;
+    (exists $schema->{id})
+        || confess "Can only register schemas that have an 'id'";
     $schema = $self->_compile_schema( $schema );
     $self->_validate_schema( $schema );
     $self->compiled_schemas->{ $schema->{id} } = $schema;

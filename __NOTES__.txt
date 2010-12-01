@@ -5,6 +5,4 @@
     - add a resolve_ref method
     - add a get_compiled_schema method
         - expect a URI
-    - add a register_schema method
-        - should require 'id' URI
     - refactor the schema compiling
