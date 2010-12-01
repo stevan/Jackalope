@@ -28,11 +28,8 @@ sub BUILD { (shift)->compiled_schemas }
 
 sub validate {
     my ($self, $schema, $data) = @_;
-
     $schema = $self->_compile_schema( $schema );
-
     $self->_validate_schema( $schema );
-
     return $self->validator->validate(
         type   => $schema->{type},
         schema => $schema,
@@ -42,11 +39,8 @@ sub validate {
 
 sub register_schema {
     my ($self, $schema) = @_;
-
     $schema = $self->_compile_schema( $schema );
-
     $self->_validate_schema( $schema );
-
     $self->compiled_schemas->{ $schema->{id} } = $schema;
 }
 
@@ -67,10 +61,10 @@ sub _validate_schema {
         require Data::Dumper;
         $Data::Dumper::Sortkeys = 1;
         die Data::Dumper::Dumper {
-            '001error'       => "Invalid schema",
-            '002result'      => $result,
-            '003schema'      => $schema,
-            '004meta_schema' => $self->compiled_schemas->{'schema/types/' . $schema_type}
+            '001-error'       => "Invalid schema",
+            '002-result'      => $result,
+            '003-schema'      => $schema,
+            '004-meta_schema' => $self->compiled_schemas->{'schema/types/' . $schema_type}
         };
     }
 }
