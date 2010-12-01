@@ -10,7 +10,6 @@ use Test::Jackalope;
 BEGIN {
     use_ok('Jackalope');
     use_ok('Jackalope::Schema::Repository');
-    use_ok('Jackalope::Schema::Spec');
 }
 
 my $repo = Jackalope::Schema::Repository->new;
