@@ -4,15 +4,10 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use Jackalope::Schema::Spec;
 use Jackalope::Schema::Validator;
-use Data::Visitor::Callback;
 
-has 'original_schemas' => (
-    init_arg => 'schemas',
-    is       => 'ro',
-    isa      => 'ArrayRef[HashRef]',
-    required => 1
-);
+use Data::Visitor::Callback;
 
 has 'compiled_schemas' => (
     is      => 'ro',
@@ -34,14 +29,31 @@ sub BUILD { (shift)->compiled_schemas }
 sub validate {
     my ($self, $schema, $data) = @_;
 
-    if ($self->_is_ref( $schema )) {
-        $schema = $self->compiled_schemas->{ $schema->{'$ref'} };
-    }
+    $schema = $self->_compile_schema( $schema );
 
-    unless (exists $schema->{__compiled_properties} && exists $schema->{__compiled_additional_properties}) {
-        $schema = $self->_flatten_extends( $schema, $self->compiled_schemas );
-        $schema = $self->_resolve_refs( $schema, $self->compiled_schemas );
-    }
+    $self->_validate_schema( $schema );
+
+    return $self->validator->validate(
+        type   => $schema->{type},
+        schema => $schema,
+        data   => $data
+    );
+}
+
+sub register_schema {
+    my ($self, $schema) = @_;
+
+    $schema = $self->_compile_schema( $schema );
+
+    $self->_validate_schema( $schema );
+
+    $self->compiled_schemas->{ $schema->{id} } = $schema;
+}
+
+# ...
+
+sub _validate_schema {
+    my ($self, $schema) = @_;
 
     my $schema_type = $schema->{type};
 
@@ -61,20 +73,27 @@ sub validate {
             '004meta_schema' => $self->compiled_schemas->{'schema/types/' . $schema_type}
         };
     }
-
-    return $self->validator->validate(
-        type   => $schema_type,
-        schema => $schema,
-        data   => $data
-    );
 }
 
-# ...
+sub _compile_schema {
+    my ($self, $schema) = @_;
+
+    if ($self->_is_ref( $schema )) {
+        $schema = $self->compiled_schemas->{ $schema->{'$ref'} };
+    }
+
+    unless (exists $schema->{__compiled_properties} && exists $schema->{__compiled_additional_properties}) {
+        $schema = $self->_flatten_extends( $schema, $self->compiled_schemas );
+        $schema = $self->_resolve_refs( $schema, $self->compiled_schemas );
+    }
+
+    return $schema;
+}
 
 sub _compile_schemas {
     my $self = shift;
 
-    my @schemas = @{ $self->original_schemas };
+    my @schemas = @{ Jackalope::Schema::Spec->new->meta_schemas };
 
     # - first we should build the basic schema map
     #   so that we can resolve uris, but this will

@@ -2,13 +2,9 @@
 = TODOS =
 
 - Jackalope::Schema
-    - rename to Jackalope::Schema::Repository
     - add a resolve_ref method
     - add a get_compiled_schema method
         - expect a URI
     - add a register_schema method
         - should require 'id' URI
     - refactor the schema compiling
-
-- Jackalope::Schema::Spec
-    - have this return the spec
