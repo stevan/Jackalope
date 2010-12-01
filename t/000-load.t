@@ -6,7 +6,6 @@ use FindBin;
 
 use Test::More;
 use Test::Fatal;
-use Test::Moose;
 use Test::Jackalope;
 
 BEGIN {

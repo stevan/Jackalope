@@ -1,13 +1,13 @@
-package Jackalope::Schema::Validators;
+package Jackalope::Schema::Validator::Core;
 use Moose;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use Try::Tiny;
-use Scalar::Util       'looks_like_number';
-use List::AllUtils     'any', 'uniq';
-use Devel::PartialDump 'dump';
+use Scalar::Util       ();
+use List::AllUtils     ();
+use Devel::PartialDump ();
 
 has 'formaters' => (
     traits  => [ 'Hash' ],
@@ -25,31 +25,26 @@ has 'formaters' => (
     }
 );
 
-sub get_validator_for_type {
-    my ($self, $type) = @_;
-    $self->can( 'validate_' . $type ) || confess "Could not find validator for $type";
-}
-
-sub validate_any  { +{ pass => 1 } }
-sub validate_null {
+sub any  { +{ pass => 1 } }
+sub null {
     my (undef, undef, $data) = @_;
     (!defined $data)
         ? +{ pass => 1 }
         : +{ error => $data . ' is not null' }
 }
 
-sub validate_boolean {
+sub boolean {
     my (undef, $schema, $data) = @_;
     (!defined($data) || $data eq "" || "$data" eq '1' || "$data" eq '0')
         ? +{ pass => 1 }
         : +{ error => $data . ' is not a boolean type' };
 }
 
-sub validate_number {
+sub number {
     my (undef, $schema, $data) = @_;
     return {
         error => 'doesnt look like a number'
-    } unless looks_like_number $data;
+    } unless Scalar::Util::looks_like_number $data;
     if (exists $schema->{less_than}) {
         return {
             error => $data . ' is not less than ' . $schema->{less_than}
@@ -73,20 +68,20 @@ sub validate_number {
     if (exists $schema->{enum}) {
         return {
             error => $data . ' is not part of (number) enum (' . (join ', ' => @{ $schema->{enum} } ) . ')'
-        } unless any { $data == $_ } @{ $schema->{enum} };
+        } unless List::AllUtils::any { $data == $_ } @{ $schema->{enum} };
     }
     return +{ pass => 1 };
 }
 
-sub validate_integer {
+sub integer {
     my ($self, $schema, $data) = @_;
     return {
         error => (defined $data ? $data : 'undef') . ' is perhaps a floating point number'
     } unless defined $data && $data =~ /^\d+$/;
-    return $self->validate_number( $schema, $data );
+    return $self->number( $schema, $data );
 }
 
-sub validate_string {
+sub string {
     my ($self, $schema, $data) = @_;
     return {
         error => 'string data is not defined'
@@ -114,26 +109,26 @@ sub validate_string {
     if (exists $schema->{enum}) {
         return {
             error => $data . ' is not part of (string) enum (' . (join ', ' => @{ $schema->{enum} } ) . ')'
-        } unless any { $data eq $_ } @{ $schema->{enum} };
+        } unless List::AllUtils::any { $data eq $_ } @{ $schema->{enum} };
     }
     return +{ pass => 1 };
 }
 
-sub validate_array {
+sub array {
     my ($self, $schema, $data) = @_;
     return {
-        error => (dump $data) . ' is not an array'
+        error => (Devel::PartialDump::dump $data) . ' is not an array'
     } unless ref $data eq 'ARRAY';
 
     if (exists $schema->{min_items}) {
         return {
-            error => (dump $data) . ' does not meet the minimum items ' . $schema->{min_items} . ' with ' . (scalar @$data)
+            error => (Devel::PartialDump::dump $data) . ' does not meet the minimum items ' . $schema->{min_items} . ' with ' . (scalar @$data)
         } if (scalar @$data) <= ($schema->{min_items} - 1);
     }
 
     if (exists $schema->{max_items}) {
         return {
-            error => (dump $data) . ' does not meet the maximum items ' . $schema->{max_items} . ' with ' . (scalar @$data)
+            error => (Devel::PartialDump::dump $data) . ' does not meet the maximum items ' . $schema->{max_items} . ' with ' . (scalar @$data)
         } if (scalar @$data) >= ($schema->{max_items} + 1);
     }
 
@@ -141,28 +136,28 @@ sub validate_array {
 
     if (exists $schema->{is_unique} && $schema->{is_unique}) {
         return  {
-            error => (dump $data) . ' is not unique'
-        } if (scalar @$data) != (scalar uniq @$data);
+            error => (Devel::PartialDump::dump $data) . ' is not unique'
+        } if (scalar @$data) != (scalar List::AllUtils::uniq @$data);
     }
 
     if (exists $schema->{items}) {
         my $item_schema = $schema->{items};
-        my $validator   = $self->get_validator_for_type( $item_schema->{type} );
+        my $validator   = $self->can( $item_schema->{type} );
         my @results     = map { $self->$validator( $item_schema, $_ ) } @$data;
         my @errors      = grep { exists $_->{error} } @results;
 
         return {
-            error      => (dump $data) . ' did not pass the test for ' . $item_schema->{type} . ' schemas',
+            error      => (Devel::PartialDump::dump $data) . ' did not pass the test for ' . $item_schema->{type} . ' schemas',
             sub_errors => \@errors
         } if @errors;
     }
     return +{ pass => 1 };
 }
 
-sub validate_object {
+sub object {
     my ($self, $schema, $data) = @_;
     return {
-        error => (dump $data) . ' is not an object'
+        error => (Devel::PartialDump::dump $data) . ' is not an object'
     } unless ref $data eq 'HASH';
 
     my %all_props = map { $_ => undef } grep { !/^__/ } keys %$data;
@@ -172,7 +167,7 @@ sub validate_object {
             $schema->{__compiled_properties}, $data, \%all_props
         );
         return {
-            error      => (dump $data) . " did not pass properties check",
+            error      => (Devel::PartialDump::dump $data) . " did not pass properties check",
             sub_errors => $result
         } if exists $result->{error};
     }
@@ -182,14 +177,14 @@ sub validate_object {
             $schema->{__compiled_additional_properties}, $data, \%all_props
         );
         return {
-            error      => (dump $data) . " did not pass additional properties check",
+            error      => (Devel::PartialDump::dump $data) . " did not pass additional properties check",
             sub_errors => $result
         } if exists $result->{error};
     }
 
     if (exists $schema->{__compiled_properties} || exists $schema->{__compiled_additional_properties}) {
         return {
-            error           => (dump $data) . ' did not match all the expected properties',
+            error           => (Devel::PartialDump::dump $data) . ' did not match all the expected properties',
             remaining_props => \%all_props,
             schema          => $schema,
         } if (scalar keys %all_props) != 0;
@@ -197,20 +192,20 @@ sub validate_object {
 
     if (exists $schema->{items}) {
         my $item_schema = $schema->{items};
-        my $validator   = $self->get_validator_for_type( $item_schema->{type} );
+        my $validator   = $self->can( $item_schema->{type} );
 
         my @results     = map { $self->$validator( $item_schema, $_ )  } values %$data;
         my @errors      = grep { exists $_->{error} } @results;
 
         return {
-            error      => (dump $data) . ' did not pass the test for ' . $item_schema->{type} . ' schemas',
+            error      => (Devel::PartialDump::dump $data) . ' did not pass the test for ' . $item_schema->{type} . ' schemas',
             sub_errors => \@errors
         } if @errors;
     }
     return +{ pass => 1 };
 }
 
-*validate_schema = \&validate_object;
+*schema = \&object;
 
 # ...
 
@@ -223,7 +218,7 @@ sub _check_properties {
 
         return { error => "property '$k' didn't exist" } if not exists $data->{ $k };
 
-        my $validator = $self->get_validator_for_type( $schema->{type} );
+        my $validator = $self->can( $schema->{type} );
         my $result    = $self->$validator( $schema, $data->{ $k } );
         return {
             error      => "property '$k' didn't pass the schema for '" . $schema->{type} . "'",
@@ -247,7 +242,7 @@ sub _check_additional_properties {
             next;
         }
 
-        my $validator = $self->get_validator_for_type( $schema->{type} );
+        my $validator = $self->can( $schema->{type} );
         my $result    = $self->$validator( $schema, $data->{ $k } );
         return {
             error      => "property '$k' didn't pass the schema for '" . $schema->{type} . "'",
@@ -259,7 +254,6 @@ sub _check_additional_properties {
     return +{ pass => 1 };
 }
 
-
 __PACKAGE__->meta->make_immutable;
 
 no Moose; 1;
@@ -270,11 +264,11 @@ __END__
 
 =head1 NAME
 
-Jackalope::Schema::Validators - A Moosey solution to this problem
+Jackalope::Schema::Validator::Core - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use Jackalope::Schema::Validators;
+  use Jackalope::Schema::Validator::Core;
 
 =head1 DESCRIPTION
 

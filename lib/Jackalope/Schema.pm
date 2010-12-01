@@ -4,7 +4,7 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use Jackalope::Schema::Validators;
+use Jackalope::Schema::Validator;
 use Data::Visitor::Callback;
 
 has 'original_schemas' => (
@@ -21,11 +21,11 @@ has 'compiled_schemas' => (
     builder => '_compile_schemas'
 );
 
-has 'validators' => (
+has 'validator' => (
     is      => 'ro',
-    isa     => 'Jackalope::Schema::Validators',
+    isa     => 'Jackalope::Schema::Validator',
     lazy    => 1,
-    default => sub { Jackalope::Schema::Validators->new },
+    default => sub { Jackalope::Schema::Validator->new },
 );
 
 # compile all the schemas ...
@@ -45,12 +45,13 @@ sub validate {
 
     my $schema_type = $schema->{type};
 
-    my $result = $self->validators->validate_schema(
-        $self->compiled_schemas->{'schema/types/' . $schema_type},
-        $schema
+    my $result = $self->validator->validate(
+        type   => 'schema',
+        schema => $self->compiled_schemas->{'schema/types/' . $schema_type},
+        data   => $schema
     );
 
-    if ($result->{error}) {
+    if (exists $result->{error}) {
         require Data::Dumper;
         $Data::Dumper::Sortkeys = 1;
         die Data::Dumper::Dumper {
@@ -61,10 +62,10 @@ sub validate {
         };
     }
 
-    my $validator = $self->validators->get_validator_for_type( $schema_type );
-    return $self->validators->$validator(
-        $schema,
-        $data
+    return $self->validator->validate(
+        type   => $schema_type,
+        schema => $schema,
+        data   => $data
     );
 }
 

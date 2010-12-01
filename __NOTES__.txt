@@ -1,12 +1,6 @@
 
 = TODOS =
 
-- Jackalope::Schema::Validators
-    - rename to Jackalope::Schema::Validator and make it just a proxy for the
-      Jackalope::Schema::Validator::Core class
-    - move the validate_<type> methods to their own class (Jackalope::Schema::Validator::Core)
-      which can be subclassed when needed
-
 - Jackalope::Schema
     - rename to Jackalope::Schema::Repository
     - add a resolve_ref method
@@ -15,9 +9,6 @@
     - add a register_schema method
         - should require 'id' URI
     - refactor the schema compiling
-
-- Test::Jackalope
-    - create this ...
 
 - Jackalope::Schema::Spec
     - have this return the spec
