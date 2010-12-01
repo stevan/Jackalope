@@ -1,8 +1,27 @@
 
 = TODOS =
 
-- Jackalope::Schema
+- Jackalope::Serializer
+    - Jackalope::Serializer::JSON
+    - Jackalope::Serializer::XML (TODO - perigrin)
+
+- Jackalope::Script
+    - create a bin/ directory
+    - Jackalope::Script::GenerateSpec
+        - this should output the spec using the
+          serializer specificed on the command line
+
+- Jackalope.js
+    - write it
+
+== LOW PRIORITY ==
+
+- Jackalope::Schema::Repository
     - add a resolve_ref method
     - add a get_compiled_schema method
         - expect a URI
+    - add a get_compiled_schema_for_type method
     - refactor the schema compiling
+
+- Jackalope::Schema::Validator::Core
+    - make it use Moose types to check against

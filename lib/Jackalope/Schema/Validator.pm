@@ -14,14 +14,20 @@ has 'validator' => (
 );
 
 sub validate {
-    my ($self, $type, $schema, $data) = validated_list(\@_,
-        type   => { isa => 'Str'     },
+    my ($self, $schema, $data) = validated_list(\@_,
         schema => { isa => 'HashRef' },
         data   => { isa => 'Any'     },
     );
     my $validator = $self->validator;
-    my $method    = $validator->can( $type ) || confess "Could not find validator for $type";
+    my $method    = $validator->can( $schema->{type} ) || confess "Could not find validator for $schema->{type}";
     return $validator->$method( $schema, $data );
+}
+
+sub has_validator_for {
+    my ($self, $type) = validated_list(\@_,
+        type => { isa => 'Str' }
+    );
+    $self->validator->can( $type ) ? 1 : 0
 }
 
 

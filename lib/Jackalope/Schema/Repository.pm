@@ -11,7 +11,7 @@ use Data::Visitor::Callback;
 
 has 'compiled_schemas' => (
     is      => 'ro',
-    isa     => 'HashRef[HashRef]',
+    isa     => 'HashRef',
     lazy    => 1,
     builder => '_compile_schemas'
 );
@@ -23,15 +23,34 @@ has 'validator' => (
     default => sub { Jackalope::Schema::Validator->new },
 );
 
-# compile all the schemas ...
-sub BUILD { (shift)->compiled_schemas }
+has 'spec' => (
+    is      => 'ro',
+    isa     => 'Jackalope::Schema::Spec',
+    lazy    => 1,
+    default => sub { Jackalope::Schema::Spec->new },
+);
+
+sub BUILD {
+    my $self = shift;
+
+    # make sure the validator
+    # has validations for all
+    # the core types in the spec
+    my $validator = $self->validator;
+    foreach my $type (@{ $self->spec->valid_types }) {
+        $validator->has_validator_for( type => $type )
+            || confess "Validator missing validation routine for type($type)";
+    }
+
+    # compile all the schemas ...
+    $self->compiled_schemas;
+}
 
 sub validate {
     my ($self, $schema, $data) = @_;
     $schema = $self->_compile_schema( $schema );
     $self->_validate_schema( $schema );
     return $self->validator->validate(
-        type   => $schema->{type},
         schema => $schema,
         data   => $data
     );
@@ -54,7 +73,6 @@ sub _validate_schema {
     my $schema_type = $schema->{type};
 
     my $result = $self->validator->validate(
-        type   => 'schema',
         schema => $self->compiled_schemas->{'schema/types/' . $schema_type},
         data   => $schema
     );
@@ -89,7 +107,7 @@ sub _compile_schema {
 sub _compile_schemas {
     my $self = shift;
 
-    my @schemas = @{ Jackalope::Schema::Spec->new->meta_schemas };
+    my @schemas = @{ $self->spec->meta_schemas };
 
     # - first we should build the basic schema map
     #   so that we can resolve uris, but this will
