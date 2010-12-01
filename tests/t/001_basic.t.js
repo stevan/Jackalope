@@ -7,8 +7,8 @@ test(
         ok(jackalope instanceof Jackalope, '... we are an instance of Jackalope');
 
 
-        var validator = new Jackalope.Validator ();
-        ok(validator instanceof Jackalope.Validator, '... we are an instance of Jackalope.Validator');
+        var validator = new Jackalope.Schema.Validator ();
+        ok(validator instanceof Jackalope.Schema.Validator, '... we are an instance of Jackalope.Schema.Validator');
 
         validation_pass( validator.validate( { "type" : "any" }, 1 ), '... validation passed for any');
         validation_pass( validator.validate( { "type" : "any" }, null ), '... validation passed for any');
