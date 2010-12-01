@@ -33,6 +33,24 @@ has 'valid_hyperlink_relation' => (
     },
 );
 
+has 'valid_types' => (
+    is      => 'ro',
+    isa     => 'ArrayRef',   
+    default => sub {
+        [qw[
+            any
+                null
+                boolean
+                number
+                    integer
+                string
+                array
+                object
+                    schema        
+        ]]
+    },
+);
+
 ## ------------------------------------------------------------------
 ## Jackalope Schema Spec
 ## ------------------------------------------------------------------

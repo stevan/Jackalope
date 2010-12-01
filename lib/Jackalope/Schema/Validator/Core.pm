@@ -45,6 +45,11 @@ sub number {
     return {
         error => 'doesnt look like a number'
     } unless Scalar::Util::looks_like_number $data;
+
+    return {
+        error => 'numeric data is a reference'
+    } if ref $data;
+
     if (exists $schema->{less_than}) {
         return {
             error => $data . ' is not less than ' . $schema->{less_than}
@@ -86,6 +91,15 @@ sub string {
     return {
         error => 'string data is not defined'
     } unless defined $data;
+
+    return {
+        error => 'string look more like a number'
+    } if Scalar::Util::looks_like_number $data;
+
+    return {
+        error => 'string data is a reference'
+    } if ref $data;
+
     if (exists $schema->{min_length}) {
         return {
             error => $data . ' is not the minimum length of ' . $schema->{min_length}
