@@ -44,4 +44,7 @@ foreach my $data (@fail) {
     );
 }
 
+validation_pass( $repo->validate( { type => 'number', less_than => 10 }, 5 ), '... we validated a number correctly' );
+validation_fail( $repo->validate( { type => 'number', less_than => 10 }, 11 ), '... we validated a number correctly' );
+
 done_testing;
