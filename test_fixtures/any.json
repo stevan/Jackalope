@@ -1,0 +1,17 @@
+[
+    {
+        schema : { "type" : "any" }
+        pass : [
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            "Hello",
+            [],
+            [ 1, 5, 6 ],
+            { "foo" : "bar" }
+        ],
+        fail : []
+    }
+]

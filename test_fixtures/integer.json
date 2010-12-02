@@ -1,0 +1,112 @@
+[
+    {
+        schema : { "type" : "integer" },
+        pass : [
+            1
+        ],
+        fail : [
+            1.5,
+            null,
+            true,
+            false,
+            "Hello",
+            [],
+            [ 1, 5, 6 ],
+            { "foo" : "bar" }
+        ]
+    },
+    {
+        schema : { "type" : "integer", "less_than" : 5 },
+        pass : [
+            1,
+            4
+        ],
+        fail : [
+            4.9,
+            5,
+            6,
+            null,
+            true,
+            false,
+            "Hello",
+            [],
+            [ 1, 5, 6 ],
+            { "foo" : "bar" }
+        ]
+    },
+    {
+        schema : { "type" : "integer", "less_than_or_equal_to" : 5 },
+        pass : [
+            1,
+            4,
+            5
+        ],
+        fail : [
+            5.1,
+            6,
+            null,
+            true,
+            false,
+            "Hello",
+            [],
+            [ 1, 5, 6 ],
+            { "foo" : "bar" }
+        ]
+    },
+    {
+        schema : { "type" : "integer", "greater_than" : 5 },
+        pass : [
+            6
+        ],
+        fail : [
+            5,
+            5.1,
+            4.9,
+            1,
+            null,
+            true,
+            false,
+            "Hello",
+            [],
+            [ 1, 5, 6 ],
+            { "foo" : "bar" }
+        ]
+    },
+    {
+        schema : { "type" : "integer", "greater_than_or_equal_to" : 5 },
+        pass : [
+            5,
+            6
+        ],
+        fail : [
+            5.1,
+            4.9,
+            1,
+            null,
+            true,
+            false,
+            "Hello",
+            [],
+            [ 1, 5, 6 ],
+            { "foo" : "bar" }
+        ]
+    },
+    {
+        schema : { "type" : "integer", "enum" : [ 5, 1 ] },
+        pass : [
+            5,
+            1
+        ],
+        fail : [
+            4.9,
+            1,
+            null,
+            true,
+            false,
+            "Hello",
+            [],
+            [ 1, 5, 6 ],
+            { "foo" : "bar" }
+        ]
+    }
+]
