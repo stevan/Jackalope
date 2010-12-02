@@ -1,11 +1,9 @@
 
 = TODOS =
 
-- test_fixtures
-    - write JS fixture runner
-
 - Jackalope.js
     - write it
+    - need to implement schema compilation
 
 == LOW PRIORITY ==
 

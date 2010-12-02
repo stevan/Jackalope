@@ -73,6 +73,25 @@
         ]
     },
     {
+        "schema" : { "type" : "number", "greater_than" : 0 },
+        "pass" : [
+            5.1,
+            6
+        ],
+        "fail" : [
+            0,
+            -5,
+            -4.5,
+            null,
+            true,
+            false,
+            "Hello",
+            [],
+            [ 1, 5, 6 ],
+            { "foo" : "bar" }
+        ]
+    },
+    {
         "schema" : { "type" : "number", "greater_than_or_equal_to" : 5 },
         "pass" : [
             5,

@@ -94,7 +94,7 @@
         ],
         "fail" : [
             { "foo" : "bar" },
-            { "id" : 22, "name" : "T-Shirt", "price" : 0.00 },
+            { "id" : 22, "name" : "T-Shirt", "price" : 0 },
             null,
             true,
             false,
