@@ -4,6 +4,7 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use Jackalope::Util    ();
 use Try::Tiny;
 use Scalar::Util       ();
 use List::AllUtils     ();
@@ -35,9 +36,9 @@ sub null {
 
 sub boolean {
     my (undef, $schema, $data) = @_;
-    (!defined($data) || $data eq "" || "$data" eq '1' || "$data" eq '0')
+    Jackalope::Util::is_bool( $data )
         ? +{ pass => 1 }
-        : +{ error => $data . ' is not a boolean type' };
+        : +{ error => (defined $data ? $data : 'undef') . ' is not a boolean type' };
 }
 
 sub number {
@@ -53,22 +54,22 @@ sub number {
     if (exists $schema->{less_than}) {
         return {
             error => $data . ' is not less than ' . $schema->{less_than}
-        } if $schema->{less_than} < $data;
+        } if $data >= $schema->{less_than};
     }
     if (exists $schema->{less_than_or_equal_to}) {
         return {
             error => $data . ' is not less than or equal to ' . $schema->{less_than_or_equal_to}
-        } if $schema->{less_than_or_equal_to} <= $data;
+        } if $data > $schema->{less_than_or_equal_to};
     }
     if (exists $schema->{greater_than}) {
         return {
             error => $data . ' is not greater than ' . $schema->{greater_than}
-        } if $schema->{greater_than} > $data;
+        } if $data <= $schema->{greater_than};
     }
     if (exists $schema->{greater_than_or_equal_to}) {
         return {
             error => $data . ' is not greater than or equal to ' . $schema->{greater_than_or_equal_to}
-        } if $schema->{greater_than_or_equal_to} >= $data;
+        } if $data < $schema->{greater_than_or_equal_to};
     }
     if (exists $schema->{enum}) {
         return {
@@ -82,7 +83,7 @@ sub integer {
     my ($self, $schema, $data) = @_;
     return {
         error => (defined $data ? $data : 'undef') . ' is perhaps a floating point number'
-    } unless defined $data && $data =~ /^\d+$/;
+    } unless defined $data && $data =~ /^-?[0-9]+$/;
     return $self->number( $schema, $data );
 }
 

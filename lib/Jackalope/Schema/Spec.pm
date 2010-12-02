@@ -4,8 +4,7 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-# for readability
-sub true () { 1 }
+use Jackalope::Util;
 
 ## formatters needed for bootstrap
 has 'valid_formatters' => (
@@ -299,10 +298,10 @@ sub get_all_schemas {
             type => { type => "string", enum => [ "number" ] },
         },
         additional_properties => {
-            less_than             => { type => "number", description => "A number must be less than this value" },
-            less_than_or_equal    => { type => "number", description => "A number must be less than or equal to this value" },
-            greater_than          => { type => "number", description => "A number must be greater than this value" },
-            greater_than_or_equal => { type => "number", description => "A number must be greater than or equal to this value" },
+            less_than                => { type => "number", description => "A number must be less than this value" },
+            less_than_or_equal_to    => { type => "number", description => "A number must be less than or equal to this value" },
+            greater_than             => { type => "number", description => "A number must be greater than this value" },
+            greater_than_or_equal_to => { type => "number", description => "A number must be greater than or equal to this value" },
             enum             => {
                 type        => "array",
                 items       => { type => "number" },

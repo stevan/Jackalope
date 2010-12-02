@@ -1,11 +1,11 @@
 [
     {
-        schema : { "type" : "number" },
-        pass : [
+        "schema" : { "type" : "number" },
+        "pass" : [
             1,
             1.5
         ],
-        fail : [
+        "fail" : [
             null,
             true,
             false,
@@ -16,13 +16,13 @@
         ]
     },
     {
-        schema : { "type" : "number", "less_than" : 5 },
-        pass : [
+        "schema" : { "type" : "number", "less_than" : 5 },
+        "pass" : [
             1,
             4,
             4.9
         ],
-        fail : [
+        "fail" : [
             5,
             6,
             null,
@@ -35,13 +35,13 @@
         ]
     },
     {
-        schema : { "type" : "number", "less_than_or_equal_to" : 5 },
-        pass : [
+        "schema" : { "type" : "number", "less_than_or_equal_to" : 5 },
+        "pass" : [
             1,
             4,
             5
         ],
-        fail : [
+        "fail" : [
             5.1,
             6,
             null,
@@ -54,12 +54,12 @@
         ]
     },
     {
-        schema : { "type" : "number", "greater_than" : 5 },
-        pass : [
+        "schema" : { "type" : "number", "greater_than" : 5 },
+        "pass" : [
             5.1,
             6
         ],
-        fail : [
+        "fail" : [
             5,
             4.9,
             1,
@@ -73,13 +73,13 @@
         ]
     },
     {
-        schema : { "type" : "number", "greater_than_or_equal_to" : 5 },
-        pass : [
+        "schema" : { "type" : "number", "greater_than_or_equal_to" : 5 },
+        "pass" : [
             5,
             5.1,
             6
         ],
-        fail : [
+        "fail" : [
             4.9,
             1,
             null,
@@ -92,15 +92,15 @@
         ]
     },
     {
-        schema : { "type" : "number", "enum" : [ 5, 1, 2.5 ] },
-        pass : [
+        "schema" : { "type" : "number", "enum" : [ 5, 1, 2.5 ] },
+        "pass" : [
             5,
             1,
             2.5
         ],
-        fail : [
+        "fail" : [
             4.9,
-            1,
+            0,
             null,
             true,
             false,

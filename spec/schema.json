@@ -85,7 +85,7 @@
             "description" : "This is a schema (or a reference to a schema)\nrepresented as an 'object' instance. The exact\ndetails of extension are described elsewhere.\n"
          },
          "links" : {
-            "is_unique" : 1,
+            "is_unique" : true,
             "type" : "array",
             "description" : "This is an array of 'link' objects, the purpose\nof which is to provide a way to map services\nto the objects described in a schema. In OOP terms,\nyou can think of them as methods, while the schema\ndescribes the instance structure.\n",
             "items" : {
@@ -146,12 +146,16 @@
             "type" : "number",
             "description" : "A number must be greater than this value"
          },
-         "less_than_or_equal" : {
+         "less_than_or_equal_to" : {
             "type" : "number",
             "description" : "A number must be less than or equal to this value"
          },
+         "greater_than_or_equal_to" : {
+            "type" : "number",
+            "description" : "A number must be greater than or equal to this value"
+         },
          "enum" : {
-            "is_unique" : 1,
+            "is_unique" : true,
             "type" : "array",
             "description" : "This is an array of possible acceptable values, it should contain no duplicates",
             "items" : {
@@ -161,10 +165,6 @@
          "less_than" : {
             "type" : "number",
             "description" : "A number must be less than this value"
-         },
-         "greater_than_or_equal" : {
-            "type" : "number",
-            "description" : "A number must be greater than or equal to this value"
          }
       },
       "id" : "schema/types/number",
@@ -194,7 +194,7 @@
             "description" : "A integer must be less than or equal to this value"
          },
          "enum" : {
-            "is_unique" : 1,
+            "is_unique" : true,
             "type" : "array",
             "description" : "This is an array of possible acceptable values, it should contain no duplicates",
             "items" : {
@@ -243,7 +243,7 @@
             "description" : "This is one of a set of built-in formatters"
          },
          "enum" : {
-            "is_unique" : 1,
+            "is_unique" : true,
             "type" : "array",
             "description" : "This is an array of possible acceptable values, it should contain no duplicates",
             "items" : {

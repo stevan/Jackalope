@@ -1,10 +1,10 @@
 [
     {
-        schema : { "type" : "null" }
-        pass : [
+        "schema" : { "type" : "null" },
+        "pass" : [
             null
         ],
-        fail : [
+        "fail" : [
             true,
             false,
             1,

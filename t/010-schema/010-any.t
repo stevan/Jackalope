@@ -2,10 +2,11 @@
 
 use strict;
 use warnings;
+use FindBin;
 
 use Test::More;
 use Test::Fatal;
-use Test::Jackalope;
+use Test::Jackalope::Fixtures;
 
 BEGIN {
     use_ok('Jackalope');
@@ -14,20 +15,9 @@ BEGIN {
 my $repo = Jackalope->new->resolve( type => 'Jackalope::Schema::Repository' );
 isa_ok($repo, 'Jackalope::Schema::Repository');
 
-my @pass = (
-    undef,
-    1,
-    "two",
-    3.1,
-    [ 4, 5, 6 ],
-    { seven => 8 }
-);
-
-foreach my $data (@pass) {
-    validation_pass(
-        $repo->validate( { type => 'any' }, $data ),
-        '... validate against the any type'
-    );
-}
+Test::Jackalope::Fixtures->new(
+    fixture_dir => [ $FindBin::Bin, '..', '..', 'test_fixtures' ],
+    repo        => $repo
+)->run_fixtures_for_type( 'any' );
 
 done_testing;

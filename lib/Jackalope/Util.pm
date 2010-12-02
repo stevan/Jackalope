@@ -1,33 +1,29 @@
-package Jackalope::Serializer::JSON;
-use Moose;
+package Jackalope::Util;
+
+use strict;
+use warnings;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use JSON::XS;
+use JSON::XS ();
 
-with 'Jackalope::Serializer';
+my @exports = qw/
+    true
+    false
+/;
 
-has 'json' => (
-    is      => 'ro',
-    isa     => 'JSON::XS',
-    lazy    => 1,
-    default => sub { JSON::XS->new },
-);
+Sub::Exporter::setup_exporter({
+    exports => \@exports,
+    groups  => { default => \@exports }
+});
 
-sub serialize {
-    my ($self, $data) = @_;
-    $self->json->encode( $data );
-}
+sub true  () { JSON::XS::true()  }
+sub false () { JSON::XS::false() }
 
-sub deserialize {
-    my ($self, $json) = @_;
-    $self->json->decode( $json );
-}
+sub is_bool { JSON::XS::is_bool( shift ) }
 
-__PACKAGE__->meta->make_immutable;
-
-no Moose; 1;
+1;
 
 __END__
 
@@ -35,21 +31,9 @@ __END__
 
 =head1 NAME
 
-Jackalope::Serializer::JSON - A Moosey solution to this problem
-
 =head1 SYNOPSIS
 
-  use Jackalope::Serializer::JSON;
-
 =head1 DESCRIPTION
-
-=head1 METHODS
-
-=over 4
-
-=item B<>
-
-=back
 
 =head1 BUGS
 

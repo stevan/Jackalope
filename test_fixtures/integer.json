@@ -1,10 +1,10 @@
 [
     {
-        schema : { "type" : "integer" },
-        pass : [
+        "schema" : { "type" : "integer" },
+        "pass" : [
             1
         ],
-        fail : [
+        "fail" : [
             1.5,
             null,
             true,
@@ -16,12 +16,12 @@
         ]
     },
     {
-        schema : { "type" : "integer", "less_than" : 5 },
-        pass : [
+        "schema" : { "type" : "integer", "less_than" : 5 },
+        "pass" : [
             1,
             4
         ],
-        fail : [
+        "fail" : [
             4.9,
             5,
             6,
@@ -35,13 +35,13 @@
         ]
     },
     {
-        schema : { "type" : "integer", "less_than_or_equal_to" : 5 },
-        pass : [
+        "schema" : { "type" : "integer", "less_than_or_equal_to" : 5 },
+        "pass" : [
             1,
             4,
             5
         ],
-        fail : [
+        "fail" : [
             5.1,
             6,
             null,
@@ -54,11 +54,11 @@
         ]
     },
     {
-        schema : { "type" : "integer", "greater_than" : 5 },
-        pass : [
+        "schema" : { "type" : "integer", "greater_than" : 5 },
+        "pass" : [
             6
         ],
-        fail : [
+        "fail" : [
             5,
             5.1,
             4.9,
@@ -73,12 +73,12 @@
         ]
     },
     {
-        schema : { "type" : "integer", "greater_than_or_equal_to" : 5 },
-        pass : [
+        "schema" : { "type" : "integer", "greater_than_or_equal_to" : 5 },
+        "pass" : [
             5,
             6
         ],
-        fail : [
+        "fail" : [
             5.1,
             4.9,
             1,
@@ -92,14 +92,14 @@
         ]
     },
     {
-        schema : { "type" : "integer", "enum" : [ 5, 1 ] },
-        pass : [
+        "schema" : { "type" : "integer", "enum" : [ 5, 1 ] },
+        "pass" : [
             5,
             1
         ],
-        fail : [
+        "fail" : [
             4.9,
-            1,
+            0,
             null,
             true,
             false,

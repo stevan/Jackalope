@@ -1,13 +1,14 @@
 [
     {
-        schema : { "type" : "boolean" }
-        pass : [
+        "schema" : { "type" : "boolean" },
+        "pass" : [
             true,
             false
         ],
-        fail : [
+        "fail" : [
             null,
             1,
+            0,
             1.5,
             "Hello",
             [],
