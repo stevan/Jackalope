@@ -9,8 +9,17 @@
 
 == LOW PRIORITY ==
 
+- Jackalope::Script::GenerateSpec
+    - fix the JSON purty stuff, need to
+      see if encode_json takes options
+
 - test_fixtures
     - write more of them
+
+- Test::Jackalope & Test.Jackalope
+    - validation_fail should also take some kind of
+      test to check the right error appears
+        - fixtures will need to support this too
 
 - Jackalope::Schema::Repository
     - add a resolve_ref method

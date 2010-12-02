@@ -61,7 +61,7 @@ sub run {
 
     if ($self->format eq 'JSON') {
         # make sure the JSON is purty
-        $self->_serializer->json->pretty(1);
+        #$self->_serializer->json->pretty(1);
     }
 
     # clean up the description strings too
