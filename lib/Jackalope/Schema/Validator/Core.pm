@@ -10,15 +10,16 @@ use Scalar::Util       ();
 use List::AllUtils     ();
 use Devel::PartialDump ();
 
-has 'formaters' => (
+has 'formatters' => (
     traits  => [ 'Hash' ],
     is      => 'ro',
     isa     => 'HashRef',
+    lazy    => 1,
     default => sub {
         +{
             uri          => 1,
             uri_template => 1,
-            regexp       => 1,
+            regex        => 1,
         }
     },
     handles => {
@@ -118,7 +119,7 @@ sub string {
     }
     if (exists $schema->{format}) {
         return {
-            error => $data . ' is not one of the built-in formats'
+            error => $schema->{format} . ' is not one of the built-in formats ' . (Devel::PartialDump::dump $self->formatters)
         } unless $self->is_valid_formatter( $schema->{format} );
     }
     if (exists $schema->{enum}) {
@@ -177,7 +178,11 @@ sub object {
 
     my %all_props = map { $_ => undef } grep { !/^__/ } keys %$data;
 
-    if (exists $schema->{__compiled_properties} && scalar keys %{ $schema->{__compiled_properties} }) {
+    my $has_properties = exists $schema->{__compiled_properties} && scalar keys %{ $schema->{__compiled_properties} };
+    my $has_additional_properties = exists $schema->{__compiled_additional_properties}
+                                  && scalar keys %{ $schema->{__compiled_additional_properties} };
+
+    if ($has_properties) {
         my $result = $self->_check_properties(
             $schema->{__compiled_properties}, $data, \%all_props
         );
@@ -187,7 +192,7 @@ sub object {
         } if exists $result->{error};
     }
 
-    if (exists $schema->{__compiled_additional_properties} && scalar keys %{ $schema->{__compiled_additional_properties} }) {
+    if ($has_additional_properties) {
         my $result = $self->_check_additional_properties(
             $schema->{__compiled_additional_properties}, $data, \%all_props
         );
@@ -197,7 +202,7 @@ sub object {
         } if exists $result->{error};
     }
 
-    if (exists $schema->{__compiled_properties} || exists $schema->{__compiled_additional_properties}) {
+    if ($has_properties || $has_additional_properties) {
         return {
             error           => (Devel::PartialDump::dump $data) . ' did not match all the expected properties',
             remaining_props => \%all_props,

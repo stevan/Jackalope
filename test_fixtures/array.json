@@ -1,0 +1,94 @@
+[
+    {
+        "schema" : { "type" : "array" },
+        "pass" : [
+            [],
+            [ 1, 5, 6 ]
+        ],
+        "fail" : [
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            "Hello",
+            { "foo" : "bar" }
+        ]
+    },
+    {
+        "schema" : { "type" : "array", "min_items" : 2 },
+        "pass" : [
+            [ 1, 2 ],
+            [ 1, 5, 6 ]
+        ],
+        "fail" : [
+            [],
+            [ 1 ],
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            "Hello",
+            { "foo" : "bar" }
+        ]
+    },
+    {
+        "schema" : { "type" : "array", "max_items" : 2 },
+        "pass" : [
+            [],
+            [ 1 ],
+            [ 1, 2 ]
+        ],
+        "fail" : [
+            [ 1, 5, 6 ],
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            "Hello",
+            { "foo" : "bar" }
+        ]
+    },
+    {
+        "schema" : { "type" : "array", "is_unique" : true },
+        "pass" : [
+            [],
+            [ 1 ],
+            [ 1, 2 ],
+            [ 1, 5, 6 ]
+        ],
+        "fail" : [
+            [ 1, 1 ],
+            [ 2, 3, 2, 4 ],
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            "Hello",
+            { "foo" : "bar" }
+        ]
+    },
+    {
+        "schema" : { "type" : "array", "items" : { "type" : "number" } },
+        "pass" : [
+            [],
+            [ 1 ],
+            [ 1, 2 ],
+            [ 1, 5, 6 ]
+        ],
+        "fail" : [
+            [ 1, "one" ],
+            [ 2, 3, "two", 4 ],
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            "Hello",
+            { "foo" : "bar" }
+        ]
+    }
+]

@@ -1,6 +1,11 @@
 
 = TODOS =
 
+- finish fixtures
+    - write JS fixture runner
+
+- move all JSON::XS usage to Jackalope::Util
+
 - Jackalope.js
     - write it
 

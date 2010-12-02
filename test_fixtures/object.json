@@ -1,0 +1,108 @@
+[
+    {
+        "schema" : { "type" : "object" },
+        "pass" : [
+            { "foo" : "bar" },
+            {}
+        ],
+        "fail" : [
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            "Hello",
+            [],
+            [ 1, 5, 6 ]
+        ]
+    },
+    {
+        "schema" : { "type" : "object", "items" : { "type" : "string" } },
+        "pass" : [
+            { "foo" : "bar" },
+            {}
+        ],
+        "fail" : [
+            { "foo" : 5 },
+            { "foo" : "bar", "baz" : [] },
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            "Hello",
+            [],
+            [ 1, 5, 6 ]
+        ]
+    },
+    {
+        "schema" : {
+            "type" : "object",
+            "properties" : {
+                "name" : { "type" : "string" },
+                "age" : { "type" : "integer", "less_than" : 125 }
+            }
+        },
+        "pass" : [
+            { "name" : "Stevan", "age" : 37 },
+            { "name" : "Bob", "age" : 87 },
+            { "name" : "Jimbo", "age" : 3 }
+        ],
+        "fail" : [
+            { "name" : "Grady", "age" : 125 },
+            { "foo" : "bar" },
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            "Hello",
+            [],
+            [ 1, 5, 6 ]
+        ]
+    },
+    {
+        "schema" : {
+            "description" : "Product",
+            "type" : "object",
+            "properties" : {
+                "id" : {
+                    "type" : "number",
+                    "description" : "Product identifier"
+                },
+                "name" : {
+                    "description" : "Name of the product",
+                    "type" : "string"
+                },
+                "price" : {
+                    "type" : "number",
+                    "greater_than" : 0
+                }
+            },
+            "additional_properties" : {
+                "tags" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string"
+                    }
+                }
+            }
+        },
+        "pass" : [
+            { "id" : 1, "name" : "Boom Box", "price" : 200.00, "tags" : [ "boomin", "box" ] },
+            { "id" : 33, "name" : "Stereo", "price" : 305.95 }
+        ],
+        "fail" : [
+            { "foo" : "bar" },
+            { "id" : 22, "name" : "T-Shirt", "price" : 0.00 },
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            "Hello",
+            [],
+            [ 1, 5, 6 ]
+        ]
+    }
+]

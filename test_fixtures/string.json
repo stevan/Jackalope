@@ -1,0 +1,112 @@
+[
+    {
+        "schema" : { "type" : "string" },
+        "pass" : [
+            "Hello",
+            ""
+        ],
+        "fail" : [
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            [],
+            [ 1, 5, 6 ],
+            { "foo" : "bar" }
+        ]
+    },
+    {
+        "schema" : { "type" : "string", "min_length" : 2 },
+        "pass" : [
+            "Hello",
+            "hi"
+        ],
+        "fail" : [
+            "",
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            [],
+            [ 1, 5, 6 ],
+            { "foo" : "bar" }
+        ]
+    },
+    {
+        "schema" : { "type" : "string", "max_length" : 2 },
+        "pass" : [
+            "",
+            "h",
+            "hi"
+        ],
+        "fail" : [
+            "Hello",
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            [],
+            [ 1, 5, 6 ],
+            { "foo" : "bar" }
+        ]
+    },
+    {
+        "schema" : { "type" : "string", "pattern" : "foo.*bar" },
+        "pass" : [
+            "foobazbar",
+            "foobar",
+            "foogorchbazblingbar"
+        ],
+        "fail" : [
+            "Hello",
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            [],
+            [ 1, 5, 6 ],
+            { "foo" : "bar" }
+        ]
+    },
+    {
+        "schema" : { "type" : "string", "format" : "uri" },
+        "pass" : [
+            "test/ing",
+            "not/really/validating/this/yet",
+            "http://www.example.org"
+        ],
+        "fail" : [
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            [],
+            [ 1, 5, 6 ],
+            { "foo" : "bar" }
+        ]
+    },
+    {
+        "schema" : { "type" : "string", "enum" : [ "one", "two", "three" ] },
+        "pass" : [
+            "one",
+            "two",
+            "three"
+        ],
+        "fail" : [
+            "four",
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            [],
+            [ 1, 5, 6 ],
+            { "foo" : "bar" }
+        ]
+    }
+]
