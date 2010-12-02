@@ -11,6 +11,8 @@ use JSON::XS ();
 my @exports = qw/
     true
     false
+    encode_json
+    decode_json
 /;
 
 Sub::Exporter::setup_exporter({
@@ -22,6 +24,9 @@ sub true  () { JSON::XS::true()  }
 sub false () { JSON::XS::false() }
 
 sub is_bool { JSON::XS::is_bool( shift ) }
+
+sub encode_json { JSON::XS::encode_json( shift ) }
+sub decode_json { JSON::XS::decode_json( shift ) }
 
 1;
 

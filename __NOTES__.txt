@@ -1,15 +1,16 @@
 
 = TODOS =
 
-- finish fixtures
+- test_fixtures
     - write JS fixture runner
-
-- move all JSON::XS usage to Jackalope::Util
 
 - Jackalope.js
     - write it
 
 == LOW PRIORITY ==
+
+- test_fixtures
+    - write more of them
 
 - Jackalope::Schema::Repository
     - add a resolve_ref method

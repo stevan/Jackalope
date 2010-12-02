@@ -4,25 +4,18 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use JSON::XS;
+use Jackalope::Util;
 
 with 'Jackalope::Serializer';
 
-has 'json' => (
-    is      => 'ro',
-    isa     => 'JSON::XS',
-    lazy    => 1,
-    default => sub { JSON::XS->new },
-);
-
 sub serialize {
     my ($self, $data) = @_;
-    $self->json->encode( $data );
+    encode_json( $data );
 }
 
 sub deserialize {
     my ($self, $json) = @_;
-    $self->json->decode( $json );
+    decode_json( $json );
 }
 
 __PACKAGE__->meta->make_immutable;

@@ -5,31 +5,21 @@
 
     <script type="text/javascript" src="lib/jquery.js"></script>
     <script type="text/javascript" src="lib/json2.js"></script>
+
     <script type="text/javascript" src="../lib/Jackalope/JS/Jackalope.js"></script>
+    <script type="text/javascript" src="../lib/Jackalope/JS/Test/Jackalope.js"></script>
+
     <script type="text/javascript" src="lib/qunit.js"></script>
-    <script type="text/javascript">
 
-    var validation_pass = function(result, message) {
-        if (result["error"] == undefined) {
-            ok(true, message);
-        }
-        else {
-            try { console.log( result ) } catch (e) {}
-            ok(false, message);
-        }
-    };
-
-    var validation_fail = function(result, message) {
-        if (result["error"] == undefined) {
-            ok(false, message);
-        }
-        else {
-            ok(true, message);
-        }
-    };
-
-    </script>
-    <script type="text/javascript" src="t/001_basic.t.js"></script>
+    <script type="text/javascript" src="t/000-load.t.js"></script>
+    <script type="text/javascript" src="t/010-schema/010-any.t.js"></script>
+    <script type="text/javascript" src="t/010-schema/020-null.t.js"></script>
+    <script type="text/javascript" src="t/010-schema/030-boolean.t.js"></script>
+    <script type="text/javascript" src="t/010-schema/040-number.t.js"></script>
+    <script type="text/javascript" src="t/010-schema/050-integer.t.js"></script>
+    <script type="text/javascript" src="t/010-schema/060-string.t.js"></script>
+    <script type="text/javascript" src="t/010-schema/070-array.t.js"></script>
+    <script type="text/javascript" src="t/010-schema/080-object.t.js"></script>
 </head>
 <body>
     <h1 id="qunit-header">Jackalope Test Suite</h1>

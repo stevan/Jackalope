@@ -8,7 +8,6 @@ our $AUTHORITY = 'cpan:STEVAN';
 use Jackalope::Util;
 use Test::Jackalope;
 use Devel::PartialDump 'dump';
-use JSON::XS;
 
 has 'fixture_dir' => (
     is       => 'ro',
@@ -23,14 +22,11 @@ has 'repo' => (
     required => 1
 );
 
-our $Test = Test::Builder->new;
-our $JSON = JSON::XS->new;
-
 sub run_fixtures_for_type {
     my ($self, $type) = @_;
 
     my $repo     = $self->repo;
-    my $fixtures = $JSON->decode( scalar $self->fixture_dir->file( $type . '.json' )->slurp );
+    my $fixtures = decode_json( scalar $self->fixture_dir->file( $type . '.json' )->slurp );
 
     foreach my $fixture (@$fixtures) {
 
