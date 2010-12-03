@@ -2,8 +2,8 @@
 = TODOS =
 
 - Jackalope.js
-    - write it
-    - need to implement schema compilation
+    - add Spec module that handles loading and compilation
+    - add some kind of basic Bread-Board type thing
 
 - Jackalope::WebService
     - write a schema -> router generator

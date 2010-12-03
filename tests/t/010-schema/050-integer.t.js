@@ -4,7 +4,7 @@ test(
     function () {
 
         var fixtures = new Test.Jackalope.Fixtures ({
-            "fixture_dir" : "../test_fixtures/",
+            "fixture_dir" : "../fixtures/",
             "validator"   : new Jackalope.Schema.Validator ()
         });
 
