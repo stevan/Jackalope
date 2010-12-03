@@ -2,7 +2,6 @@
 = TODOS =
 
 - Jackalope.js
-    - add Spec module that handles loading and compilation
     - add some kind of basic Bread-Board type thing
 
 - Jackalope::WebService
@@ -10,7 +9,6 @@
         - Plack::App::Path::Router?
         - use the metadata to supply controller/action stuff
             - have controller/action lookup Bread::Board service
-
 
 == LOW PRIORITY ==
 

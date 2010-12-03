@@ -1,0 +1,12 @@
+[
+    {
+        "schema" : { "$ref" : "schema/core/ref" },
+        "pass" : [
+            { "$ref" : "schema/core/ref" }
+        ],
+        "fail" : [
+            { "$ref" : [] },
+            { "$ref" : "test", "foo" : "bar" }
+        ]
+    }
+]

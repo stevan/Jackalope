@@ -35,14 +35,14 @@ sub run_fixtures_for_type {
         foreach my $data (@{ $fixture->{pass} }) {
             validation_pass(
                 $repo->validate( $schema, $data ),
-                '... validation passed for ' . (dump $data) . ' against ' . $schema->{type}
+                '... validation passed for ' . (dump $data) . ' against ' . $type
             );
         }
 
         foreach my $data (@{ $fixture->{fail} }) {
             validation_fail(
                 $repo->validate( $schema, $data ),
-                '... validation failed for ' . (dump $data) . ' against ' . $schema->{type}
+                '... validation failed for ' . (dump $data) . ' against ' . $type
             );
         }
     }

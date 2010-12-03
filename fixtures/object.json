@@ -50,6 +50,7 @@
         ],
         "fail" : [
             { "name" : "Grady", "age" : 125 },
+            { "name" : "Grady", "age" : 125, "sex" : "male" },
             { "foo" : "bar" },
             null,
             true,
@@ -95,6 +96,7 @@
         "fail" : [
             { "foo" : "bar" },
             { "id" : 22, "name" : "T-Shirt", "price" : 0 },
+            { "id" : 22, "name" : "T-Shirt", "price" : 0, "stock-location" : "Warehouse" },
             null,
             true,
             false,

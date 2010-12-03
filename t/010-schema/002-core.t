@@ -2,10 +2,12 @@
 
 use strict;
 use warnings;
+use FindBin;
 
 use Test::More;
 use Test::Fatal;
 use Test::Jackalope;
+use Test::Jackalope::Fixtures;
 
 BEGIN {
     use_ok('Jackalope');
@@ -13,6 +15,11 @@ BEGIN {
 
 my $repo = Jackalope->new->resolve( type => 'Jackalope::Schema::Repository' );
 isa_ok($repo, 'Jackalope::Schema::Repository');
+
+my $fixtures = Test::Jackalope::Fixtures->new(
+    fixture_dir => [ $FindBin::Bin, '..', '..', 'fixtures' ],
+    repo        => $repo
+);
 
 foreach my $type ( qw[ ref hyperlink ] ) {
     validation_pass(
@@ -22,56 +29,10 @@ foreach my $type ( qw[ ref hyperlink ] ) {
         ),
         '... validate the ' . $type . ' type with the schema type'
     );
+    $fixtures->run_fixtures_for_type( $type );
 }
 
-validation_pass(
-    $repo->validate(
-        { '$ref' => 'schema/core/ref' },
-        { '$ref' => 'schema/core/ref' }
-    ),
-    '... validate a ref type'
-);
 
-my @links = (
-    {
-        "relation" => "self",
-        "href"     => "{id}"
-    },
-    {
-        "relation" => "described_by",
-        "href"     => "schema/{type}"
-    },
-    {
-        "relation"      => "self",
-        "href"          => "product/{id}/view",
-        "target_schema" => { '$ref' => "#" }
-    },
-    {
-        "relation" => "self",
-        "href"     => "product/{id}/update",
-        "method"   => "POST",
-        "schema"   => { '$ref' => "#" }
-    },
-    {
-        "relation"    => "create",
-        "href"        => "product/create",
-        "method"      => "POST",
-        "schema"      => { '$ref' => "/my_schemas/product" },
-        "title"       => "Create Product",
-        "description" => "Create a product resource with this",
-        "metadata"    => {
-            controller => 'ProductFactory',
-            action     => 'create_product'
-        }
-    }
-);
-
-foreach my $link (@links) {
-    validation_pass(
-        $repo->validate( { '$ref' => 'schema/core/hyperlink' }, $link ),
-        '... validate a hyperlink type'
-    );
-}
 
 
 done_testing;
