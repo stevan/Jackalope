@@ -33,7 +33,7 @@ sub BUILD {
     # the core types in the spec
     my $validator = $self->validator;
     foreach my $type (@{ $self->spec->valid_types }) {
-        $validator->has_validator_for( type => $type )
+        $validator->has_validator_for( $type )
             || confess "Validator missing validation routine for type($type)";
     }
 
@@ -45,10 +45,7 @@ sub validate {
     my ($self, $schema, $data) = @_;
     $schema = $self->_compile_schema( $schema );
     $self->_validate_schema( $schema );
-    return $self->validator->validate(
-        schema => $schema,
-        data   => $data
-    );
+    return $self->validator->validate( $schema, $data );
 }
 
 sub register_schema {
@@ -68,8 +65,8 @@ sub _validate_schema {
     my $schema_type = $schema->{type};
 
     my $result = $self->validator->validate(
-        schema => $self->compiled_schemas->{'schema/types/' . $schema_type},
-        data   => $schema
+        $self->compiled_schemas->{'schema/types/' . $schema_type},
+        $schema
     );
 
     if (exists $result->{error}) {

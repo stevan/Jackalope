@@ -1,6 +1,5 @@
 package Jackalope::Schema::Validator;
 use Moose;
-use MooseX::Params::Validate;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
@@ -12,19 +11,14 @@ has 'validator' => (
 );
 
 sub validate {
-    my ($self, $schema, $data) = validated_list(\@_,
-        schema => { isa => 'HashRef' },
-        data   => { isa => 'Any'     },
-    );
+    my ($self, $schema, $data) = @_;
     my $validator = $self->validator;
     my $method    = $validator->can( $schema->{type} ) || confess "Could not find validator for $schema->{type}";
     return $validator->$method( $schema, $data );
 }
 
 sub has_validator_for {
-    my ($self, $type) = validated_list(\@_,
-        type => { isa => 'Str' }
-    );
+    my ($self, $type) = @_;
     $self->validator->can( $type ) ? 1 : 0
 }
 
