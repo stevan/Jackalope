@@ -7,6 +7,7 @@ our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use JSON::XS ();
+use Sub::Exporter;
 
 my @exports = qw/
     true
