@@ -5,6 +5,13 @@
     - write it
     - need to implement schema compilation
 
+- Jackalope::WebService
+    - write a schema -> router generator
+        - Plack::App::Path::Router?
+        - use the metadata to supply controller/action stuff
+            - have controller/action lookup Bread::Board service
+
+
 == LOW PRIORITY ==
 
 - Jackalope::Script::GenerateSpec
