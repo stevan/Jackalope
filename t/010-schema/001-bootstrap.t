@@ -14,7 +14,7 @@ BEGIN {
 my $repo = Jackalope->new->resolve( type => 'Jackalope::Schema::Repository' );
 isa_ok($repo, 'Jackalope::Schema::Repository');
 
-foreach my $type ( @{ $repo->spec->valid_types } ) {
+foreach my $type ( $repo->spec->valid_types ) {
     validation_pass(
         $repo->validate(
             { '$ref' => 'schema/types/schema' },

@@ -32,22 +32,26 @@ has 'valid_hyperlink_relation' => (
     },
 );
 
-has 'valid_types' => (
+has 'typemap' => (
+    traits  => [ 'Hash' ],
     is      => 'ro',
-    isa     => 'ArrayRef',
+    isa     => 'HashRef',
     default => sub {
-        [qw[
-            any
-                null
-                boolean
-                number
-                    integer
-                string
-                array
-                object
-                    schema
-        ]]
+        +{
+            any             => 'schema/types/any',
+                null        => 'schema/types/null',
+                boolean     => 'schema/types/boolean',
+                number      => 'schema/types/number',
+                    integer => 'schema/types/integer',
+                string      => 'schema/types/string',
+                array       => 'schema/types/array',
+                object      => 'schema/types/object',
+                    schema  => 'schema/types/schema',
+        }
     },
+    handles => {
+        'valid_types' => 'keys'
+    }
 );
 
 ## ------------------------------------------------------------------
@@ -61,18 +65,39 @@ has 'valid_types' => (
 ## then to re-read it again, in order to fully understand the spec.
 ## ------------------------------------------------------------------
 
-sub get_all_schemas {
-    my $self = shift;
+sub get_spec {
+    my $self       = shift;
+    my $typemap    = $self->typemap;
+    my $schema_map = {};
 
-    ## ------------------------------------------------------------------
-    ## Reference Schema
-    ## ------------------------------------------------------------------
-    ## The reference schema is needed in order to improve the
-    ## re-usability of schemas, so therefore is added as a
-    ## core element of the spec.
-    ## ------------------------------------------------------------------
+    foreach my $type ( keys %{ $self->typemap } ) {
+        my $schema = $self->$type();
+        $schema_map->{ $schema->{'id'} } = $schema;
+    }
 
-    my $ref = {
+    foreach my $schema ( $self->ref, $self->hyperlink ) {
+        $schema_map->{ $schema->{'id'} } = $schema;
+    }
+
+    return +{
+        typemap    => $typemap,
+        schema_map => $schema_map,
+        metadata   => {
+            valid_formatters         => $self->valid_formatters,
+            valid_hyperlink_relation => $self->valid_hyperlink_relation
+        }
+    };
+}
+
+## ------------------------------------------------------------------
+## Reference Schema
+## ------------------------------------------------------------------
+## The reference schema is needed in order to improve the
+## re-usability of schemas, so therefore is added as a
+## core element of the spec.
+## ------------------------------------------------------------------
+sub ref {
+    return +{
         id          => "schema/core/ref",
         title       => "The reference schema",
         description => q[
@@ -92,18 +117,20 @@ sub get_all_schemas {
         ],
         type        => "object",
         properties  => {
-            '$ref' => { type => "string", format => "uri" }
+            '$ref' => { type => "string", 'format' => "uri" }
         }
     };
+}
 
-    ## ------------------------------------------------------------------
-    ## Hyperlink Schema
-    ## ------------------------------------------------------------------
-    ## The Hyperlink schema is an additional schema which provides a way
-    ## to talk about and describe links for resources.
-    ## ------------------------------------------------------------------
-
-    my $hyperlink = {
+## ------------------------------------------------------------------
+## Hyperlink Schema
+## ------------------------------------------------------------------
+## The Hyperlink schema is an additional schema which provides a way
+## to talk about and describe links for resources.
+## ------------------------------------------------------------------
+sub hyperlink {
+    my $self = shift;
+    return +{
         id          => "schema/core/hyperlink",
         title       => "The 'Link' schema",
         description => q[
@@ -125,7 +152,7 @@ sub get_all_schemas {
             },
             href => {
                 type        => "string",
-                format      => "uri_template",
+                'format'    => "uri_template",
                 description => q[
                     This is a URI for the resource, it may also
                     be a URI template containing variables. In the
@@ -183,26 +210,28 @@ sub get_all_schemas {
             }
         }
     };
+}
 
-    ## ------------------------------------------------------------------
-    ## Core Schema Types
-    ## ------------------------------------------------------------------
-    ## The schemas are split up into their respective types. The basic
-    ## types represented here are those of JSON objects, but they should
-    ## be compatible with any other data representation language out
-    ## there, and easily implemented in any host language. The basic
-    ## type structure is as follows:
-    ##   Any
-    ##       Null
-    ##       Boolean
-    ##       Number
-    ##           Integer
-    ##       String
-    ##       Array[ T ]
-    ##       Object[ String, T ]
-    ## ------------------------------------------------------------------
+## ------------------------------------------------------------------
+## Core Schema Types
+## ------------------------------------------------------------------
+## The schemas are split up into their respective types. The basic
+## types represented here are those of JSON objects, but they should
+## be compatible with any other data representation language out
+## there, and easily implemented in any host language. The basic
+## type structure is as follows:
+##   Any
+##       Null
+##       Boolean
+##       Number
+##           Integer
+##       String
+##       Array[ T ]
+##       Object[ String, T ]
+## ------------------------------------------------------------------
 
-    my $any = {
+sub any {
+    return +{
         id          => "schema/types/any",
         title       => "The 'Any' type schema",
         description => q[
@@ -217,7 +246,7 @@ sub get_all_schemas {
             type => { type => "string", enum => [ "any" ] }
         },
         additional_properties => {
-            id          => { type => "string", format => "uri", description => "This should be a URI" },
+            id          => { type => "string", 'format' => "uri", description => "This should be a URI" },
             title       => { type => "string", description => "The human readable title of a given schema" },
             description => { type => "string", description => "A short human readable description of the schema" },
             extends     => {
@@ -242,8 +271,10 @@ sub get_all_schemas {
             }
         }
     };
+}
 
-    my $null = {
+sub null {
+    return +{
         id          => "schema/types/null",
         title       => "The 'Null' type schema",
         description => q[
@@ -257,8 +288,10 @@ sub get_all_schemas {
             type => { type => "string", enum => [ "null" ] }
         }
     };
+}
 
-    my $boolean = {
+sub boolean {
+    return +{
         id          => "schema/types/boolean",
         title       => "The 'Boolean' type schema",
         description => q[
@@ -278,8 +311,10 @@ sub get_all_schemas {
             type => { type => "string", enum => [ "boolean" ] }
         }
     };
+}
 
-    my $number = {
+sub number {
+    return +{
         id          => "schema/types/number",
         title       => "The 'Number' type schema",
         description => q[
@@ -310,8 +345,10 @@ sub get_all_schemas {
             }
         }
     };
+}
 
-    my $integer = {
+sub integer {
+    return +{
         id          => "schema/types/integer",
         title       => "The 'Integer' type schema",
         description => q[
@@ -340,8 +377,11 @@ sub get_all_schemas {
             },
         }
     };
+}
 
-    my $string = {
+sub string {
+    my $self = shift;
+    return +{
         id          => "schema/types/string",
         title       => "The 'String' type schema",
         description => q[
@@ -363,8 +403,8 @@ sub get_all_schemas {
         additional_properties => {
             min_length => { type => "number", description => "The minimum length of the string given" },
             max_length => { type => "number", description => "The maximum length of the string given" },
-            pattern    => { type => "string", format => "regex", description => "A regular expression that can be checked against the string" },
-            format     => {
+            pattern    => { type => "string", 'format' => "regex", description => "A regular expression that can be checked against the string" },
+            'format'   => {
                 type        => "string",
                 enum        => [ @{ $self->valid_formatters } ],
                 description => "This is one of a set of built-in formatters",
@@ -377,8 +417,10 @@ sub get_all_schemas {
             },
         }
     };
+}
 
-    my $array = {
+sub array {
+    return +{
         id          => "schema/types/array",
         title       => "The 'Array' type schema",
         description => q[
@@ -407,8 +449,10 @@ sub get_all_schemas {
             },
         }
     };
+}
 
-    my $object = {
+sub object {
+    return +{
         id          => "schema/types/object",
         title       => "The 'Object' type schema",
         description => q[
@@ -459,12 +503,14 @@ sub get_all_schemas {
             }
         }
     };
+}
 
-    ## ------------------------------------------------------------------
-    ## The Bootstrap type
-    ## ------------------------------------------------------------------
+## ------------------------------------------------------------------
+## The Bootstrap type
+## ------------------------------------------------------------------
 
-    my $schema = {
+sub schema {
+    return +{
         id          => "schema/types/schema",
         title       => "The 'Schema' type schema",
         description => q[
@@ -477,26 +523,11 @@ sub get_all_schemas {
             type => { type => "string", enum => [ "schema" ] },
         },
     };
-
-    ## ------------------------------------------------------------------
-    ## The End
-    ## ------------------------------------------------------------------
-
-    [
-        $ref,
-        $hyperlink,
-        $any,
-            $null,
-            $boolean,
-            $number,
-                $integer,
-            $string,
-            $array,
-            $object,
-                $schema
-    ];
 }
 
+## ------------------------------------------------------------------
+## The End
+## ------------------------------------------------------------------
 
 __PACKAGE__->meta->make_immutable;
 

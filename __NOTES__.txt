@@ -1,6 +1,15 @@
 
 = TODOS =
 
+- Jackalope::API::*
+    - create a set of roles that can be used
+      in the Bread::Board config to typemap
+      to concrete classes
+
+- Jackalope::Schema::Spec & Jackalope.Schema.Spec
+    - make better use of the typemap to clean
+      up some code
+
 - Jackalope.js
     - add some kind of basic Bread-Board type thing
 
@@ -11,6 +20,9 @@
             - have controller/action lookup Bread::Board service
 
 == LOW PRIORITY ==
+
+- Test.Jackalope
+    - write .toJSON methods that strip the __compiled_* stuff from the output of schemas
 
 - Jackalope::Script::GenerateSpec
     - fix the JSON purty stuff, need to
@@ -37,3 +49,8 @@
 - Jackalope::Serializer
     - Jackalope::Serializer::XML (TODO - perigrin)
     - Jackalope::Serializer::YAML (why??)
+
+- Jackalope::Spec
+    - perhaps use that description cleanup method in GenerateSpec on the actual spec
+
+

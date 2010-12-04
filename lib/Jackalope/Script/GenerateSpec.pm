@@ -74,7 +74,7 @@ sub run {
             }
             return $data;
         }
-    )->visit( $self->_spec->get_all_schemas );
+    )->visit( $self->_spec->get_spec );
 
     my $fh = $self->target->openw;
     $fh->print( $self->_serializer->serialize( $schemas ) );

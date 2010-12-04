@@ -2,7 +2,6 @@
 test(
     "Basic test",
     function() {
-
         var jackalope = new Jackalope ();
         ok(jackalope instanceof Jackalope, '... we are an instance of Jackalope');
 
@@ -11,7 +10,6 @@ test(
             validator : new Jackalope.Schema.Validator ()
         });
         ok(repo instanceof Jackalope.Schema.Repository, '... we are an instance of Jackalope.Schema.Repository');
-
     }
 
 );

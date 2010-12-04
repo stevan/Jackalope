@@ -32,7 +32,7 @@ sub BUILD {
     # has validations for all
     # the core types in the spec
     my $validator = $self->validator;
-    foreach my $type (@{ $self->spec->valid_types }) {
+    foreach my $type ( $self->spec->valid_types ) {
         $validator->has_validator_for( $type )
             || confess "Validator missing validation routine for type($type)";
     }
@@ -99,17 +99,9 @@ sub _compile_schema {
 sub _compile_schemas {
     my $self = shift;
 
-    my @schemas = @{ $self->spec->get_all_schemas };
-
-    # - first we should build the basic schema map
-    #   so that we can resolve uris, but this will
-    #   not be what is actually stored, we have to
-    #   build that at the end
-
-    my %schema_map;
-    foreach my $schema ( @schemas ) {
-        $schema_map{ $schema->{id} } = $schema;
-    }
+    my $spec       = $self->spec->get_spec;
+    my $schema_map = $spec->{'schema_map'};
+    my @schemas    = values %$schema_map;
 
     # - then we should flatten extends, but we should
     #   process the schemas individually and only
@@ -118,7 +110,7 @@ sub _compile_schemas {
 
     my @flattened;
     foreach my $schema ( @schemas ) {
-        push @flattened => $self->_flatten_extends( $schema, \%schema_map );
+        push @flattened => $self->_flatten_extends( $schema, $schema_map );
     }
 
     # - then we should resolve all the reminaing refs
@@ -127,7 +119,7 @@ sub _compile_schemas {
 
     my @resolved;
     foreach my $schema ( @schemas ) {
-        push @resolved => $self->_resolve_refs( $schema, \%schema_map );
+        push @resolved => $self->_resolve_refs( $schema, $schema_map );
     }
 
     return +{ map { $_->{id} => $_ } @resolved };

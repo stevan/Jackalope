@@ -2,6 +2,12 @@
 test(
     "Bootstrap test",
     function() {
+        // verify that all the tests run
+        // because if the schema doesn't
+        // load right they won't run, but
+        // errors will not occur.
+        // - SL
+        expect(11);
 
         var tester = new Test.Jackalope ();
 
@@ -11,7 +17,7 @@ test(
         });
         ok(repo instanceof Jackalope.Schema.Repository, '... we are an instance of Jackalope.Schema.Repository');
 
-        var types = ['any', 'null', 'boolean', 'number', 'integer', 'string', 'array', 'object'];
+        var types = repo.spec.valid_types();
 
         for (var i = 0; i < types.length; i++) {
             tester.validation_pass(
