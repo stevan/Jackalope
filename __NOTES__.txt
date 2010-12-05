@@ -1,28 +1,33 @@
 
 = TODOS =
 
-- Jackalope::API::*
-    - create a set of roles that can be used
-      in the Bread::Board config to typemap
-      to concrete classes
-
-- Jackalope::Schema::Spec & Jackalope.Schema.Spec
-    - make better use of the typemap to clean
-      up some code
-
 - Jackalope.js
-    - add some kind of basic Bread-Board type thing
+    - add register_schema to Jackalope.Schema.Repository
+        - add the appropriate tests for it
 
 - Jackalope::WebService
     - write a schema -> router generator
         - Plack::App::Path::Router?
         - use the metadata to supply controller/action stuff
             - have controller/action lookup Bread::Board service
+    - add a spec schema to the spec which we can use
+      to make a demo spec web service
 
 == LOW PRIORITY ==
 
-- Test.Jackalope
+- Jackalope.js
+    - add some kind of basic Bread-Board type thing
+
+- Jackalope::Schema::Spec & Jackalope.Schema.Spec
+    - make better use of the typemap to clean
+      up some code
+    - perhaps use that description cleanup method in GenerateSpec on the actual spec
+
+- Test::Jackalope & Test.Jackalope
     - write .toJSON methods that strip the __compiled_* stuff from the output of schemas
+    - validation_fail should also take some kind of
+      test to check the right error appears
+        - fixtures will need to support this too
 
 - Jackalope::Script::GenerateSpec
     - fix the JSON purty stuff, need to
@@ -30,11 +35,6 @@
 
 - test_fixtures
     - write more of them
-
-- Test::Jackalope & Test.Jackalope
-    - validation_fail should also take some kind of
-      test to check the right error appears
-        - fixtures will need to support this too
 
 - Jackalope::Schema::Repository
     - add a resolve_ref method
@@ -50,7 +50,11 @@
     - Jackalope::Serializer::XML (TODO - perigrin)
     - Jackalope::Serializer::YAML (why??)
 
-- Jackalope::Spec
-    - perhaps use that description cleanup method in GenerateSpec on the actual spec
+== PERHAPS ==
 
-
+- Jackalope::API::*
+    - create a set of roles that can be used
+      in the Bread::Board config to typemap
+      to concrete classes
+    - NOTE: I tried this, it didn't feel right
+      but should keep the idea around just in case
