@@ -23,13 +23,11 @@ is(exception{
             "properties"  => {
                 "id" => {
                       "type"        => "number",
-                      "description" => "Product identifier",
-                      "required"    => 1
+                      "description" => "Product identifier"
                 },
                 "name"=> {
                       "description" => "Name of the product",
-                      "type"        => "string",
-                      "required"    => 1
+                      "type"        => "string"
                 }
             },
             "links"=> [
