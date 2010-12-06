@@ -9,13 +9,13 @@ use Jackalope::Util;
 with 'Jackalope::Serializer';
 
 sub serialize {
-    my ($self, $data) = @_;
-    encode_json( $data );
+    my ($self, $data, $params) = @_;
+    encode_json( $data, $params || () );
 }
 
 sub deserialize {
-    my ($self, $json) = @_;
-    decode_json( $json );
+    my ($self, $json, $params) = @_;
+    decode_json( $json, $params || () );
 }
 
 __PACKAGE__->meta->make_immutable;
