@@ -1,0 +1,38 @@
+<html>
+<head>
+<title>Jackalope : Schema Server</title>
+<script type="text/javascript" src="/static/js/json2.js"></script>
+<script type="text/javascript" src="/static/js/jquery.js"></script>
+<script type="text/javascript">
+
+$(document).ready(function () {
+
+    $.ajax({
+        "url"     : "/fetch/meta/schema",
+        "type"    : "POST",
+        "data"    : "{ \"type\" : \"object\" }",
+        "success" : function (data) {
+            var schema = JSON.parse(data);
+            $.each(
+                [ 'id', 'title', 'description', 'type' ],
+                function () { $('.schema #' + this).html( schema[this] ) }
+            );
+            $('.schema #extends').html( schema['extends']['$ref'] );
+        }
+    })
+
+
+});
+
+</script>
+</head>
+<body>
+<table class="schema" border="1">
+    <tr><td>id</td><td id="id"></td></tr>
+    <tr><td>title</td><td id="title"></td></tr>
+    <tr><td>description</td><td id="description"></td></tr>
+    <tr><td>type</td><td id="type"></td></tr>
+    <tr><td>extends</td><td id="extends"></td></tr>
+</table>
+</body>
+</html>
