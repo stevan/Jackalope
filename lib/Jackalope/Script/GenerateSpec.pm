@@ -59,11 +59,6 @@ has '_serializer' => (
 sub run {
     my $self = shift;
 
-    if ($self->format eq 'JSON') {
-        # make sure the JSON is purty
-        #$self->_serializer->json->pretty(1);
-    }
-
     # clean up the description strings too
     my $schemas = Data::Visitor::Callback->new(
         hash => sub {
@@ -77,7 +72,7 @@ sub run {
     )->visit( $self->_spec->get_spec );
 
     my $fh = $self->target->openw;
-    $fh->print( $self->_serializer->serialize( $schemas ) );
+    $fh->print( $self->_serializer->serialize( $schemas, { pretty => 1 } ) );
     $fh->close;
 }
 

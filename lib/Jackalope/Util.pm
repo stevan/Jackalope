@@ -26,8 +26,21 @@ sub false () { JSON::XS::false() }
 
 sub is_bool { JSON::XS::is_bool( shift ) }
 
-sub encode_json { JSON::XS::encode_json( shift ) }
-sub decode_json { JSON::XS::decode_json( shift ) }
+sub encode_json {
+    my ($data, $params) = @_;
+    my $json = JSON::XS->new;
+    do { $json->$_( $params->{ $_ } ) foreach keys %$params }
+        if defined $params;
+    $json->encode( $data )
+}
+
+sub decode_json {
+    my ($data, $params) = @_;
+    my $json = JSON::XS->new;
+    do { $json->$_( $params->{ $_ } ) foreach keys %$params }
+        if defined $params;
+    $json->decode( $data )
+}
 
 1;
 
