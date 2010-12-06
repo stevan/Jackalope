@@ -1,10 +1,6 @@
 
 = TODOS =
 
-- Jackalope.js
-    - add register_schema to Jackalope.Schema.Repository
-        - add the appropriate tests for it
-
 - Jackalope::WebService
     - write a schema -> router generator
         - Plack::App::Path::Router?
