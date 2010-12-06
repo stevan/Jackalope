@@ -9,14 +9,22 @@
     - add a spec schema to the spec which we can use
       to make a demo spec web service
 
+- Jackalope::Schema::Repository
+    - need to merge all inherited props, not just
+      the properties and additonal_properties
+        - test this too
+    - make better use of the spec typemap to clean up some code
+    - add a resolve_ref method
+    - add a get_compiled_schema method
+        - expect a URI
+    - add a get_compiled_schema_for_type method
+
 == LOW PRIORITY ==
 
 - Jackalope.js
     - add some kind of basic Bread-Board type thing
 
 - Jackalope::Schema::Spec & Jackalope.Schema.Spec
-    - make better use of the typemap to clean
-      up some code
     - perhaps use that description cleanup method in GenerateSpec on the actual spec
 
 - Test::Jackalope & Test.Jackalope
@@ -33,10 +41,6 @@
     - write more of them
 
 - Jackalope::Schema::Repository
-    - add a resolve_ref method
-    - add a get_compiled_schema method
-        - expect a URI
-    - add a get_compiled_schema_for_type method
     - refactor the schema compiling
 
 - Jackalope::Schema::Validator::Core
