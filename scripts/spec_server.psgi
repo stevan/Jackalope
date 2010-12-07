@@ -3,6 +3,9 @@
 use strict;
 use warnings;
 
+use Bread::Board;
+
+use Moose::Util::TypeConstraints 'enum';
 use Path::Router;
 
 use Plack;
@@ -11,7 +14,7 @@ use Plack::Builder;
 use Plack::App::Path::Router;
 
 use Jackalope;
-use Jackalope::Serializer::JSON;
+use Jackalope::Web::RouteBuilder;
 
 {
     package Jackalope::Web::Services::SpecServer;
@@ -72,7 +75,7 @@ $repo->register_schema({
             method        => "GET",
             target_schema => { '$ref' => '#' },
             metadata      => {
-                controller => 'SpecServer',
+                controller => 'spec_server',
                 action     => 'get_spec'
             }
         },
@@ -90,13 +93,14 @@ $repo->register_schema({
                 items => { type => "string", 'format' => "uri" },
             },
             metadata      => {
-                controller => 'SpecServer',
+                controller => 'spec_server',
                 action     => 'get_typemap'
             }
         },
         {
             relation      => "self",
             href          => "/fetch/schema",
+            method        => 'GET',
             schema        => {
                 type       => "object",
                 properties => {
@@ -105,7 +109,7 @@ $repo->register_schema({
             },
             target_schema => { '$ref' => 'schema/types/object' },
             metadata      => {
-                controller => 'SpecServer',
+                controller => 'spec_server',
                 action     => 'fetch_schema_by_id'
             }
         },
@@ -114,68 +118,69 @@ $repo->register_schema({
             href          => "/fetch/:type/schema",
             target_schema => { '$ref' => 'schema/types/schema' },
             metadata      => {
-                controller => 'SpecServer',
-                action     => 'fetch_meta_schema_by_type'
+                controller  => 'spec_server',
+                action      => 'fetch_meta_schema_by_type',
+                validations => {
+                    type => enum([ $repo->spec->valid_types ])
+                }
             }
         }
     ]
 });
 
-my $spec_server = $repo->compiled_schemas->{'web/spec_server'};
 
-my $serializer = Jackalope::Serializer::JSON->new;
+my $c = container 'SpecServerWebService' => as {
 
-my %CONTROLLERS = (
-    SpecServer => Jackalope::Web::Services::SpecServer->new(
-        spec => Jackalope::Schema::Spec->new
-    )
-);
+    service 'SchemaRepo' => $repo;
 
-my $router = Path::Router->new;
-
-foreach my $link ( @{ $spec_server->{links} } ) {
-    $router->add_route(
-        $link->{href},
-        target => sub {
-            my $r = shift;
-
-            my $params = {};
-            if ( exists $link->{schema} ) {
-                my $schema = $link->{schema};
-
-                if ( (not exists $link->{method}) || $link->{method} eq 'GET' ) {
-                    $params = $r->query_parameters->as_hashref_mixed;
-                }
-                elsif ( $link->{method} eq 'POST' || $link->{method} eq 'PUT' ) {
-                    $params = $serializer->deserialize( $r->content );
-                }
-
-                my $result = $repo->validate( $schema, $params );
-                if ($result->{error}) {
-                    return [ 500, [], [ "Params failed to validate"] ];
-                }
-            }
-
-            if ( exists $r->env->{'plack.router.match'} ) {
-                my $match = $r->env->{'plack.router.match'};
-                $params = { %$params, %{ $match->mapping } };
-            }
-
-            my $controller = $CONTROLLERS{ $link->{metadata}->{controller} };
-            my $action     = $controller->can( $link->{metadata}->{action} );
-            my $output     = $controller->$action( %$params );
-
-            if ( exists $link->{target_schema} ) {
-                my $result = $repo->validate( $link->{target_schema}, $output );
-                if ($result->{error}) {
-                    return [ 500, [], [ "Output didn't match the target_schema"] ];
-                }
-            }
-
-            return [ 200, [], [ $serializer->serialize( $output, { pretty => 1 } ) ] ];
+    service 'JSONSerializer' => (
+        block => sub {
+            $j->resolve(
+                service    => 'Jackalope::Serializer',
+                parameters => { 'format' => 'JSON' }
+            );
         }
     );
-}
+
+    service 'SpecServer' => (
+        class        => 'Jackalope::Web::Services::SpecServer',
+        dependencies => {
+            spec => (service 'SchemaSpec' => ( class => 'Jackalope::Schema::Spec' ))
+        }
+    );
+
+    service 'router_config' => (
+        block        => sub { $repo->compiled_schemas->{'web/spec_server'}->{'links'} },
+        dependencies => {
+            spec_server => 'SpecServer',
+            serializer  => 'JSONSerializer',
+            repo        => 'SchemaRepo'
+        }
+    );
+
+    service 'Router' => (
+        block => sub {
+            my $s       = shift;
+            my $router  = Path::Router->new;
+            my $service = $s->parent->get_service('router_config');
+            my $links   = $service->get;
+
+            foreach my $link ( @$links ) {
+                $router->add_route(
+                    @{
+                        Jackalope::Web::RouteBuilder->new(
+                            link_spec => $link,
+                            service   => $service
+                        )->compile_routes
+                    }
+                )
+            }
+
+            $router;
+        }
+    );
+};
+
 
 
 builder {
@@ -183,7 +188,7 @@ builder {
         path => sub { s!^/static/!! },
         root => './root/static/'
     );
-    Plack::App::Path::Router->new( router => $router );
+    Plack::App::Path::Router->new( router => $c->resolve( service => 'Router' ) );
 };
 
 
