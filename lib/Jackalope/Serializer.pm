@@ -4,6 +4,12 @@ use Moose::Role;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+has 'default_params' => (
+    is        => 'ro',
+    isa       => 'HashRef',
+    predicate => 'has_default_params'
+);
+
 requires 'content_type';
 
 requires 'serialize';
