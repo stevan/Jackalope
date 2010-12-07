@@ -8,10 +8,16 @@ use Test::Fatal;
 
 BEGIN {
     use_ok('Jackalope');
-    use_ok('Jackalope::Serializer::JSON');
 }
 
-my $serializer = Jackalope::Serializer::JSON->new;
+my $j = Jackalope->new;
+
+my $serializer = $j->resolve(
+    service    => 'Jackalope::Serializer',
+    parameters => {
+        'format' => 'JSON'
+    }
+);
 isa_ok($serializer, 'Jackalope::Serializer::JSON');
 
 is($serializer->serialize({ foo => 'bar' }), '{"foo":"bar"}', '... got the right JSON');

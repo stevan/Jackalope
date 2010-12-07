@@ -5,6 +5,8 @@ use Bread::Board;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use Class::Load 'load_class';
+
 use Jackalope::Schema::Validator::Core;
 use Jackalope::Schema::Validator;
 use Jackalope::Schema::Spec;
@@ -16,12 +18,27 @@ has '+name' => ( default => sub { (shift)->meta->name } );
 
 sub BUILD {
     my $self = shift;
-    container $self => as { $self->typemapping };
+    container $self => as {
+
+        service 'Jackalope::Serializer' => (
+            block => sub {
+                my $s = shift;
+                my $class = 'Jackalope::Serializer::' . $s->param('format');
+                load_class( $class );
+                $class->new;
+            },
+            parameters => {
+                'format' => { isa => 'Str' }
+            }
+        );
+
+        # schema repository, this infers
+        # all the other stuff as well, like
+        # the spec and the validators
+        typemap 'Jackalope::Schema::Repository' => infer;
+    };
 }
 
-sub typemapping {
-    typemap 'Jackalope::Schema::Repository' => infer;
-}
 
 __PACKAGE__->meta->make_immutable;
 
