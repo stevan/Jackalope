@@ -39,49 +39,47 @@ sub compile_routes {
             ? (validations => $link->{metadata}->{validations})
             : ()),
         target  => sub {
-            my $r = shift;
+            my $r    = shift;
+            my @args = @_;
 
-             my $params = {};
 
-             # we know we are expecting data
-             # if there is a 'schema' in the
-             # link description, so we extract
-             # the parameters based on the
-             # 'method' specified
-             if ( exists $link->{schema} ) {
-                 if ( $link->{method} eq 'GET' ) {
-                     $params = $r->query_parameters->as_hashref_mixed;
-                 }
-                 elsif ( $link->{method} eq 'POST' || $link->{method} eq 'PUT' ) {
-                     $params = $serializer->deserialize( $r->content );
-                 }
+            my $params = {};
+            # we know we are expecting data
+            # if there is a 'schema' in the
+            # link description, so we extract
+            # the parameters based on the
+            # 'method' specified
+            if ( exists $link->{schema} ) {
+                if ( $link->{method} eq 'GET' ) {
+                    $params = $r->query_parameters->as_hashref_mixed;
+                }
+                elsif ( $link->{method} eq 'POST' || $link->{method} eq 'PUT' ) {
+                    $params = $serializer->deserialize( $r->content );
+                }
 
-                 # then, since we have the 'schema'
-                 # key, we can check the set of
-                 # params against it
-                 my $result = $repo->validate( $link->{schema}, $params );
-                 if ($result->{error}) {
-                     return [ 500, [], [ "Params failed to validate"] ];
-                 }
-             }
+                # then, since we have the 'schema'
+                # key, we can check the set of
+                # params against it
+                my $result = $repo->validate( $link->{schema}, $params );
+                if ($result->{error}) {
+                    return [ 500, [], [ "Params failed to validate"] ];
+                }
+            }
 
-             # next we check for the router match
-             # and see what it has in it's mapping
-             if ( exists $r->env->{'plack.router.match'} ) {
-                 my $match = $r->env->{'plack.router.match'};
-                 $params = { %$params, %{ $match->mapping } };
-             }
+            my $output = $controller->$action( @args, $params );
 
-             my $output = $controller->$action( %$params );
+            if ( exists $link->{target_schema} ) {
+                my $result = $repo->validate( $link->{target_schema}, $output );
+                if ($result->{error}) {
+                    return [ 500, [], [ "Output didn't match the target_schema"] ];
+                }
+            }
 
-             if ( exists $link->{target_schema} ) {
-                 my $result = $repo->validate( $link->{target_schema}, $output );
-                 if ($result->{error}) {
-                     return [ 500, [], [ "Output didn't match the target_schema"] ];
-                 }
-             }
-
-             return [ 200, [], [ $serializer->serialize( $output, { pretty => 1 } ) ] ];
+            return [
+                200,
+                [ 'Content-Type' => $serializer->content_type ],
+                [ $serializer->serialize( $output, { pretty => 1 } ) ]
+            ];
         },
     ];
 }

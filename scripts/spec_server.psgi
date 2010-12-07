@@ -3,6 +3,8 @@
 use strict;
 use warnings;
 
+use lib '/Users/stevan/Projects/CPAN/current/Bread-Board/lib';
+
 use Bread::Board;
 
 use Moose::Util::TypeConstraints 'enum';
@@ -31,17 +33,13 @@ use Jackalope::Web::RouteBuilder;
     sub get_typemap { (shift)->spec->typemap  }
 
     sub fetch_meta_schema_by_type {
-        my ($self, $type) = validated_list(\@_,
-            type => { isa => "Str" },
-        );
+        my ($self, $type) = @_;
         $self->_process_schema( $self->get_spec->{schema_map}->{ $self->get_typemap->{ $type } } );
     }
 
     sub fetch_schema_by_id {
-        my ($self, $id) = validated_list(\@_,
-            id => { isa => "Str" },
-        );
-        $self->_process_schema( $self->get_spec->{schema_map}->{ $id } );
+        my ($self, $params) = @_;
+        $self->_process_schema( $self->get_spec->{schema_map}->{ $params->{id} } );
     }
 
     sub _process_schema {
@@ -129,32 +127,16 @@ $repo->register_schema({
 });
 
 
-my $c = container 'SpecServerWebService' => as {
+my $c = container $j => as {
 
-    service 'SchemaRepo' => $repo;
-
-    service 'JSONSerializer' => (
-        block => sub {
-            $j->resolve(
-                service    => 'Jackalope::Serializer',
-                parameters => { 'format' => 'JSON' }
-            );
-        }
-    );
-
-    service 'SpecServer' => (
-        class        => 'Jackalope::Web::Services::SpecServer',
-        dependencies => {
-            spec => (service 'SchemaSpec' => ( class => 'Jackalope::Schema::Spec' ))
-        }
-    );
+    typemap 'Jackalope::Web::Services::SpecServer' => infer;
 
     service 'router_config' => (
         block        => sub { $repo->compiled_schemas->{'web/spec_server'}->{'links'} },
         dependencies => {
-            spec_server => 'SpecServer',
-            serializer  => 'JSONSerializer',
-            repo        => 'SchemaRepo'
+            spec_server => 'type:Jackalope::Web::Services::SpecServer',
+            repo        => 'type:Jackalope::Schema::Repository',
+            serializer  => { 'Jackalope::Serializer' => { 'format' => 'JSON' } }
         }
     );
 
