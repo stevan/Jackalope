@@ -8,6 +8,8 @@ use Jackalope::Util;
 
 with 'Jackalope::Serializer';
 
+sub content_type { 'application/json' };
+
 sub serialize {
     my ($self, $data, $params) = @_;
     encode_json( $data, $params || () );
