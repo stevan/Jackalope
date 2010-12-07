@@ -97,7 +97,6 @@ $repo->register_schema({
         {
             relation      => "self",
             href          => "/fetch/schema",
-            method        => "GET",
             schema        => {
                 type       => "object",
                 properties => {
@@ -112,14 +111,7 @@ $repo->register_schema({
         },
         {
             relation      => "self",
-            href          => "/fetch/meta/schema",
-            method        => "GET",
-            schema        => {
-                type       => "object",
-                properties => {
-                    type => { type => "string" }
-                }
-            },
+            href          => "/fetch/:type/schema",
             target_schema => { '$ref' => 'schema/types/schema' },
             metadata      => {
                 controller => 'SpecServer',
@@ -147,11 +139,11 @@ foreach my $link ( @{ $spec_server->{links} } ) {
         target => sub {
             my $r = shift;
 
-            my $params;
+            my $params = {};
             if ( exists $link->{schema} ) {
                 my $schema = $link->{schema};
 
-                if ( $link->{method} eq 'GET' ) {
+                if ( (not exists $link->{method}) || $link->{method} eq 'GET' ) {
                     $params = $r->query_parameters->as_hashref_mixed;
                 }
                 elsif ( $link->{method} eq 'POST' || $link->{method} eq 'PUT' ) {
@@ -162,6 +154,11 @@ foreach my $link ( @{ $spec_server->{links} } ) {
                 if ($result->{error}) {
                     return [ 500, [], [ "Params failed to validate"] ];
                 }
+            }
+
+            if ( exists $r->env->{'plack.router.match'} ) {
+                my $match = $r->env->{'plack.router.match'};
+                $params = { %$params, %{ $match->mapping } };
             }
 
             my $controller = $CONTROLLERS{ $link->{metadata}->{controller} };
