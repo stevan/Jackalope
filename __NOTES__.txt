@@ -1,13 +1,10 @@
 
 = TODOS =
 
-- Jackalope::WebService
-    - write a schema -> router generator
-        - Plack::App::Path::Router?
-        - use the metadata to supply controller/action stuff
-            - have controller/action lookup Bread::Board service
-    - add a spec schema to the spec which we can use
-      to make a demo spec web service
+- Jackalope::Web::RouteBuilder
+    - add support for link->relation of create
+      and described_by, those will be handled
+      in a different way
 
 == LOW PRIORITY ==
 
