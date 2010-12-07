@@ -4,6 +4,8 @@ use Moose::Role;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+requires 'content_type';
+
 requires 'serialize';
 requires 'deserialize';
 
