@@ -12,12 +12,20 @@ sub content_type { 'application/json' };
 
 sub serialize {
     my ($self, $data, $params) = @_;
-    encode_json( $data, $params || () );
+
+    $params = { %{ $self->default_params }, %{ $params || {} } }
+        if $self->has_default_params;
+
+    encode_json( $data, $params );
 }
 
 sub deserialize {
     my ($self, $json, $params) = @_;
-    decode_json( $json, $params || () );
+
+    $params = { %{ $self->default_params }, %{ $params || {} } }
+        if $self->has_default_params;
+
+    decode_json( $json, $params );
 }
 
 __PACKAGE__->meta->make_immutable;

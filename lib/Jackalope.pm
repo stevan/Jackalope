@@ -25,10 +25,15 @@ sub BUILD {
                 my $s = shift;
                 my $class = 'Jackalope::Serializer::' . $s->param('format');
                 load_class( $class );
-                $class->new;
+                $class->new(
+                    $s->param('default_params')
+                        ? (default_params => $s->param('default_params'))
+                        : ()
+                );
             },
             parameters => {
-                'format' => { isa => 'Str' }
+                'format'         => { isa => 'Str' },
+                'default_params' => { isa => 'HashRef', optional => 1 }
             }
         );
 
