@@ -3,9 +3,12 @@
 use strict;
 use warnings;
 
+use Path::Router;
+
 use Plack;
 use Plack::Request;
 use Plack::Builder;
+use Plack::App::Path::Router;
 
 use Jackalope;
 use Jackalope::Serializer::JSON;
@@ -110,7 +113,7 @@ $repo->register_schema({
         {
             relation      => "self",
             href          => "/fetch/meta/schema",
-            method        => "POST",
+            method        => "GET",
             schema        => {
                 type       => "object",
                 properties => {
@@ -136,53 +139,54 @@ my %CONTROLLERS = (
     )
 );
 
+my $router = Path::Router->new;
+
+foreach my $link ( @{ $spec_server->{links} } ) {
+    $router->add_route(
+        $link->{href},
+        target => sub {
+            my $r = shift;
+
+            my $params;
+            if ( exists $link->{schema} ) {
+                my $schema = $link->{schema};
+
+                if ( $link->{method} eq 'GET' ) {
+                    $params = $r->query_parameters->as_hashref_mixed;
+                }
+                elsif ( $link->{method} eq 'POST' || $link->{method} eq 'PUT' ) {
+                    $params = $serializer->deserialize( $r->content );
+                }
+
+                my $result = $repo->validate( $schema, $params );
+                if ($result->{error}) {
+                    return [ 500, [], [ "Params failed to validate"] ];
+                }
+            }
+
+            my $controller = $CONTROLLERS{ $link->{metadata}->{controller} };
+            my $action     = $controller->can( $link->{metadata}->{action} );
+            my $output     = $controller->$action( %$params );
+
+            if ( exists $link->{target_schema} ) {
+                my $result = $repo->validate( $link->{target_schema}, $output );
+                if ($result->{error}) {
+                    return [ 500, [], [ "Output didn't match the target_schema"] ];
+                }
+            }
+
+            return [ 200, [], [ $serializer->serialize( $output, { pretty => 1 } ) ] ];
+        }
+    );
+}
+
+
 builder {
     enable "Plack::Middleware::Static" => (
         path => sub { s!^/static/!! },
         root => './root/static/'
     );
-    builder {
-
-        foreach my $link ( @{ $spec_server->{links} } ) {
-
-            mount $link->{href} => sub {
-                my $r = Plack::Request->new( shift );
-
-                my $params;
-                if ( exists $link->{schema} ) {
-                    my $schema = $link->{schema};
-
-                    if ( $link->{method} eq 'GET' ) {
-                        $params = $r->query_parameters->as_hashref_mixed;
-                    }
-                    elsif ( $link->{method} eq 'POST' || $link->{method} eq 'PUT' ) {
-                        $params = $serializer->deserialize( $r->content );
-                    }
-
-                    my $result = $repo->validate( $schema, $params );
-                    if ($result->{error}) {
-                        return [ 500, [], [ "Params failed to validate"] ];
-                    }
-                }
-
-                my $controller = $CONTROLLERS{ $link->{metadata}->{controller} };
-                my $action     = $controller->can( $link->{metadata}->{action} );
-                my $output     = $controller->$action( %$params );
-
-                if ( exists $link->{target_schema} ) {
-                    my $result = $repo->validate( $link->{target_schema}, $output );
-                    if ($result->{error}) {
-                        return [ 500, [], [ "Output didn't match the target_schema"] ];
-                    }
-                }
-
-                return [ 200, [], [ $serializer->serialize( $output, { pretty => 1 } ) ] ];
-            };
-
-        }
-
-        mount "/favicon.ico" => sub { [ 200, [], [] ] };
-    };
+    Plack::App::Path::Router->new( router => $router );
 };
 
 
