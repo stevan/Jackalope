@@ -78,7 +78,7 @@ sub compile_routes {
             return [
                 200,
                 [ 'Content-Type' => $serializer->content_type ],
-                [ $serializer->serialize( $output, { pretty => 1 } ) ]
+                [ $serializer->serialize( $output ) ]
             ];
         },
     ];

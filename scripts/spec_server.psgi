@@ -136,7 +136,12 @@ my $c = container $j => as {
         dependencies => {
             spec_server => 'type:Jackalope::Web::Services::SpecServer',
             repo        => 'type:Jackalope::Schema::Repository',
-            serializer  => { 'Jackalope::Serializer' => { 'format' => 'JSON' } }
+            serializer  => {
+                'Jackalope::Serializer' => {
+                    'format'         => 'JSON',
+                    'default_params' => { pretty => 1 }
+                }
+            }
         }
     );
 
