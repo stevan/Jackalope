@@ -151,6 +151,7 @@ sub _compile_schema {
     unless ( $self->_is_schema_compiled( $schema ) ) {
         $schema = $self->_prepare_schema_for_compiling( $schema );
         $self->_flatten_extends( $schema, $self->_compiled_schemas );
+        $self->_resolve_embedded_extends( $schema, $self->_compiled_schemas );
         $self->_resolve_refs( $schema, $self->_compiled_schemas );
         $self->_mark_as_compiled( $schema );
     }
@@ -231,6 +232,7 @@ sub _flatten_extends {
 sub _merge_schema {
     my ($self, $schema, $super, $schema_map) = @_;
     foreach my $key ( keys %{ $super->{'raw'} } ) {
+        next if $key eq 'id'; # ID should never be copied
         if ( not exists $schema->{'raw'}->{ $key } ) {
             $schema->{'compiled'}->{ $key } = ref $super->{'raw'}->{ $key }
                                             ? clone( $super->{'raw'}->{ $key } )
@@ -274,6 +276,31 @@ sub _resolve_refs {
                 $_ = $self->_is_self_ref( $data )
                         ? $schema->{'compiled'}
                         : $self->_resolve_ref( $data, $schema_map )->{'compiled'}
+            }
+        }
+    )->visit(
+        $schema->{'compiled'}
+    );
+}
+
+sub _resolve_embedded_extends {
+    my ($self, $schema, $schema_map) = @_;
+    Data::Visitor::Callback->new(
+        ignore_return_values => 1,
+        hash => sub {
+            my ($v, $data) = @_;
+            if ( exists $data->{'extends'} && $self->_is_ref( $data->{'extends'} ) ) {
+                my $embedded_schema = $self->_prepare_schema_for_compiling( $data );
+                my $new_schema_map  = { %$schema_map, '#' => $schema };
+                $self->_merge_schema(
+                    $embedded_schema,
+                    $self->_resolve_ref( $data->{'extends'}, $new_schema_map ),
+                    $new_schema_map
+                );
+                $embedded_schema->{'compiled'}->{'properties'}            = $self->_merge_properties( properties            => $embedded_schema, $new_schema_map );
+                $embedded_schema->{'compiled'}->{'additional_properties'} = $self->_merge_properties( additional_properties => $embedded_schema, $new_schema_map );
+                delete $embedded_schema->{'compiled'}->{'extends'};
+                $_ = $embedded_schema->{'compiled'};
             }
         }
     )->visit(

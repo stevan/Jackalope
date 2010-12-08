@@ -36,7 +36,8 @@ has 'router_builder' => (
 
         my $repo = $self->service->param('repo');
 
-        $self->_schema( $repo->register_schema( $self->schema ) );
+                                                                # FIXME
+        $self->_schema( $repo->register_schema( $self->schema )->{'compiled'} );
 
         Jackalope::Web::RouterBuilder->new(
             schema  => $self->schema,

@@ -94,7 +94,14 @@ my $c = container $j => as {
                             relation => 'create',
                             href     => '/create',
                             method   => 'PUT',
-                            schema   => { '$ref' => '#' },
+                            schema   => {
+                                type       => "object",
+                                extends    => { '$ref' => '#' },
+                                properties => {
+                                    id => { type => 'null' }
+                                },
+                                links => []
+                            },
                             metadata => {
                                 controller => 'person_manager',
                                 action     => 'create'
@@ -174,7 +181,7 @@ test_psgi
           my $cb = shift;
           {
               my $req = PUT( "http://localhost/create" => (
-                  Content => '{"id":-1,"first_name":"Stevan","last_name":"Little","age":37,"sex":"male"}'
+                  Content => '{"id":null,"first_name":"Stevan","last_name":"Little","age":37,"sex":"male"}'
               ));
               my $res = $cb->($req);
               is($res->code, 201, '... got the right status for create');
