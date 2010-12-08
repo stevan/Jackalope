@@ -65,7 +65,17 @@ has 'typemap' => (
 ## then to re-read it again, in order to fully understand the spec.
 ## ------------------------------------------------------------------
 
-sub get_spec {
+# this is essentially a cache
+# for the complied spec.
+has '_spec' => (
+    init_arg => undef,
+    reader   => 'get_spec',
+    isa      => 'HashRef',
+    lazy     => 1,
+    builder  => '_build_spec'
+);
+
+sub _build_spec {
     my $self       = shift;
     my $typemap    = $self->typemap;
     my $schema_map = {};
@@ -75,7 +85,7 @@ sub get_spec {
         $schema_map->{ $schema->{'id'} } = $schema;
     }
 
-    foreach my $schema ( $self->ref, $self->hyperlink ) {
+    foreach my $schema ( $self->ref, $self->hyperlink, $self->spec ) {
         $schema_map->{ $schema->{'id'} } = $schema;
     }
 
@@ -85,6 +95,45 @@ sub get_spec {
         metadata   => {
             valid_formatters         => $self->valid_formatters,
             valid_hyperlink_relation => $self->valid_hyperlink_relation
+        }
+    };
+}
+
+## ------------------------------------------------------------------
+## Spec Schema
+## ------------------------------------------------------------------
+## This basically specifies the Spec and how it should be structured.
+## ------------------------------------------------------------------
+
+sub spec {
+    return +{
+        id          => "schema/core/spec",
+        title       => "The spec schema",
+        description => "This is a schema to describe the full spec",
+        type        => "object",
+        properties  => {
+            typemap => {
+                type        => "object",
+                items       => { type => "string", 'format' => "uri" },
+                description => "This is a mapping of the core type names to thier schema IDs."
+            },
+            schema_map => {
+                type        => "object",
+                items       => { type => "schema" },
+                description => "This is the mapping of schema ID to schema, it is used for schema lookup"
+            }
+        },
+        additional_properties => {
+            metadata => {
+                type        => "object",
+                description => q[
+                    This is a free-form metadata object where extra
+                    information can be stored. None of the information
+                    that is contained in here should be relied on, if
+                    and when we need to rely on it, we can promote it
+                    to a real property.
+                ]
+            }
         }
     };
 }
@@ -145,9 +194,9 @@ sub hyperlink {
                 description => q[
                     The relation of the link to the resource described
                     by the schema. Currently available values are:
-                        self         - relating to an instance of the schema
+                        self - relating to an instance of the schema
                         described_by - a link the schema itself
-                        create       - a link used to create instances
+                        create - a link used to create instances
                 ]
             },
             href => {
@@ -155,12 +204,13 @@ sub hyperlink {
                 'format'    => "uri_template",
                 description => q[
                     This is a URI for the resource, it may also
-                    be a URI template containing variables. In the
-                    case of these templates the variables should be
-                    resolved in the context of the object instance.
-                    This means that a template like so:
+                    be a URI template containing variables (using the
+                    RoR style colon prefix). In the case of these
+                    templates the variables should be resolved in
+                    the context of the object instance. This means
+                    that a template like so:
 
-                        /product/{id}/view
+                        /product/:id/view
 
                     should be resolved to be this:
 
@@ -191,6 +241,17 @@ sub hyperlink {
                     should be an 'object' type schema and the
                     query string parameters should be checked
                     against it.
+                ]
+            },
+            uri_schema   => {
+                type        => "schema",
+                description => q[
+                    This is a schema (or a reference to a schema)
+                    of the results of the mapping of the URI-template
+                    in the 'href' property. On the server side it
+                    can be used to validate the value that we get,
+                    and on the client side it can be used to check
+                    to assure the URL being called is valid.
                 ]
             },
             method       => {
