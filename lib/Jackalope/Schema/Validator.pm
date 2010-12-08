@@ -13,7 +13,7 @@ has 'validator' => (
 sub validate {
     my ($self, $schema, $data) = @_;
     my $validator = $self->validator;
-    my $method    = $validator->can( $schema->{type} ) || confess "Could not find validator for $schema->{type}";
+    my $method    = $validator->can( $schema->{'type'} ) || confess "Could not find validator for $schema->{type}";
     return $validator->$method( $schema, $data );
 }
 

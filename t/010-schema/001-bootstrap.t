@@ -15,21 +15,40 @@ my $repo = Jackalope->new->resolve( type => 'Jackalope::Schema::Repository' );
 isa_ok($repo, 'Jackalope::Schema::Repository');
 
 foreach my $type ( $repo->spec->valid_types ) {
+
+    my $schema = $repo->get_compiled_schema_for_type( $type );
+
     validation_pass(
         $repo->validate(
             { '$ref' => 'schema/types/schema' },
-            $repo->compiled_schemas->{'schema/types/' . $type},
+            $schema->{'raw'},
         ),
-        '... validate the ' . $type . ' schema with the schema type'
+        '... validate the raw ' . $type . ' schema with the schema type'
+    );
+
+    validation_pass(
+        $repo->validate(
+            { '$ref' => 'schema/types/schema' },
+            $schema->{'compiled'},
+        ),
+        '... validate the compiled ' . $type . ' schema with the schema type'
     );
 }
 
 validation_pass(
     $repo->validate(
         { '$ref' => 'schema/types/schema' },
-        $repo->compiled_schemas->{'schema/types/schema'},
+        $repo->get_compiled_schema_by_uri('schema/types/schema')->{'compiled'},
     ),
-    '... validate the schema type with the schema type (bootstrappin)'
+    '... validate the compiled schema type with the schema type (bootstrappin)'
+);
+
+validation_pass(
+    $repo->validate(
+        { '$ref' => 'schema/types/schema' },
+        $repo->get_compiled_schema_by_uri('schema/types/schema')->{'raw'},
+    ),
+    '... validate the raw schema type with the schema type (bootstrappin)'
 );
 
 validation_pass(

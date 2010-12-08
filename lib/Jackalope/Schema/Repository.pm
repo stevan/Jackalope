@@ -4,13 +4,15 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use Data::UUID;
+use Clone 'clone';
 use Data::Visitor::Callback;
 
-has 'compiled_schemas' => (
+has '_compiled_schemas' => (
     is      => 'ro',
     isa     => 'HashRef',
     lazy    => 1,
-    builder => '_compile_schemas'
+    builder => '_build_compiled_schemas'
 );
 
 has 'validator' => (
@@ -25,6 +27,21 @@ has 'spec' => (
     required => 1
 );
 
+use Data::Dumper;
+sub DUMP {
+    local $Data::Dumper::Sortkeys = 1;
+    return Dumper(
+        Data::Visitor::Callback->new(
+            hash => sub {
+                my (undef, $data) = @_;
+                delete $data->{'description'} unless ref $data->{'description'};
+                delete $data->{'title'}       unless ref $data->{'title'};
+                $data;
+            }
+        )->visit( $_[0] )
+    );
+}
+
 sub BUILD {
     my $self = shift;
 
@@ -38,23 +55,50 @@ sub BUILD {
     }
 
     # compile all the schemas ...
-    $self->compiled_schemas;
+    $self->_compiled_schemas;
 }
+
+## Schema Accessors
+
+sub get_compiled_schema_by_uri {
+    my ($self, $uri) = @_;
+    $self->_compiled_schemas->{ $uri }
+        || confess "Could not find schema for $uri";
+}
+
+sub get_compiled_schema_for_type {
+    my ($self, $type) = @_;
+    $self->_compiled_schemas->{ $self->spec->get_uri_for_type( $type ) }
+        || confess "Could not find schema for $type";
+}
+
+sub get_compiled_schema_by_ref {
+    my ($self, $ref) = @_;
+    ($self->_is_ref( $ref ))
+        || confess "$ref is not a ref";
+    $self->_resolve_ref( $ref, $self->_compiled_schemas )
+        || confess "Could not find schema for " . $ref->{'$ref'};
+}
+
+## Validators
 
 sub validate {
     my ($self, $schema, $data) = @_;
-    $schema = $self->_compile_schema( $schema );
-    $self->_validate_schema( $schema );
-    return $self->validator->validate( $schema, $data );
+    my $compiled_schema = $self->_compile_schema( $schema );
+    $self->_validate_schema( $compiled_schema->{'compiled'} );
+    return $self->validator->validate(
+        $compiled_schema->{'compiled'},
+        $data
+    );
 }
 
 sub register_schema {
     my ($self, $schema) = @_;
     (exists $schema->{id})
         || confess "Can only register schemas that have an 'id'";
-    $schema = $self->_compile_schema( $schema );
-    $self->_validate_schema( $schema );
-    $self->compiled_schemas->{ $schema->{id} } = $schema;
+    my $compiled_schema = $self->_compile_schema( $schema );
+    $self->_validate_schema( $compiled_schema->{'compiled'} );
+    $self->_insert_compiled_schema( $compiled_schema );
 }
 
 # ...
@@ -62,10 +106,10 @@ sub register_schema {
 sub _validate_schema {
     my ($self, $schema) = @_;
 
-    my $schema_type = $schema->{type};
+    my $schema_type = $schema->{'type'};
 
     my $result = $self->validator->validate(
-        $self->compiled_schemas->{'schema/types/' . $schema_type},
+        $self->get_compiled_schema_for_type( $schema_type )->{'compiled'},
         $schema
     );
 
@@ -77,84 +121,171 @@ sub _validate_schema {
                 '001-error'       => "Invalid schema",
                 '002-result'      => $result,
                 '003-schema'      => $schema,
-                '004-meta_schema' => $self->compiled_schemas->{'schema/types/' . $schema_type}
+                '004-meta_schema' => $self->get_compiled_schema_for_type( $schema_type )
             }
         );
     }
 }
 
+# private compiled schema stuff
+
+sub _build_compiled_schemas {
+    # by default we load in the core ...
+    return (shift)->_compile_core_schemas;
+}
+
+sub _insert_compiled_schema {
+    my ($self, $schema) = @_;
+    $self->_compiled_schemas->{ $schema->{'compiled'}->{'id'} } = $schema;
+}
+
+# Schema compilation
+
 sub _compile_schema {
     my ($self, $schema) = @_;
 
     if ($self->_is_ref( $schema )) {
-        $schema = $self->compiled_schemas->{ $schema->{'$ref'} };
+        $schema = $self->get_compiled_schema_by_ref( $schema );
     }
 
-    unless (exists $schema->{__compiled_properties} && exists $schema->{__compiled_additional_properties}) {
-        $schema = $self->_flatten_extends( $schema, $self->compiled_schemas );
-        $schema = $self->_resolve_refs( $schema, $self->compiled_schemas );
+    unless ( $self->_is_schema_compiled( $schema ) ) {
+        $schema = $self->_prepare_schema_for_compiling( $schema );
+        $self->_flatten_extends( $schema, $self->_compiled_schemas );
+        $self->_resolve_refs( $schema, $self->_compiled_schemas );
+        $self->_mark_as_compiled( $schema );
     }
 
     return $schema;
 }
 
-sub _compile_schemas {
+sub _compile_core_schemas {
     my $self = shift;
 
     my $spec       = $self->spec->get_spec;
-    my $schema_map = $spec->{'schema_map'};
-    my @schemas    = values %$schema_map;
+    my @schemas    = map { $self->_prepare_schema_for_compiling( $_ ) } values %{ $spec->{'schema_map'} };
+    my $schema_map = $self->_generate_schema_map( @schemas );
 
-    # - then we should flatten extends, but we should
-    #   process the schemas individually and only
-    #   process 'extends' that are 'refs' (which should
-    #   perhaps be enforced in the spec??)
-
-    my @flattened;
     foreach my $schema ( @schemas ) {
-        push @flattened => $self->_flatten_extends( $schema, $schema_map );
+        $self->_flatten_extends( $schema, $schema_map );
     }
 
-    # - then we should resolve all the reminaing refs
-    #   we need to be stricter about checking that it
-    #   is indeed a ref and not the ref spec
-
-    my @resolved;
     foreach my $schema ( @schemas ) {
-        push @resolved => $self->_resolve_refs( $schema, $schema_map );
+        $self->_resolve_refs( $schema, $schema_map );
     }
 
-    return +{ map { $_->{id} => $_ } @resolved };
+    foreach my $schema ( @schemas ) {
+        $self->_mark_as_compiled( $schema );
+    }
+
+    return $schema_map;
 }
+
+sub _prepare_schema_for_compiling {
+    my ($self, $raw) = @_;
+
+    my $schema = +{
+        raw         => $raw,
+        compiled    => clone( $raw ),
+        is_compiled => 0,
+    };
+
+    # NOTE:
+    # this might not be good idea
+    # - SL
+    $schema->{'compiled'}->{'id'} ||= Data::UUID->new->create_str;
+
+    return $schema;
+}
+
+sub _mark_as_compiled {
+    my ($self, $schema) = @_;
+    $schema->{'is_compiled'} = 1;
+}
+
+sub _is_schema_compiled {
+    my ($self, $schema) = @_;
+    (exists $schema->{'is_compiled'} && $schema->{'is_compiled'} == 1) ? 1 : 0
+}
+
+sub _generate_schema_map {
+    my ($self, @schemas) = @_;
+    return +{ map { $_->{'compiled'}->{'id'} => $_ } @schemas }
+}
+
+# compiling extensions
 
 sub _flatten_extends {
     my ($self, $schema, $schema_map) = @_;
-    return Data::Visitor::Callback->new(
-        hash => sub {
-            my ($v, $data) = @_;
-            if ( exists $data->{'extends'} &&  $self->_is_ref( $data->{'extends'} ) ) {
-                return $self->_compile_properties( $data, $schema_map );
-            }
-            return $data;
-        }
-    )->visit(
-        $self->_compile_properties( $schema, $schema_map )
-    );
+    if ( exists $schema->{'raw'}->{'extends'} && $self->_is_ref( $schema->{'raw'}->{'extends'} ) ) {
+        $self->_merge_schema(
+            $schema,
+            $self->_resolve_ref( $schema->{'raw'}->{'extends'}, $schema_map ),
+            $schema_map
+        );
+        $schema->{'compiled'}->{'properties'}            = $self->_merge_properties( properties            => $schema, $schema_map );
+        $schema->{'compiled'}->{'additional_properties'} = $self->_merge_properties( additional_properties => $schema, $schema_map );
+        delete $schema->{'compiled'}->{'extends'};
+    }
 }
+
+sub _merge_schema {
+    my ($self, $schema, $super, $schema_map) = @_;
+    foreach my $key ( keys %{ $super->{'raw'} } ) {
+        if ( not exists $schema->{'raw'}->{ $key } ) {
+            $schema->{'compiled'}->{ $key } = ref $super->{'raw'}->{ $key }
+                                            ? clone( $super->{'raw'}->{ $key } )
+                                            : $super->{'raw'}->{ $key };
+        }
+    }
+    if ( $super->{'raw'}->{'extends'} && $self->_is_ref( $super->{'raw'}->{'extends'} ) ) {
+        $self->_merge_schema(
+            $schema,
+            $self->_resolve_ref( $super->{'raw'}->{'extends'}, $schema_map ),
+            $schema_map
+        );
+    }
+}
+
+sub _merge_properties {
+    my ($self, $prop_type, $schema, $schema_map) = @_;
+    return +{
+        (exists $schema->{'raw'}->{'extends'}
+            ? %{
+                $self->_merge_properties(
+                    $prop_type,
+                    $self->_resolve_ref( $schema->{'raw'}->{'extends'}, $schema_map ),
+                    $schema_map
+                )
+              }
+            : ()),
+        %{ clone( $schema->{'raw'}->{ $prop_type } || {} ) },
+    }
+}
+
+# resolving references in a schema
 
 sub _resolve_refs {
     my ($self, $schema, $schema_map) = @_;
-    return Data::Visitor::Callback->new(
+    Data::Visitor::Callback->new(
+        ignore_return_values => 1,
         hash => sub {
             my ($v, $data) = @_;
             if (exists $data->{'$ref'} && $self->_is_ref( $data )) {
-                return $self->_is_self_ref( $data )
-                    ? $schema
-                    : $schema_map->{ $data->{'$ref'} }
+                $_ = $self->_is_self_ref( $data )
+                        ? $schema->{'compiled'}
+                        : $self->_resolve_ref( $data, $schema_map )->{'compiled'}
             }
-            return $data;
         }
-    )->visit( $schema );
+    )->visit(
+        $schema->{'compiled'}
+    );
+}
+
+# Ref utils
+
+sub _resolve_ref {
+    my ($self, $ref, $schema_map) = @_;
+    return $schema_map->{ $ref->{'$ref'} };
 }
 
 sub _is_ref {
@@ -165,32 +296,6 @@ sub _is_ref {
 sub _is_self_ref {
     my ($self, $ref) = @_;
     return ($self->_is_ref( $ref ) && $ref->{'$ref'} eq '#') ? 1 : 0;
-}
-
-sub _compile_properties {
-    my ($self, $schema, $schema_map) = @_;
-    my ($compiled_properties, $compiled_additional_properties) = $self->_compile_extended_properties( $schema, $schema_map );
-    $schema->{'__compiled_properties'}            = $compiled_properties;
-    $schema->{'__compiled_additional_properties'} = $compiled_additional_properties;
-    return $schema;
-}
-
-sub _compile_extended_properties {
-    my ($self, $schema, $schema_map) = @_;
-    return (
-        $self->_merge_properties( properties            => $schema, $schema_map ),
-        $self->_merge_properties( additional_properties => $schema, $schema_map )
-    );
-}
-
-sub _merge_properties {
-    my ($self, $type, $schema, $schema_map) = @_;
-    return +{
-        (exists $schema->{'extends'}
-            ? %{ $self->_merge_properties( $type, $schema_map->{ $schema->{'extends'}->{'$ref'} }, $schema_map ) }
-            : ()),
-        %{ $schema->{ $type } || {} },
-    }
 }
 
 

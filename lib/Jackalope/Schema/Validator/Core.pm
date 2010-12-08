@@ -178,13 +178,13 @@ sub object {
 
     my %all_props = map { $_ => undef } grep { !/^__/ } keys %$data;
 
-    my $has_properties = exists $schema->{__compiled_properties} && scalar keys %{ $schema->{__compiled_properties} };
-    my $has_additional_properties = exists $schema->{__compiled_additional_properties}
-                                  && scalar keys %{ $schema->{__compiled_additional_properties} };
+    my $has_properties = exists $schema->{properties} && scalar keys %{ $schema->{properties} };
+    my $has_additional_properties = exists $schema->{additional_properties}
+                                  && scalar keys %{ $schema->{additional_properties} };
 
     if ($has_properties) {
         my $result = $self->_check_properties(
-            $schema->{__compiled_properties}, $data, \%all_props
+            $schema->{properties}, $data, \%all_props
         );
         return {
             error      => (Devel::PartialDump::dump $data) . " did not pass properties check",
@@ -194,7 +194,7 @@ sub object {
 
     if ($has_additional_properties) {
         my $result = $self->_check_additional_properties(
-            $schema->{__compiled_additional_properties}, $data, \%all_props
+            $schema->{additional_properties}, $data, \%all_props
         );
         return {
             error      => (Devel::PartialDump::dump $data) . " did not pass additional properties check",

@@ -22,12 +22,20 @@ my $fixtures = Test::Jackalope::Fixtures->new(
 );
 
 foreach my $type ( qw[ ref hyperlink ] ) {
+    my $schema = $repo->get_compiled_schema_by_uri('schema/core/' . $type);
     validation_pass(
         $repo->validate(
             { '$ref' => 'schema/types/object' },
-            $repo->compiled_schemas->{'schema/core/' . $type},
+            $schema->{'compiled'},
         ),
-        '... validate the ' . $type . ' type with the schema type'
+        '... validate the compiled ' . $type . ' type with the schema type'
+    );
+    validation_pass(
+        $repo->validate(
+            { '$ref' => 'schema/types/object' },
+            $schema->{'raw'},
+        ),
+        '... validate the raw ' . $type . ' type with the schema type'
     );
     $fixtures->run_fixtures_for_type( $type );
 }

@@ -50,7 +50,8 @@ has 'typemap' => (
         }
     },
     handles => {
-        'valid_types' => 'keys'
+        'valid_types'      => 'keys',
+        'get_uri_for_type' => 'get',
     }
 );
 
@@ -426,10 +427,10 @@ sub integer {
             type => { type => "string", enum => [ "integer" ] },
         },
         additional_properties => {
-            less_than             => { type => "integer", description => "A integer must be less than this value" },
-            less_than_or_equal    => { type => "integer", description => "A integer must be less than or equal to this value" },
-            greater_than          => { type => "integer", description => "A integer must be greater than this value" },
-            greater_than_or_equal => { type => "integer", description => "A integer must be greater than or equal to this value" },
+            less_than                => { type => "integer", description => "A integer must be less than this value" },
+            less_than_or_equal_to    => { type => "integer", description => "A integer must be less than or equal to this value" },
+            greater_than             => { type => "integer", description => "A integer must be greater than this value" },
+            greater_than_or_equal_to => { type => "integer", description => "A integer must be greater than or equal to this value" },
             enum    => {
                 type        => "array",
                 items       => { type => "integer" },
