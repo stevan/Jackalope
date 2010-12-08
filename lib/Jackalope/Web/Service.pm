@@ -9,6 +9,7 @@ use Jackalope::Web::RouterBuilder;
 
 has 'schema' => (
     is       => 'ro',
+    writer   => '_schema',
     isa      => subtype('HashRef', where { exists $_->{links} ? 1 : 0 }),
     required => 1
 );
@@ -32,6 +33,11 @@ has 'router_builder' => (
     lazy    => 1,
     default => sub {
         my $self = shift;
+
+        my $repo = $self->service->param('repo');
+
+        $self->_schema( $repo->register_schema( $self->schema ) );
+
         Jackalope::Web::RouterBuilder->new(
             schema  => $self->schema,
             service => $self->service

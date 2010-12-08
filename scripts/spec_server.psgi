@@ -6,10 +6,8 @@ use warnings;
 use lib '/Users/stevan/Projects/CPAN/current/Bread-Board/lib';
 
 use Bread::Board;
-use Moose::Util::TypeConstraints 'enum';
 
 use Plack;
-use Plack::Request;
 use Plack::Builder;
 use Plack::App::Path::Router;
 
@@ -19,16 +17,16 @@ use Jackalope::Web::Service;
 {
     package Jackalope::Web::Services::SpecServer;
     use Moose;
-    use MooseX::Params::Validate;
 
     has 'spec' => (
         is       => 'ro',
         isa      => 'Jackalope::Schema::Spec',
-        required => 1
+        required => 1,
+        handles  => {
+            'get_spec'    => 'get_spec',
+            'get_typemap' => 'typemap'
+        }
     );
-
-    sub get_spec    { (shift)->spec->get_spec }
-    sub get_typemap { (shift)->spec->typemap  }
 
     sub fetch_meta_schema_by_type {
         my ($self, $type) = @_;

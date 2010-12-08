@@ -2,7 +2,8 @@
 = TODOS =
 
 - Jackalope::Web::Service
-    - ...
+    - needs to be able to take multiple schemas
+        - can merge the resulting routers
 
 - Jackalope::Web::RouteBuilder
     - add support for link->relation of create

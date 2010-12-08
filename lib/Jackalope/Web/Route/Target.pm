@@ -49,6 +49,7 @@ sub execute {
         # params against it
         my $result = $repo->validate( $link->{schema}, $params );
         if ($result->{error}) {
+            use Data::Dumper; warn Dumper($result);
             return [ 500, [], [ "Params failed to validate"] ];
         }
     }
@@ -62,11 +63,21 @@ sub execute {
         }
     }
 
-    return [
-        200,
-        [ 'Content-Type' => $serializer->content_type ],
-        [ $serializer->serialize( $output ) ]
-    ];
+    if ( $link->{relation} eq 'create' ) {
+        # 201 Created
+        return [ 201, [], [] ];
+    }
+    elsif ( (not defined $output) && $link->{method} eq 'POST' ) {
+        # 202 Accepted
+        return [ 202, [], [] ];
+    }
+    else {
+        return [
+            200,
+            [ 'Content-Type' => $serializer->content_type ],
+            [ $serializer->serialize( $output ) ]
+        ];
+    }
 }
 
 __PACKAGE__->meta->make_immutable;

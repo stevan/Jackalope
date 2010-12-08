@@ -72,12 +72,14 @@ sub _validate_schema {
     if (exists $result->{error}) {
         require Data::Dumper;
         $Data::Dumper::Sortkeys = 1;
-        die Data::Dumper::Dumper {
-            '001-error'       => "Invalid schema",
-            '002-result'      => $result,
-            '003-schema'      => $schema,
-            '004-meta_schema' => $self->compiled_schemas->{'schema/types/' . $schema_type}
-        };
+        die Data::Dumper::Dumper(
+            {
+                '001-error'       => "Invalid schema",
+                '002-result'      => $result,
+                '003-schema'      => $schema,
+                '004-meta_schema' => $self->compiled_schemas->{'schema/types/' . $schema_type}
+            }
+        );
     }
 }
 
