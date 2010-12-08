@@ -13,15 +13,9 @@
         subclasses of Web::Route::Target
         - make a factory for Web::Route::Target
 
-- Jackalope::Schema::Repository
-    - need to merge all inherited props, not just
-      the properties and additonal_properties
-        - test this too
-    - make better use of the spec typemap to clean up some code
-    - add a resolve_ref method
-    - add a get_compiled_schema method
-        - expect a URI
-    - add a get_compiled_schema_for_type method
+- Jackalope.Schema.Repository
+    - refactor the compilation process
+      to match the Perl version
 
 == LOW PRIORITY ==
 
@@ -37,15 +31,8 @@
       test to check the right error appears
         - fixtures will need to support this too
 
-- Jackalope::Script::GenerateSpec
-    - fix the JSON purty stuff, need to
-      see if encode_json takes options
-
 - test_fixtures
     - write more of them
-
-- Jackalope::Schema::Repository
-    - refactor the schema compiling
 
 - Jackalope::Schema::Validator::Core
     - make it use Moose types to check against

@@ -62,22 +62,25 @@ sub BUILD {
 
 sub get_compiled_schema_by_uri {
     my ($self, $uri) = @_;
-    $self->_compiled_schemas->{ $uri }
+    my $schema = $self->_compiled_schemas->{ $uri }
         || confess "Could not find schema for $uri";
+    $schema->{'compiled'};
 }
 
 sub get_compiled_schema_for_type {
     my ($self, $type) = @_;
-    $self->_compiled_schemas->{ $self->spec->get_uri_for_type( $type ) }
+    my $schema = $self->_compiled_schemas->{ $self->spec->get_uri_for_type( $type ) }
         || confess "Could not find schema for $type";
+    $schema->{'compiled'};
 }
 
 sub get_compiled_schema_by_ref {
     my ($self, $ref) = @_;
     ($self->_is_ref( $ref ))
         || confess "$ref is not a ref";
-    $self->_resolve_ref( $ref, $self->_compiled_schemas )
+    my $schema = $self->_resolve_ref( $ref, $self->_compiled_schemas )
         || confess "Could not find schema for " . $ref->{'$ref'};
+    $schema->{'compiled'};
 }
 
 ## Validators
@@ -109,7 +112,7 @@ sub _validate_schema {
     my $schema_type = $schema->{'type'};
 
     my $result = $self->validator->validate(
-        $self->get_compiled_schema_for_type( $schema_type )->{'compiled'},
+        $self->get_compiled_schema_for_type( $schema_type ),
         $schema
     );
 
@@ -145,7 +148,8 @@ sub _compile_schema {
     my ($self, $schema) = @_;
 
     if ($self->_is_ref( $schema )) {
-        $schema = $self->get_compiled_schema_by_ref( $schema );
+        $schema = $self->_resolve_ref( $schema, $self->_compiled_schemas )
+            || confess "Could not find schema for " . $schema->{'$ref'};
     }
 
     unless ( $self->_is_schema_compiled( $schema ) ) {
@@ -169,6 +173,11 @@ sub _compile_core_schemas {
     foreach my $schema ( @schemas ) {
         $self->_flatten_extends( $schema, $schema_map );
     }
+
+    # NOTE:
+    # Dont think I need to do _resolve_embedded_extends
+    # in here, because there shoudn't be any.
+    # - SL
 
     foreach my $schema ( @schemas ) {
         $self->_resolve_refs( $schema, $schema_map );

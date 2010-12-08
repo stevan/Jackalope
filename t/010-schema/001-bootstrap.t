@@ -21,15 +21,7 @@ foreach my $type ( $repo->spec->valid_types ) {
     validation_pass(
         $repo->validate(
             { '$ref' => 'schema/types/schema' },
-            $schema->{'raw'},
-        ),
-        '... validate the raw ' . $type . ' schema with the schema type'
-    );
-
-    validation_pass(
-        $repo->validate(
-            { '$ref' => 'schema/types/schema' },
-            $schema->{'compiled'},
+            $schema,
         ),
         '... validate the compiled ' . $type . ' schema with the schema type'
     );
@@ -38,17 +30,9 @@ foreach my $type ( $repo->spec->valid_types ) {
 validation_pass(
     $repo->validate(
         { '$ref' => 'schema/types/schema' },
-        $repo->get_compiled_schema_by_uri('schema/types/schema')->{'compiled'},
+        $repo->get_compiled_schema_by_uri('schema/types/schema'),
     ),
     '... validate the compiled schema type with the schema type (bootstrappin)'
-);
-
-validation_pass(
-    $repo->validate(
-        { '$ref' => 'schema/types/schema' },
-        $repo->get_compiled_schema_by_uri('schema/types/schema')->{'raw'},
-    ),
-    '... validate the raw schema type with the schema type (bootstrappin)'
 );
 
 validation_pass(

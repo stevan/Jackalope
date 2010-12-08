@@ -53,8 +53,8 @@ is(exception{
     )
 }, undef, '... did not die when registering this schema');
 
-my $person   = $repo->get_compiled_schema_by_uri('simple/person')->{'compiled'};
-my $employee = $repo->get_compiled_schema_by_uri('simple/employee')->{'compiled'};
+my $person   = $repo->get_compiled_schema_by_uri('simple/person');
+my $employee = $repo->get_compiled_schema_by_uri('simple/employee');
 
 ok(exists $employee->{'type'}, '... employee has the type key');
 is($employee->{'type'}, 'object', '... it is the right employee type');

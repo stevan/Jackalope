@@ -26,16 +26,9 @@ foreach my $type ( qw[ ref hyperlink ] ) {
     validation_pass(
         $repo->validate(
             { '$ref' => 'schema/types/object' },
-            $schema->{'compiled'},
+            $schema,
         ),
         '... validate the compiled ' . $type . ' type with the schema type'
-    );
-    validation_pass(
-        $repo->validate(
-            { '$ref' => 'schema/types/object' },
-            $schema->{'raw'},
-        ),
-        '... validate the raw ' . $type . ' type with the schema type'
     );
     $fixtures->run_fixtures_for_type( $type );
 }
