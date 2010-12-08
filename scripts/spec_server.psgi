@@ -114,13 +114,19 @@ my $c = container $j => as {
                         {
                             relation      => "self",
                             href          => "/fetch/:type/schema",
+                            uri_schema    => {
+                                type       => "object",
+                                properties => {
+                                    type => {
+                                        type => "string",
+                                        enum => [ $s->param('repo')->spec->valid_types ]
+                                    }
+                                }
+                            },
                             target_schema => { '$ref' => 'schema/types/schema' },
                             metadata      => {
                                 controller  => 'spec_server',
                                 action      => 'fetch_meta_schema_by_type',
-                                validations => {
-                                    type => enum([ $s->param('repo')->spec->valid_types ])
-                                }
                             }
                         }
                     ]

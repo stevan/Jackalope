@@ -204,12 +204,13 @@ sub hyperlink {
                 'format'    => "uri_template",
                 description => q[
                     This is a URI for the resource, it may also
-                    be a URI template containing variables. In the
-                    case of these templates the variables should be
-                    resolved in the context of the object instance.
-                    This means that a template like so:
+                    be a URI template containing variables (using the
+                    RoR style colon prefix). In the case of these
+                    templates the variables should be resolved in
+                    the context of the object instance. This means
+                    that a template like so:
 
-                        /product/{id}/view
+                        /product/:id/view
 
                     should be resolved to be this:
 
@@ -240,6 +241,17 @@ sub hyperlink {
                     should be an 'object' type schema and the
                     query string parameters should be checked
                     against it.
+                ]
+            },
+            uri_schema   => {
+                type        => "schema",
+                description => q[
+                    This is a schema (or a reference to a schema)
+                    of the results of the mapping of the URI-template
+                    in the 'href' property. On the server side it
+                    can be used to validate the value that we get,
+                    and on the client side it can be used to check
+                    to assure the URL being called is valid.
                 ]
             },
             method       => {

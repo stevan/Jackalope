@@ -1,10 +1,16 @@
 
 = TODOS =
 
+- Jackalope::Web::Service
+    - ...
+
 - Jackalope::Web::RouteBuilder
     - add support for link->relation of create
       and described_by, those will be handled
       in a different way
+      - probably best to accomplish this with
+        subclasses of Web::Route::Target
+        - make a factory for Web::Route::Target
 
 == LOW PRIORITY ==
 

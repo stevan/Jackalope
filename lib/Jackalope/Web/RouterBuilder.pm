@@ -6,6 +6,7 @@ our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use Path::Router;
+use Jackalope::Web::Route::Target;
 
 has 'schema' => (
     is       => 'ro',
@@ -39,58 +40,13 @@ sub compile_router {
 
         $router->add_route(
             $link->{href},
-            # Accept the defaults
-            # in the metadata hash
-            (exists $link->{metadata}->{defaults}
-                ? (defaults => $link->{metadata}->{defaults})
-                : ()),
-            # Accept the validations
-            # in the metadata hash
-            (exists $link->{metadata}->{validations}
-                ? (validations => $link->{metadata}->{validations})
-                : ()),
-            target  => sub {
-                my $r    = shift;
-                my @args = @_;
-
-                my $params = {};
-                # we know we are expecting data
-                # if there is a 'schema' in the
-                # link description, so we extract
-                # the parameters based on the
-                # 'method' specified
-                if ( exists $link->{schema} ) {
-                    if ( $link->{method} eq 'GET' ) {
-                        $params = $r->query_parameters->as_hashref_mixed;
-                    }
-                    elsif ( $link->{method} eq 'POST' || $link->{method} eq 'PUT' ) {
-                        $params = $serializer->deserialize( $r->content );
-                    }
-
-                    # then, since we have the 'schema'
-                    # key, we can check the set of
-                    # params against it
-                    my $result = $repo->validate( $link->{schema}, $params );
-                    if ($result->{error}) {
-                        return [ 500, [], [ "Params failed to validate"] ];
-                    }
-                }
-
-                my $output = $controller->$action( @args, $params );
-
-                if ( exists $link->{target_schema} ) {
-                    my $result = $repo->validate( $link->{target_schema}, $output );
-                    if ($result->{error}) {
-                        return [ 500, [], [ "Output didn't match the target_schema"] ];
-                    }
-                }
-
-                return [
-                    200,
-                    [ 'Content-Type' => $serializer->content_type ],
-                    [ $serializer->serialize( $output ) ]
-                ];
-            }
+            target  => Jackalope::Web::Route::Target->new(
+                link       => $link,
+                repo       => $repo,
+                serializer => $serializer,
+                controller => $controller,
+                action     => $action
+            )
         );
     }
 
