@@ -4,20 +4,20 @@
         "pass" : [
             {
                 "relation" : "self",
-                "href"     : "{id}"
+                "href"     : ":id"
             },
             {
                 "relation" : "described_by",
-                "href"     : "schema/{type}"
+                "href"     : "schema/:type"
             },
             {
                 "relation"      : "self",
-                "href"          : "product/{id}/view",
+                "href"          : "product/:id/view",
                 "target_schema" : { "$ref" : "#" }
             },
             {
                 "relation" : "self",
-                "href"     : "product/{id}/update",
+                "href"     : "product/:id/update",
                 "method"   : "POST",
                 "schema"   : { "$ref" : "#" }
             },
@@ -31,6 +31,16 @@
                 "metadata"    : {
                     "controller" : "ProductFactory",
                     "action"     : "create_product"
+                }
+            },
+            {
+                "relation"   : "self",
+                "href"       : ":id",
+                "uri_schema" : {
+                    "type" : "object",
+                    "properties" : {
+                        "id" : { "type" : "integer" }
+                    }
                 }
             }
         ],
