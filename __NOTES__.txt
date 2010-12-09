@@ -2,16 +2,17 @@
 = TODOS =
 
 - Jackalope::Web::Service
-    - needs to be able to take multiple schemas
-        - can merge the resulting routers
-
-- Jackalope::Web::RouteBuilder
-    - add support for link->relation of create
-      and described_by, those will be handled
-      in a different way
-      - probably best to accomplish this with
-        subclasses of Web::Route::Target
-        - make a factory for Web::Route::Target
+    - this should be able to take an array of schemas
+        - it does not need to keep a ref to them,
+          it can simply register them and gather
+          the IDs
+    - this should own the Router instance
+        - this makes it easier for it to process
+          more then one schema in a single service
+        - during creation of the Router, it should
+          look in the metadata for possible hints
+          as to what type of Target class to use
+            - Jackalope::Web::Route::Target is the default
 
 - Jackalope.Schema.Repository
     - refactor the compilation process

@@ -152,7 +152,7 @@ builder {
         root => './root/static/'
     );
     Plack::App::Path::Router->new(
-        router => $c->resolve( service => 'SpecService' )->get_router
+        router => $c->resolve( service => 'SpecService' )->router
     );
 };
 

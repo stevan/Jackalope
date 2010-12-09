@@ -78,84 +78,71 @@ my $c = container $j => as {
             my $s = shift;
             Jackalope::Web::Service->new(
                 service => $s,
-                schema  => {
-                    id         => 'simple/crud/person',
-                    title      => 'This is a simple person schema',
-                    type       => 'object',
-                    properties => {
-                        id         => { type => 'integer' },
-                        first_name => { type => 'string' },
-                        last_name  => { type => 'string' },
-                        age        => { type => 'integer', greater_than => 0 },
-                        sex        => { type => 'string', enum => [qw[ male female ]] }
-                    },
-                    links => [
-                        {
-                            relation => 'create',
-                            href     => '/create',
-                            method   => 'PUT',
-                            schema   => {
-                                type       => "object",
-                                extends    => { '$ref' => '#' },
-                                properties => {
-                                    id => { type => 'null' }
+                schemas  => [
+                    {
+                        id         => 'simple/crud/person',
+                        title      => 'This is a simple person schema',
+                        type       => 'object',
+                        properties => {
+                            id         => { type => 'integer' },
+                            first_name => { type => 'string' },
+                            last_name  => { type => 'string' },
+                            age        => { type => 'integer', greater_than => 0 },
+                            sex        => { type => 'string', enum => [qw[ male female ]] }
+                        },
+                        links => [
+                            {
+                                relation => 'create',
+                                href     => '/create',
+                                method   => 'PUT',
+                                schema   => {
+                                    type       => "object",
+                                    extends    => { '$ref' => '#' },
+                                    properties => {
+                                        id => { type => 'null' }
+                                    },
+                                    links => []
                                 },
-                                links => []
-                            },
-                            metadata => {
-                                controller => 'person_manager',
-                                action     => 'create'
-                            }
-                        },
-                        {
-                            relation      => 'self',
-                            href          => '/:id',
-                            method        => 'GET',
-                            target_schema => { '$ref' => '#' },
-                            uri_schema    => {
-                                type       => 'object',
-                                properties => {
-                                    id => { type => 'integer' }
+                                metadata => {
+                                    controller => 'person_manager',
+                                    action     => 'create'
                                 }
                             },
-                            metadata => {
-                                controller => 'person_manager',
-                                action     => 'read'
-                            }
-                        },
-                        {
-                            relation      => 'self',
-                            href          => '/:id/update',
-                            method        => 'POST',
-                            schema        => { '$ref' => '#' },
-                            uri_schema    => {
-                                type       => 'object',
-                                properties => {
-                                    id => { type => 'integer' }
+                            {
+                                relation      => 'self',
+                                href          => '/:id',
+                                method        => 'GET',
+                                target_schema => { '$ref' => '#' },
+                                uri_schema    => { type => 'object', properties => { id => { type => 'integer' } } },
+                                metadata => {
+                                    controller => 'person_manager',
+                                    action     => 'read'
                                 }
                             },
-                            metadata => {
-                                controller => 'person_manager',
-                                action     => 'update'
-                            }
-                        },
-                        {
-                            relation      => 'self',
-                            href          => '/:id/delete',
-                            method        => 'DELETE',
-                            uri_schema    => {
-                                type       => 'object',
-                                properties => {
-                                    id => { type => 'integer' }
+                            {
+                                relation      => 'self',
+                                href          => '/:id/update',
+                                method        => 'POST',
+                                schema        => { '$ref' => '#' },
+                                uri_schema    => { type => 'object', properties => { id => { type => 'integer' } } },
+                                metadata => {
+                                    controller => 'person_manager',
+                                    action     => 'update'
                                 }
                             },
-                            metadata => {
-                                controller => 'person_manager',
-                                action     => 'delete'
+                            {
+                                relation      => 'self',
+                                href          => '/:id/delete',
+                                method        => 'DELETE',
+                                uri_schema    => { type => 'object', properties => { id => { type => 'integer' } } },
+                                metadata => {
+                                    controller => 'person_manager',
+                                    action     => 'delete'
+                                }
                             }
-                        }
-                    ]
-                }
+                        ]
+                    }
+                ]
             );
         },
         dependencies => {
@@ -172,7 +159,7 @@ my $c = container $j => as {
 };
 
 my $app = Plack::App::Path::Router->new(
-    router => $c->resolve( service => 'SimpleCRUDPerson' )->get_router
+    router => $c->resolve( service => 'SimpleCRUDPerson' )->router
 );
 
 test_psgi

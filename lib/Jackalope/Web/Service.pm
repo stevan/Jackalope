@@ -5,21 +5,12 @@ use Moose::Util::TypeConstraints;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use Jackalope::Web::RouterBuilder;
-
-has 'schema' => (
-    is       => 'ro',
-    writer   => '_schema',
-    isa      => subtype('HashRef', where { exists $_->{links} ? 1 : 0 }),
-    required => 1
-);
+use Path::Router;
+use Jackalope::Web::Route::Target::Default;
 
 # NOTE:
-# Normally this is a resolved
-# Bread::Board::Service, however
-# there is no need to hard code
-# that, it should work with other
-# things too.
+# Normally this is a resolved Bread::Board::Service,
+# however there is no need to hard code that
 # - SL
 has 'service' => (
     is       => 'ro',
@@ -27,31 +18,60 @@ has 'service' => (
     required => 1
 );
 
-has 'router_builder' => (
+# these are the original uncompiled schemas
+# that can be used for sending to the client
+has 'schemas' => (
+    traits  => [ 'Array' ],
     is      => 'ro',
-    isa     => 'Jackalope::Web::RouterBuilder',
+    isa     => 'ArrayRef[HashRef]',
     lazy    => 1,
-    default => sub {
-        my $self = shift;
-
-        my $repo = $self->service->param('repo');
-        $repo->register_schema( $self->schema );
-
-        $self->_schema( $repo->get_compiled_schema_by_uri( $self->schema->{'id'} ) );
-
-        Jackalope::Web::RouterBuilder->new(
-            schema  => $self->schema,
-            service => $self->service
-        )
-    },
+    default => sub { [] },
     handles => {
-        'get_router' => 'compile_router'
+        'get_all_schemas' => 'elements',
+        'add_schema'      => 'push'
     }
 );
 
+has 'router' => (
+    is      => 'ro',
+    isa     => 'Path::Router',
+    lazy    => 1,
+    builder => 'build_router',
+);
+
+sub build_router {
+    my $self       = shift;
+    my $router     = Path::Router->new;
+    my $serializer = $self->service->param( 'serializer' );
+    my $repo       = $self->service->param( 'repo' );
+    my @schemas    = map { $repo->register_schema( $_ ) } $self->get_all_schemas;
+
+    foreach my $schema ( @schemas ) {
+        foreach my $link ( @{ $schema->{links} } ) {
+
+            my $controller   = $self->service->param( $link->{'metadata'}->{'controller'} );
+            my $action       = $controller->can( $link->{'metadata'}->{'action'} );
+            my $target_class = $link->{'metadata'}->{'target_class'} || 'Jackalope::Web::Route::Target::Default';
+
+            $router->add_route(
+                $link->{'href'},
+                target  => $target_class->new(
+                    link       => $link,
+                    repo       => $repo,
+                    serializer => $serializer,
+                    controller => $controller,
+                    action     => $action
+                )
+            );
+        }
+    }
+
+    $router;
+}
+
 __PACKAGE__->meta->make_immutable;
 
-no Moose; 1;
+no Moose; no Moose::Util::TypeConstraints; 1;
 
 __END__
 

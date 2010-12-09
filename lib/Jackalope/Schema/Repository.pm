@@ -102,6 +102,7 @@ sub register_schema {
     my $compiled_schema = $self->_compile_schema( $schema );
     $self->_validate_schema( $compiled_schema->{'compiled'} );
     $self->_insert_compiled_schema( $compiled_schema );
+    return $compiled_schema->{'compiled'};
 }
 
 # ...
