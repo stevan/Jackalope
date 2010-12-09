@@ -1,22 +1,57 @@
 
 = TODOS =
 
+- schema/core/hyperlink
+    - add a label field which
+      can be used to link to
+      other elements
+    - http://www.w3.org/TR/xlink/
+
+- HTTP status codes
+    - https://demo.staging.fellowshiponeapi.com/v1/Util/HttpStatusCodes.help
+
 - Jackalope::Web::Service
-    - this should be able to take an array of schemas
-        - it does not need to keep a ref to them,
-          it can simply register them and gather
-          the IDs
-    - this should own the Router instance
-        - this makes it easier for it to process
-          more then one schema in a single service
-        - during creation of the Router, it should
-          look in the metadata for possible hints
-          as to what type of Target class to use
-            - Jackalope::Web::Route::Target is the default
+    - we should pass in a Factory to the Web::Service and the factory
+      can choose which type of target object based on patterns
+      if no pattern exists then ...
+      - target_class in the link->metadata should handle names like Moose Traits and Catalyst plugins
+          +Some::Full::Path => is handled straight
+          Another           => becomes Jackalope::Route::Target::Another
+
+- Jackalope::Web::Route::Target::REST::
+    - these should be able to rely on some simple conventions
+      in the links for the various CRUD actions and be able to
+      ask the router for the URIs
+    - we need to write defaults into the route so that they
+      can be idenfified from the outside and URIs can be created
+        - at a min. we should have the label, but the combo
+          of the label, method and relation should do enough
+    - it can make some assumptions about the repository
+      knowing that it is going to use the Jackalope::ResourceRepository
+      role, this should simplify the metadata even more
+
+- Jackalope::ResourceRepository
+    - a role whose interface we can depend on
+      to do CRUD operations and such
+
+- Jackalope::Web::Error::
+    - a set of Throwable exceptions for the various
+      HTTP status codes
+        - 204 No Content (??)
+        - 304 Not Modified
+        - 400 Bad Request
+        - 404 Not Found
+        - 409 Conflict
+        - 500 server error
+    - these can be thrown by the Model classes to
+      communicate with the Route::Target classes
 
 - Jackalope.Schema.Repository
     - refactor the compilation process
       to match the Perl version
+
+- read up on ETags
+    - http://en.wikipedia.org/wiki/HTTP_ETag
 
 == LOW PRIORITY ==
 
@@ -50,3 +85,17 @@
       to concrete classes
     - NOTE: I tried this, it didn't feel right
       but should keep the idea around just in case
+
+== LINKS ==
+
+http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+http://en.wikipedia.org/wiki/Representational_State_Transfer
+http://martinfowler.com/articles/richardsonMaturityModel.html
+http://code.msdn.microsoft.com/cannonicalRESTEntity
+http://www.w3.org/TR/xforms/
+http://thisweekinrest.wordpress.com/
+http://tools.ietf.org/html/rfc5988
+http://alexscordellis.blogspot.com/2010/11/restful-architecture-what-should-we-put.html
+http://restinpractice.com/default.aspx
+
+

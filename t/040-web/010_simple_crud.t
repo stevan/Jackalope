@@ -52,17 +52,23 @@ use Plack::App::Path::Router;
 
     sub read {
         my ($self, $id) = @_;
+        (exists $self->db->{ $id })
+            || die "No person found for $id";
         return $self->db->{ $id };
     }
 
     sub update {
         my ($self, $id, $person) = @_;
+        (exists $self->db->{ $id })
+            || die "No person found for $id";
         $self->db->{ $id } = $person;
         return;
     }
 
     sub delete {
         my ($self, $id) = @_;
+        (exists $self->db->{ $id })
+            || die "No person found for $id";
         delete $self->db->{ $id };
         return;
     }
@@ -187,6 +193,40 @@ test_psgi
               my $res = $cb->($req);
               is($res->code, 202, '... got the right status for update');
               is($res->content, '', '... got the right value for update');
+          }
+          {
+              my $req = PUT( "http://localhost/create" => (
+                  Content => '{"id":null,"first_name":"Jack","last_name":"Alope","age":20,"sex":"male"}'
+              ));
+              my $res = $cb->($req);
+              is($res->code, 201, '... got the right status for create');
+              is($res->content, '', '... got the right value for create');
+          }
+          {
+              my $req = GET( "http://localhost/2");
+              my $res = $cb->($req);
+              is($res->code, 200, '... got the right status for read');
+              is($res->content, '{"age":20,"first_name":"Jack","id":2,"last_name":"Alope","sex":"male"}', '... got the right value for read');
+          }
+          {
+              my $req = POST( "http://localhost/2/update" => (
+                  Content => '{"id":2,"first_name":"Jack","last_name":"Alope","age":21,"sex":"male"}'
+              ));
+              my $res = $cb->($req);
+              is($res->code, 202, '... got the right status for update');
+              is($res->content, '', '... got the right value for update');
+          }
+          {
+              my $req = POST( "http://localhost/1/delete");
+              my $res = $cb->($req);
+              is($res->code, 202, '... got the right status for delete');
+              is($res->content, '', '... got the right value for delete');
+          }
+          {
+              my $req = POST( "http://localhost/1");
+              my $res = $cb->($req);
+              is($res->code, 500, '... got the right status for update (error)');
+              like($res->content, qr/Action failed because : No person found for 1/, '... got the right value for update (error)');
           }
       };
 

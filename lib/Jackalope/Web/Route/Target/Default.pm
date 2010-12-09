@@ -4,6 +4,7 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use Try::Tiny;
 use Data::Dump 'dump';
 
 with 'Jackalope::Web::Route::Target';
@@ -29,7 +30,7 @@ sub execute {
         # we can check the mappings against it
         my $result = $repo->validate( $link->{uri_schema}, $mapping );
         if ($result->{error}) {
-            warn dump $result;
+            #warn dump $result;
             return [ 500, [], [ "URI Params failed to validate"] ];
         }
     }
@@ -54,7 +55,7 @@ sub execute {
         # params against it
         my $result = $repo->validate( $link->{schema}, $params );
         if ($result->{error}) {
-            warn dump $result;
+            #warn dump $result;
             return [ 500, [], [ "Params failed to validate"] ];
         }
     }
@@ -63,7 +64,17 @@ sub execute {
     # with the router args first, followed by
     # the set of validated query or post params
     # in a hash ref
-    my $output = $controller->$action( @args, $params || () );
+    my $exception;
+    my $output = try {
+        $controller->$action( @args, $params || () );
+    } catch {
+        $exception = $_;
+    };
+
+    if ($exception) {
+        #warn dump $exception;
+        return [ 500, [], [ "Action failed because : $exception"] ];
+    }
 
     # if we have a target_schema
     # then we are expecting output
@@ -71,7 +82,7 @@ sub execute {
         # check the output against the target_schema
         my $result = $repo->validate( $link->{target_schema}, $output );
         if ($result->{error}) {
-            warn dump $result;
+            #warn dump $result;
             return [ 500, [], [ "Output didn't match the target_schema"] ];
         }
     }
@@ -83,10 +94,10 @@ sub execute {
         # 201 Created
         return [ 201, [], [] ];
     }
-    # posting data and getting no
-    # output back means we just send
+    # posting data or deleting and getting no
+    # output back, means we just send
     # the '202 Accepted' status
-    elsif ( (not defined $output) && $link->{method} eq 'POST' ) {
+    elsif ( (not defined $output) && ($link->{method} eq 'POST' || $link->{method} eq 'DELETE') ) {
         # 202 Accepted
         return [ 202, [], [] ];
     }
