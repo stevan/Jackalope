@@ -45,4 +45,5 @@ my $j = Jackalope->new;
     is($serializer->content_type, 'application/json', '... got the right content type for this serializer');
 }
 
+
 done_testing;

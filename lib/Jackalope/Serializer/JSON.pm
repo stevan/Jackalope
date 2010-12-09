@@ -4,6 +4,7 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use Try::Tiny;
 use Jackalope::Util;
 
 with 'Jackalope::Serializer';
@@ -16,7 +17,12 @@ sub serialize {
     $params = { %{ $self->default_params }, %{ $params || {} } }
         if $self->has_default_params;
 
-    encode_json( $data, $params );
+    try   { encode_json( $data, $params ) }
+    catch {
+        confess "Failed to serialize\n"
+              . "... JSON::XS said : $_"
+              . "... for data : $data";
+    }
 }
 
 sub deserialize {
@@ -25,7 +31,12 @@ sub deserialize {
     $params = { %{ $self->default_params }, %{ $params || {} } }
         if $self->has_default_params;
 
-    decode_json( $json, $params );
+    try   { decode_json( $json, $params ) }
+    catch {
+        confess "Failed to deserialize\n"
+              . "... JSON::XS said : $_"
+              . "... for json : $json";
+    }
 }
 
 __PACKAGE__->meta->make_immutable;
