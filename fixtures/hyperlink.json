@@ -11,17 +11,20 @@
                 "href"     : "schema/:type"
             },
             {
+                "label"         : "view_product",
                 "relation"      : "self",
                 "href"          : "product/:id/view",
                 "target_schema" : { "$ref" : "#" }
             },
             {
+                "label"    : "update_product",
                 "relation" : "self",
                 "href"     : "product/:id/update",
                 "method"   : "POST",
                 "schema"   : { "$ref" : "#" }
             },
             {
+                "label"       : "create_product",
                 "relation"    : "create",
                 "href"        : "product/create",
                 "method"      : "POST",
@@ -46,7 +49,15 @@
         ],
         "fail" : [
             { "$ref" : [] },
-            { "$ref" : "test", "foo" : "bar" }
+            { "$ref" : "test", "foo" : "bar" },
+            {
+                "label"    : "identity",
+                "relation" : "self"
+            },
+            {
+                "label"    : "identity",
+                "href"     : ":id"
+            }
         ]
     }
 ]

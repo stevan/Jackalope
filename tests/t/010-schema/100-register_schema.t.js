@@ -29,11 +29,13 @@ test(
                     },
                     "links" : [
                         {
+                            "label"         : "view_product",
                             "relation"      : "self",
                             "href"          : "product/{id}/view",
                             "target_schema" : { "$ref" : "#" }
                         },
                         {
+                            "label"    : "update_product",
                             "relation" : "self",
                             "href"     : "product/{id}/update",
                             "method"   : "POST",
@@ -58,11 +60,13 @@ test(
                     },
                     "links" : [
                         {
+                            "label"         : "list_products",
                             "relation"      : "self",
                             "href"          : "product/list",
                             "target_schema" : { "$ref" : "#" }
                         },
                         {
+                            "label"    : "create_product",
                             "relation" : "create",
                             "href"     : "product/create",
                             "method"   : "POST",

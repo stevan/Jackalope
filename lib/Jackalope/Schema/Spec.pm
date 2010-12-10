@@ -262,6 +262,21 @@ sub hyperlink {
             },
             title        => { type => "string", description => "The human readable title of a given link" },
             description  => { type => "string", description => "A short human readable description of the link" },
+            label => {
+                type        => "string",
+                description => q[
+                    This is a string label meant to uniquely identify
+                    the link within a group of other links. It is
+                    not enforced or required that it be unique, but
+                    is suggested. The string should also be simple
+                    enough to be used in a URL, which means avoiding
+                    certain characters, however this too is not a
+                    requirement (they can always be encoded) but it
+                    will help keep your URLs pretty.
+                    The main intent of this addition is to allow a
+                    simple way for links to link to other links.
+                ]
+            },
             metadata     => {
                 type        => "object",
                 description => q[
