@@ -34,6 +34,106 @@
             }
          }
       },
+      "schema/web/service" : {
+         "id" : "schema/web/service",
+         "title" : "This is a simple REST enabled schema",
+         "type" : "object",
+         "links" : [
+            {
+               "target_schema" : {
+                  "type" : "array",
+                  "items" : {
+                     "type" : "object",
+                     "extends" : {
+                        "$ref" : "schema/web/resource"
+                     },
+                     "properties" : {
+                        "body" : {
+                           "$ref" : "#"
+                        }
+                     }
+                  }
+               },
+               "href" : "/",
+               "relation" : "list",
+               "method" : "GET"
+            },
+            {
+               "data_schema" : {
+                  "$ref" : "#"
+               },
+               "target_schema" : {
+                  "type" : "object",
+                  "extends" : {
+                     "$ref" : "schema/web/resource"
+                  },
+                  "properties" : {
+                     "body" : {
+                        "$ref" : "#"
+                     }
+                  }
+               },
+               "href" : "/",
+               "relation" : "create",
+               "method" : "POST"
+            },
+            {
+               "target_schema" : {
+                  "type" : "object",
+                  "extends" : {
+                     "$ref" : "schema/web/resource"
+                  },
+                  "properties" : {
+                     "body" : {
+                        "$ref" : "#"
+                     }
+                  }
+               },
+               "uri_schema" : {
+                  "id" : {
+                     "type" : "string"
+                  }
+               },
+               "href" : "/:id",
+               "relation" : "read",
+               "method" : "GET"
+            },
+            {
+               "data_schema" : {
+                  "$ref" : "#"
+               },
+               "target_schema" : {
+                  "type" : "object",
+                  "extends" : {
+                     "$ref" : "schema/web/resource"
+                  },
+                  "properties" : {
+                     "body" : {
+                        "$ref" : "#"
+                     }
+                  }
+               },
+               "uri_schema" : {
+                  "id" : {
+                     "type" : "string"
+                  }
+               },
+               "href" : "/:id",
+               "relation" : "edit",
+               "method" : "PUT"
+            },
+            {
+               "uri_schema" : {
+                  "id" : {
+                     "type" : "string"
+                  }
+               },
+               "href" : "/:id",
+               "relation" : "delete",
+               "method" : "DELETE"
+            }
+         ]
+      },
       "schema/types/schema" : {
          "id" : "schema/types/schema",
          "title" : "The 'Schema' type schema",
@@ -106,6 +206,84 @@
             }
          }
       },
+      "schema/web/resource" : {
+         "id" : "schema/web/resource",
+         "title" : "The 'Resource' schema",
+         "type" : "object",
+         "description" : "The is a 'wrapper' of sorts for resources\nas viewed from the concept of the web and\nREST. It is mostly intended to be extended\nwhere the 'body' property is overriden with\nthe schema of our choice.\n",
+         "properties" : {
+            "body" : {
+               "type" : "any",
+               "description" : "This is the body of the resource, it is of type\n'any' for now, but it as this schema is meant to\nbe extended and this property overridden, this is\nbasically whatever you need it to be.\n"
+            },
+            "version" : {
+               "format" : "uuid",
+               "type" : "string",
+               "description" : "This is a UUID string representing the current\nversion of the resource. When the resource is updated\nthe version should be compared first, to make sure\nthat it has not been updated by another.\n"
+            },
+            "id" : {
+               "type" : "string",
+               "description" : "This is the ID of the given resource, it is\nassumed to be some kind of string, which should\nstill just work fine even for numeric values.\nThis is expected to be the lookup key for\nresources in a resource repository.\n"
+            },
+            "links" : {
+               "type" : "array",
+               "description" : "This is a list of links which represent the\ncapabilities of given resource, the consumer of\nthe resource can use these links to perform\ndifferent actions.\n",
+               "items" : {
+                  "$ref" : "schema/core/xlink"
+               }
+            }
+         }
+      },
+      "schema/types/string" : {
+         "additional_properties" : {
+            "pattern" : {
+               "format" : "regex",
+               "type" : "string",
+               "description" : "A regular expression that can be checked against the string"
+            },
+            "format" : {
+               "enum" : [
+                  "uri",
+                  "uri_template",
+                  "regex",
+                  "uuid"
+               ],
+               "type" : "string",
+               "description" : "This is one of a set of built-in formatters"
+            },
+            "enum" : {
+               "is_unique" : true,
+               "type" : "array",
+               "description" : "This is an array of possible acceptable values, it should contain no duplicates",
+               "items" : {
+                  "type" : "string"
+               }
+            },
+            "min_length" : {
+               "type" : "number",
+               "description" : "The minimum length of the string given"
+            },
+            "max_length" : {
+               "type" : "number",
+               "description" : "The maximum length of the string given"
+            }
+         },
+         "id" : "schema/types/string",
+         "title" : "The 'String' type schema",
+         "type" : "schema",
+         "description" : "This is a schema for the 'string' type, which is\nany value that is explcitly cast as a string. This\nmeans that it can be an entirely numeric string,\nas long it is cast as a string based on the details\nof the implementation language. As with 'boolean'\nvalues, any transport format (JSON, XML, etc.) is\nexpected to provide some kind of way to explicitly\ncast a given value as a given type so as to make\nfor better interoperability.\n",
+         "extends" : {
+            "$ref" : "schema/types/any"
+         },
+         "properties" : {
+            "type" : {
+               "enum" : [
+                  "string"
+               ],
+               "type" : "string"
+            }
+         }
+      },
       "schema/types/array" : {
          "additional_properties" : {
             "max_items" : {
@@ -173,56 +351,6 @@
             "type" : {
                "enum" : [
                   "object"
-               ],
-               "type" : "string"
-            }
-         }
-      },
-      "schema/types/string" : {
-         "additional_properties" : {
-            "pattern" : {
-               "format" : "regex",
-               "type" : "string",
-               "description" : "A regular expression that can be checked against the string"
-            },
-            "format" : {
-               "enum" : [
-                  "uri",
-                  "uri_template",
-                  "regex",
-                  "uuid"
-               ],
-               "type" : "string",
-               "description" : "This is one of a set of built-in formatters"
-            },
-            "enum" : {
-               "is_unique" : true,
-               "type" : "array",
-               "description" : "This is an array of possible acceptable values, it should contain no duplicates",
-               "items" : {
-                  "type" : "string"
-               }
-            },
-            "min_length" : {
-               "type" : "number",
-               "description" : "The minimum length of the string given"
-            },
-            "max_length" : {
-               "type" : "number",
-               "description" : "The maximum length of the string given"
-            }
-         },
-         "id" : "schema/types/string",
-         "title" : "The 'String' type schema",
-         "type" : "schema",
-         "description" : "This is a schema for the 'string' type, which is\nany value that is explcitly cast as a string. This\nmeans that it can be an entirely numeric string,\nas long it is cast as a string based on the details\nof the implementation language. As with 'boolean'\nvalues, any transport format (JSON, XML, etc.) is\nexpected to provide some kind of way to explicitly\ncast a given value as a given type so as to make\nfor better interoperability.\n",
-         "extends" : {
-            "$ref" : "schema/types/any"
-         },
-         "properties" : {
-            "type" : {
-               "enum" : [
-                  "string"
                ],
                "type" : "string"
             }
