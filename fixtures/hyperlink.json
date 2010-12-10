@@ -40,10 +40,7 @@
                 "relation"   : "self",
                 "href"       : ":id",
                 "uri_schema" : {
-                    "type" : "object",
-                    "properties" : {
-                        "id" : { "type" : "integer" }
-                    }
+                    "id" : { "type" : "integer" }
                 }
             }
         ],

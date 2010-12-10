@@ -249,7 +249,8 @@ sub hyperlink {
                 ]
             },
             uri_schema   => {
-                type        => "schema",
+                type        => "object",
+                items       => { type => 'schema' },
                 description => q[
                     This is a schema (or a reference to a schema)
                     of the results of the mapping of the URI-template
