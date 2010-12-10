@@ -11,7 +11,11 @@ BEGIN {
     use_ok('Jackalope');
 }
 
-my $repo = Jackalope->new->resolve( type => 'Jackalope::Schema::Repository' );
+my $repo = Jackalope->new(
+    use_web_spec => 1
+)->resolve(
+    type => 'Jackalope::Schema::Repository'
+);
 isa_ok($repo, 'Jackalope::Schema::Repository');
 
 is(exception{

@@ -16,6 +16,12 @@ extends 'Bread::Board::Container';
 
 has '+name' => ( default => sub { (shift)->meta->name } );
 
+has 'use_web_spec' => (
+    is      => 'ro',
+    isa     => 'Bool',
+    default => 0,
+);
+
 sub BUILD {
     my $self = shift;
     container $self => as {
@@ -36,6 +42,13 @@ sub BUILD {
                 'default_params' => { isa => 'HashRef', optional => 1 }
             }
         );
+
+        if ($self->use_web_spec) {
+            load_class('Jackalope::Schema::Spec::REST');
+            typemap 'Jackalope::Schema::Spec' => infer(
+                class => 'Jackalope::Schema::Spec::REST'
+            );
+        }
 
         # schema repository, this infers
         # all the other stuff as well, like

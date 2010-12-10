@@ -71,7 +71,7 @@ use Plack::App::Path::Router;
     }
 }
 
-my $j = Jackalope->new;
+my $j = Jackalope->new( use_web_spec => 1 );
 my $c = container $j => as {
 
     typemap 'Simple::CRUD::PersonManager' => infer;
