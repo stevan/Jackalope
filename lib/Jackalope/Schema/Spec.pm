@@ -195,13 +195,14 @@ sub hyperlink {
         properties  => {
             relation => {
                 type        => "string",
-                enum        => [ @{ $self->valid_hyperlink_relation } ],
                 description => q[
-                    The relation of the link to the resource described
-                    by the schema. Currently available values are:
-                        self - relating to an instance of the schema
-                        described_by - a link the schema itself
-                        create - a link used to create instances
+                    This string should in some way describe the relation
+                    of the link to the object instance. The validity of
+                    the values is determined by the consumer of the
+                    link data. By convention it should either be one
+                    of well-know link relations, which can be found here
+                    http://www.iana.org/assignments/link-relations/link-relations.xhtml,
+                    or a URI specific to the consumer of this link data.
                 ]
             },
             href => {
@@ -267,21 +268,6 @@ sub hyperlink {
             },
             title        => { type => "string", description => "The human readable title of a given link" },
             description  => { type => "string", description => "A short human readable description of the link" },
-            label => {
-                type        => "string",
-                description => q[
-                    This is a string label meant to uniquely identify
-                    the link within a group of other links. It is
-                    not enforced or required that it be unique, but
-                    is suggested. The string should also be simple
-                    enough to be used in a URL, which means avoiding
-                    certain characters, however this too is not a
-                    requirement (they can always be encoded) but it
-                    will help keep your URLs pretty.
-                    The main intent of this addition is to allow a
-                    simple way for links to link to other links.
-                ]
-            },
             metadata     => {
                 type        => "object",
                 description => q[
