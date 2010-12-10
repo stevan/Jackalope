@@ -20,6 +20,7 @@ has 'formatters' => (
             uri          => 1,
             uri_template => 1,
             regex        => 1,
+            uuid         => 1,
         }
     },
     handles => {
