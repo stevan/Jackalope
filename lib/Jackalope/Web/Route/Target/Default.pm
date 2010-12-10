@@ -28,10 +28,15 @@ sub execute {
         my $mapping = $r->env->{'plack.router.match'}->mapping;
         # since we have the 'uri_schema',
         # we can check the mappings against it
-        my $result = $repo->validate( $link->{uri_schema}, $mapping );
-        if ($result->{error}) {
-            #warn dump $result;
-            return [ 500, [], [ "URI Params failed to validate"] ];
+        foreach my $key ( keys %{ $link->{uri_schema} } ) {
+            unless (exists $mapping->{ $key }) {
+                return [ 500, [], [ "Required URI Param $key did not exist"] ];
+            }
+            my $result = $repo->validate( $link->{uri_schema}->{ $key }, $mapping->{ $key } );
+            if ($result->{error}) {
+                #warn dump $result;
+                return [ 500, [], [ "URI Params failed to validate"] ];
+            }
         }
     }
 
