@@ -37,10 +37,10 @@ is(exception{
                     "target_schema" => { '$ref' => "#" }
                 },
                 {
-                    "relation" => "edit",
-                    "href"     => "product/{id}/update",
-                    "method"   => "POST",
-                    "schema"   => { '$ref' => "#" }
+                    "relation"    => "edit",
+                    "href"        => "product/{id}/update",
+                    "method"      => "POST",
+                    "data_schema" => { '$ref' => "#" }
                 },
             ]
         }
@@ -63,10 +63,10 @@ is(exception{
                     "target_schema" => { '$ref' => "#" }
                 },
                 {
-                    "relation" => "create",
-                    "href"     => "product/create",
-                    "method"   => "POST",
-                    "schema"   => { '$ref' => "/my_schemas/product" }
+                    "relation"    => "create",
+                    "href"        => "product/create",
+                    "method"      => "POST",
+                    "data_schema" => { '$ref' => "/my_schemas/product" }
                 }
             ]
         }

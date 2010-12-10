@@ -29,17 +29,17 @@ is(exception{
             },
             links => [
                 {
-                    relation => 'create',
-                    href     => '/create',
-                    method   => 'PUT',
-                    schema   => {
+                    relation    => 'create',
+                    href        => '/create',
+                    method      => 'PUT',
+                    data_schema => {
                         extends    => { '$ref' => '#' },
                         properties => {
                             id => { type => 'null' }
                         },
                         links => []
                     },
-                    metadata => {
+                    metadata    => {
                         controller => 'person_manager',
                         action     => 'create'
                     }
@@ -52,7 +52,7 @@ is(exception{
 my $person = $repo->get_compiled_schema_by_uri('simple/person');
 
 is_deeply(
-    $person->{'links'}->[0]->{'schema'}->{'properties'},
+    $person->{'links'}->[0]->{'data_schema'}->{'properties'},
     {
         'age' => {
                    'greater_than' => 0,

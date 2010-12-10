@@ -189,7 +189,8 @@
                "enum" : [
                   "uri",
                   "uri_template",
-                  "regex"
+                  "regex",
+                  "uuid"
                ],
                "type" : "string",
                "description" : "This is one of a set of built-in formatters"
@@ -309,6 +310,10 @@
                "type" : "schema",
                "description" : "This is a schema (or a reference to a schema),\nof the resource being linked to. Typically this\nwill be just { '$ref' => '#' } to indicate that\nit refers to the schema it is contained within.\n"
             },
+            "data_schema" : {
+               "type" : "schema",
+               "description" : "This is a schema (or a reference to a schema)\nof the submission data that will be accepted\nby this link. In the case of a POST or PUT\nmethod, the data is expected in the given\ntransport format. In the case of GET, this\nshould be an 'object' type schema and the\nquery string parameters should be checked\nagainst it.\n"
+            },
             "uri_schema" : {
                "type" : "object",
                "description" : "This is a schema (or a reference to a schema)\nof the results of the mapping of the URI-template\nin the 'href' property. On the server side it\ncan be used to validate the value that we get,\nand on the client side it can be used to check\nto assure the URL being called is valid.\n",
@@ -333,10 +338,6 @@
             "metadata" : {
                "type" : "object",
                "description" : "This is just a place for random additional metadata\nthat might be useful for your given implementation.\nThis is totally free form and can be anything you want.\n"
-            },
-            "schema" : {
-               "type" : "schema",
-               "description" : "This is a schema (or a reference to a schema)\nof the submission data that will be accepted\nby this link. In the case of a POST or PUT\nmethod, the data is expected in the given\ntransport format. In the case of GET, this\nshould be an 'object' type schema and the\nquery string parameters should be checked\nagainst it.\n"
             },
             "description" : {
                "type" : "string",
@@ -419,12 +420,8 @@
       "valid_formatters" : [
          "uri",
          "uri_template",
-         "regex"
-      ],
-      "valid_hyperlink_relation" : [
-         "self",
-         "described_by",
-         "create"
+         "regex",
+         "uuid"
       ]
    },
    "authority" : "cpan:STEVAN"

@@ -132,6 +132,7 @@ sub spec {
 ## re-usability of schemas, so therefore is added as a
 ## core element of the spec.
 ## ------------------------------------------------------------------
+
 sub ref {
     return +{
         id          => "schema/core/ref",
@@ -164,6 +165,7 @@ sub ref {
 ## The Hyperlink schema is an additional schema which provides a way
 ## to talk about and describe links for resources.
 ## ------------------------------------------------------------------
+
 sub hyperlink {
     my $self = shift;
     return +{
@@ -218,7 +220,7 @@ sub hyperlink {
                     it refers to the schema it is contained within.
                 ]
             },
-            schema       => {
+            data_schema  => {
                 type        => "schema",
                 description => q[
                     This is a schema (or a reference to a schema)
