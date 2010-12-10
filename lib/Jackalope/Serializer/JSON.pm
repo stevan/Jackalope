@@ -5,6 +5,7 @@ our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use Try::Tiny;
+use Devel::PartialDump 'dump';
 use Jackalope::Util;
 
 with 'Jackalope::Serializer';
@@ -21,7 +22,7 @@ sub serialize {
     catch {
         confess "Failed to serialize\n"
               . "... JSON::XS said : $_"
-              . "... for data : $data";
+              . "... for data : " . (dump $data);
     }
 }
 
