@@ -2,6 +2,11 @@
 test(
     "Web test",
     function() {
+        // XXX - this is broken, but it was throwing
+        // an expcetion so everything seemed okay
+        // so we add this here to help.
+        // - SL
+        expect(24);
 
         var tester   = new Test.Jackalope ();
         var fixtures = new Test.Jackalope.Fixtures ({

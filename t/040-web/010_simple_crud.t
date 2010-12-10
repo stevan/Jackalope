@@ -83,7 +83,7 @@ my $c = container $j => as {
                 service => $s,
                 schemas  => [
                     {
-                        id         => 'simple/crud/person',
+                        id         => 'simple/person',
                         title      => 'This is a simple person schema',
                         extends    => { '$ref' => 'schema/web/service' },
                         properties => {

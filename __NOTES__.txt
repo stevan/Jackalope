@@ -79,11 +79,6 @@
     - these should be able to rely on some simple conventions
       in the links for the various CRUD actions and be able to
       ask the router for the URIs
-        - create = POST
-          read   = GET
-          update = PUT
-            (upsert = PUT)
-          delete = DELETE
     - we need to write defaults into the route so that they
       can be idenfified from the outside and URIs can be created
         - the method and relation should do enough
@@ -107,6 +102,7 @@
 - Jackalope.Schema.Repository
     - refactor the compilation process
       to match the Perl version
+        - the 003-web.t.js tests are broken because of this
 
 == LOW PRIORITY ==
 
