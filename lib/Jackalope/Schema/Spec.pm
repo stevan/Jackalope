@@ -6,7 +6,6 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 use Jackalope::Util;
 
-## formatters needed for bootstrap
 has 'valid_formatters' => (
     is      => 'ro',
     isa     => 'ArrayRef',
@@ -15,19 +14,7 @@ has 'valid_formatters' => (
             uri
             uri_template
             regex
-        ]]
-    },
-);
-
-## basic set of hyperlink relations
-has 'valid_hyperlink_relation' => (
-    is      => 'ro',
-    isa     => 'ArrayRef',
-    default => sub {
-        [qw[
-            self
-            described_by
-            create
+            uuid
         ]]
     },
 );
@@ -81,12 +68,8 @@ sub _build_spec {
     my $typemap    = $self->typemap;
     my $schema_map = {};
 
-    foreach my $type ( keys %{ $self->typemap } ) {
+    foreach my $type ( keys %{ $self->typemap }, qw[ ref hyperlink spec ] ) {
         my $schema = $self->$type();
-        $schema_map->{ $schema->{'id'} } = $schema;
-    }
-
-    foreach my $schema ( $self->ref, $self->hyperlink, $self->spec ) {
         $schema_map->{ $schema->{'id'} } = $schema;
     }
 
@@ -96,8 +79,7 @@ sub _build_spec {
         typemap    => $typemap,
         schema_map => $schema_map,
         metadata   => {
-            valid_formatters         => $self->valid_formatters,
-            valid_hyperlink_relation => $self->valid_hyperlink_relation
+            valid_formatters => $self->valid_formatters,
         }
     };
 }
