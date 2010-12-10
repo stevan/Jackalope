@@ -1,14 +1,71 @@
 
 = TODOS =
 
-- schema/core/hyperlink
-    - add a label field which
-      can be used to link to
-      other elements
-    - http://www.w3.org/TR/xlink/
+- spec for REST API
+    - NOTE: This is heavily inspired by the ATOM publishing protocol
+    - CRUD actions
+        - listing
+            - listing is done by GETing to the URI of a collection
+            - the result is basically a list of resources, nothing more
+        - creation
+            - creation is done by POSTing to the URI of a collection
+            - returns a 201 status
+            - the response Location header should provide the link to read the resource
+            - the newly created resource should be in the body of the response
+                - the resource should include links that
+                  provide hrefs for the various other actions
+        - read
+            - reading is done by GETing the specified reading URI
+                - the resource id should be embedded in the URI
+        - update
+            - updating is done by PUTing to the specified update URI
+                - the resource id should be embedded in the URI
+                - this URI may or may not be the same as the read URI (API designers choice)
+                - you need only PUT the resource body data, which is not required to have an id
+                  the associated metadata (links, etc) are considered read-only and the
+                  responsibility of the server so there is no need for it to be returned
+            - the updated resource is sent back in the body of the request
+        - delete
+            - deletion is done by sending DELETE to the specified deletion URI
+                - the id should be embedded in the URI
+                - this URI may or may not be the same as the read URI (API designers choice)
+    - Caching options
+        - we should support eTags and conditional GETS, but this is more for the client end
+            - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#edit-no-lost-update
+            - this will allow us to do two things
+                1) cache more effectively
+                2) detect conflicts
+            - this should gel with the 'version' field in the resource spec
+    - Media (binary data)
+        - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#media-link-entries
 
-- HTTP status codes
-    - https://demo.staging.fellowshiponeapi.com/v1/Util/HttpStatusCodes.help
+- Jackalope::ResourceRepository
+    - ponder some kind of Resource wrapper that
+      could be a default, but optional, something like
+        - {
+              id       : 53237372,
+              resource : { ... the data goes here ... },
+              version  : <uuid>,
+              links    : {
+                  { relation : "self", href : "/53237372/update", method : "POST" },
+                  ... more links ...
+              }
+          }
+        - keeping the ID on the outside will help keep
+          the data inside the resource pure since the ID
+          is really arbitrary as far as the data is concerned
+        - the elements of the link are also the elements
+          that the Router would use to construct the URLs
+          so that fits together nicely
+            - read up on http://www.w3.org/TR/xlink/
+        - ponder adding a version string, so that we can
+          take advantage of ETags
+            - read up on http://en.wikipedia.org/wiki/HTTP_ETag
+        - this is also a generic structure that the
+          ResourceRepository can know how to deal with
+          and leave the processing of the internal resource
+          to consumers of the REsourceRepository role
+
 
 - Jackalope::Web::Service
     - we should pass in a Factory to the Web::Service and the factory
@@ -22,23 +79,24 @@
     - these should be able to rely on some simple conventions
       in the links for the various CRUD actions and be able to
       ask the router for the URIs
+        - create = POST
+          read   = GET
+          update = PUT
+            (upsert = PUT)
+          delete = DELETE
     - we need to write defaults into the route so that they
       can be idenfified from the outside and URIs can be created
-        - at a min. we should have the label, but the combo
-          of the label, method and relation should do enough
+        - the method and relation should do enough
     - it can make some assumptions about the repository
       knowing that it is going to use the Jackalope::ResourceRepository
       role, this should simplify the metadata even more
-
-- Jackalope::ResourceRepository
-    - a role whose interface we can depend on
-      to do CRUD operations and such
+    - Remember, PUT actions are Idempotent, you should always return
+      the same resource if it hasn't been changed
+    - read about 201 Created in http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
 - Jackalope::Web::Error::
     - a set of Throwable exceptions for the various
       HTTP status codes
-        - 204 No Content (??)
-        - 304 Not Modified
         - 400 Bad Request
         - 404 Not Found
         - 409 Conflict
@@ -49,9 +107,6 @@
 - Jackalope.Schema.Repository
     - refactor the compilation process
       to match the Perl version
-
-- read up on ETags
-    - http://en.wikipedia.org/wiki/HTTP_ETag
 
 == LOW PRIORITY ==
 
@@ -88,6 +143,7 @@
 
 == LINKS ==
 
+
 http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 http://en.wikipedia.org/wiki/Representational_State_Transfer
 http://martinfowler.com/articles/richardsonMaturityModel.html
@@ -97,5 +153,16 @@ http://thisweekinrest.wordpress.com/
 http://tools.ietf.org/html/rfc5988
 http://alexscordellis.blogspot.com/2010/11/restful-architecture-what-should-we-put.html
 http://restinpractice.com/default.aspx
+
+- ATOM
+    - http://www.atomenabled.org/
+
+- LINK relations
+    - http://www.iana.org/assignments/link-relations/link-relations.xhtml
+
+- HTTP status codes
+    - https://demo.staging.fellowshiponeapi.com/v1/Util/HttpStatusCodes.help
+
+
 
 
