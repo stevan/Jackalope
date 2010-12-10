@@ -91,6 +91,8 @@ sub _build_spec {
     }
 
     return +{
+        version    => ${ $self->meta->get_package_symbol('$VERSION') },
+        authority  => ${ $self->meta->get_package_symbol('$AUTHORITY') },
         typemap    => $typemap,
         schema_map => $schema_map,
         metadata   => {
@@ -113,7 +115,9 @@ sub spec {
         description => "This is a schema to describe the full spec",
         type        => "object",
         properties  => {
-            typemap => {
+            version   => { type => 'number' },
+            authority => { type => 'string' },
+            typemap   => {
                 type        => "object",
                 items       => { type => "string", 'format' => "uri" },
                 description => "This is a mapping of the core type names to thier schema IDs."

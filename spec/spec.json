@@ -294,6 +294,12 @@
                   "format" : "uri",
                   "type" : "string"
                }
+            },
+            "version" : {
+               "type" : "number"
+            },
+            "authority" : {
+               "type" : "string"
             }
          }
       },
@@ -414,6 +420,7 @@
       "schema" : "schema/types/schema",
       "null" : "schema/types/null"
    },
+   "version" : "0.01",
    "metadata" : {
       "valid_formatters" : [
          "uri",
@@ -425,5 +432,6 @@
          "described_by",
          "create"
       ]
-   }
+   },
+   "authority" : "cpan:STEVAN"
 }
