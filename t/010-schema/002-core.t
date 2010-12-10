@@ -21,7 +21,7 @@ my $fixtures = Test::Jackalope::Fixtures->new(
     repo        => $repo
 );
 
-foreach my $type ( qw[ ref hyperlink ] ) {
+foreach my $type ( qw[ ref hyperlink xlink ] ) {
     my $schema = $repo->get_compiled_schema_by_uri('schema/core/' . $type);
     validation_pass(
         $repo->validate(
@@ -33,7 +33,13 @@ foreach my $type ( qw[ ref hyperlink ] ) {
     $fixtures->run_fixtures_for_type( $type );
 }
 
-
+validation_pass(
+    $repo->validate(
+        { '$ref' => 'schema/core/spec' },
+        $repo->spec->get_spec,
+    ),
+    '... validate the spec with the spec schema'
+);
 
 
 done_testing;

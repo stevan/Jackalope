@@ -329,7 +329,7 @@
                   "DELETE"
                ],
                "type" : "string",
-               "description" : "The HTTP method expected by this link"
+               "description" : "The HTTP method expected by this link, if\nthis isn't included then GET is assumed.\n"
             },
             "title" : {
                "type" : "string",
@@ -345,7 +345,7 @@
             }
          },
          "id" : "schema/core/hyperlink",
-         "title" : "The 'Link' schema",
+         "title" : "The 'HyperLink' schema",
          "type" : "object",
          "description" : "This is the 'link' type for the hyper schema\nwhich represents links for resources.\n",
          "properties" : {
@@ -357,6 +357,35 @@
             "relation" : {
                "type" : "string",
                "description" : "This string should in some way describe the relation\nof the link to the object instance. The validity of\nthe values is determined by the consumer of the\nlink data. By convention it should either be one\nof well-know link relations, which can be found here\nhttp://www.iana.org/assignments/link-relations/link-relations.xhtml,\nor a URI specific to the consumer of this link data.\n"
+            }
+         }
+      },
+      "schema/core/xlink" : {
+         "additional_properties" : {
+            "method" : {
+               "enum" : [
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "DELETE"
+               ],
+               "type" : "string",
+               "description" : "The HTTP method expected by this link, if\nthis isn't included then GET is assumed.\n"
+            }
+         },
+         "id" : "schema/core/xlink",
+         "title" : "The 'XLink' schema",
+         "type" : "object",
+         "description" : "This is the 'link' type for the hyper schema\nwhich represents the concrete links that are\ndescribed with the hyperlink schema.\n",
+         "properties" : {
+            "href" : {
+               "format" : "uri",
+               "type" : "string",
+               "description" : "This is a URI of the resource the link is pointing to.\n"
+            },
+            "relation" : {
+               "type" : "string",
+               "description" : "This string describes the relation of the link\nto the actual resource it points to. For more\ndetails see the docs for the 'relation' element\nin the schema/core/hyperlink schema.\n"
             }
          }
       },
@@ -415,7 +444,7 @@
       "schema" : "schema/types/schema",
       "null" : "schema/types/null"
    },
-   "version" : "0.01",
+   "version" : 0.01,
    "metadata" : {
       "valid_formatters" : [
          "uri",

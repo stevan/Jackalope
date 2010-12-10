@@ -68,13 +68,13 @@ sub _build_spec {
     my $typemap    = $self->typemap;
     my $schema_map = {};
 
-    foreach my $type ( keys %{ $self->typemap }, qw[ ref hyperlink spec ] ) {
+    foreach my $type ( keys %{ $self->typemap }, qw[ ref spec hyperlink xlink ] ) {
         my $schema = $self->$type();
         $schema_map->{ $schema->{'id'} } = $schema;
     }
 
     return +{
-        version    => ${ $self->meta->get_package_symbol('$VERSION') },
+        version    => ${ $self->meta->get_package_symbol('$VERSION') } + 0,
         authority  => ${ $self->meta->get_package_symbol('$AUTHORITY') },
         typemap    => $typemap,
         schema_map => $schema_map,
@@ -170,7 +170,7 @@ sub hyperlink {
     my $self = shift;
     return +{
         id          => "schema/core/hyperlink",
-        title       => "The 'Link' schema",
+        title       => "The 'HyperLink' schema",
         description => q[
             This is the 'link' type for the hyper schema
             which represents links for resources.
@@ -248,7 +248,10 @@ sub hyperlink {
             method       => {
                 type        => "string",
                 enum        => [ "GET", "POST", "PUT", "DELETE" ],
-                description => "The HTTP method expected by this link"
+                description => q[
+                    The HTTP method expected by this link, if
+                    this isn't included then GET is assumed.
+                ],
             },
             title        => { type => "string", description => "The human readable title of a given link" },
             description  => { type => "string", description => "A short human readable description of the link" },
@@ -259,6 +262,56 @@ sub hyperlink {
                     that might be useful for your given implementation.
                     This is totally free form and can be anything you want.
                 ]
+            }
+        }
+    };
+}
+
+## ------------------------------------------------------------------
+## Xlink Schema
+## ------------------------------------------------------------------
+## The Xlink schema is an additional schema which provides a way
+## to represent concrete links that are described with the hyperlink
+## schema above.
+## ------------------------------------------------------------------
+
+sub xlink {
+    my $self = shift;
+    return +{
+        id          => "schema/core/xlink",
+        title       => "The 'XLink' schema",
+        description => q[
+            This is the 'link' type for the hyper schema
+            which represents the concrete links that are
+            described with the hyperlink schema.
+        ],
+        type        => "object",
+        properties  => {
+            relation => {
+                type        => "string",
+                description => q[
+                    This string describes the relation of the link
+                    to the actual resource it points to. For more
+                    details see the docs for the 'relation' element
+                    in the schema/core/hyperlink schema.
+                ]
+            },
+            href => {
+                type        => "string",
+                'format'    => "uri",
+                description => q[
+                    This is a URI of the resource the link is pointing to.
+                ]
+            },
+        },
+        additional_properties => {
+            method       => {
+                type        => "string",
+                enum        => [ "GET", "POST", "PUT", "DELETE" ],
+                description => q[
+                    The HTTP method expected by this link, if
+                    this isn't included then GET is assumed.
+                ],
             }
         }
     };

@@ -1,0 +1,17 @@
+[
+    {
+        "schema" : { "$ref" : "schema/core/xlink" },
+        "pass" : [
+            { "method" : "GET", "relation" : "list", "href" : "/" },
+            { "method" : "POST", "relation" : "create", "href" : "/" },
+            { "method" : "PUT", "relation" : "edit", "href" : "/10" },
+            { "method" : "DELETE", "relation" : "list", "href" : "/10" },
+            { "relation" : "list", "href" : "/" }
+        ],
+        "fail" : [
+            { "method" : "HEAD", "relation" : "list", "href" : "/" },
+            { "href" : "/" },
+            { "relation" : "edit" }
+        ]
+    }
+]

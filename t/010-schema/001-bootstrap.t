@@ -35,12 +35,4 @@ validation_pass(
     '... validate the compiled schema type with the schema type (bootstrappin)'
 );
 
-validation_pass(
-    $repo->validate(
-        { '$ref' => 'schema/core/spec' },
-        $repo->spec->get_spec,
-    ),
-    '... validate the spec with the spec schema'
-);
-
 done_testing;
