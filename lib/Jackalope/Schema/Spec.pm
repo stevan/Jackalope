@@ -68,7 +68,7 @@ sub _build_spec {
     my $typemap    = $self->typemap;
     my $schema_map = {};
 
-    foreach my $type ( keys %{ $self->typemap }, qw[ ref spec hyperlink xlink resource ] ) {
+    foreach my $type ( keys %{ $self->typemap }, qw[ ref spec hyperlink xlink resource service ] ) {
         my $schema = $self->$type();
         $schema_map->{ $schema->{'id'} } = $schema;
     }
@@ -380,6 +380,92 @@ sub resource {
             }
         }
     }
+}
+
+## ------------------------------------------------------------------
+## Service Schema
+## ------------------------------------------------------------------
+## The Service schema is a simple template for REST based web
+## service that follows a convention for the standard operations
+## that would be performed on a REST resource collection.
+## ------------------------------------------------------------------
+
+sub service {
+    my $self = shift;
+    return +{
+        id    => 'schema/web/service',
+        title => 'This is a simple REST enabled schema',
+        type  => 'object',
+        links => [
+            {
+                relation      => 'list',
+                href          => '/',
+                method        => 'GET',
+                target_schema => {
+                    type  => "array",
+                    items => {
+                        type       => 'object',
+                        extends    => { '$ref' => 'schema/web/resource' },
+                        properties => {
+                            body => { '$ref' => '#' },
+                        }
+                    }
+                },
+            },
+            {
+                relation      => 'create',
+                href          => '/',
+                method        => 'POST',
+                data_schema   => { '$ref' => '#' },
+                target_schema => {
+                    type       => 'object',
+                    extends    => { '$ref' => 'schema/web/resource' },
+                    properties => {
+                        body => { '$ref' => '#' },
+                    }
+                },
+            },
+            {
+                relation      => 'read',
+                href          => '/:id',
+                method        => 'GET',
+                target_schema => {
+                    type       => 'object',
+                    extends    => { '$ref' => 'schema/web/resource' },
+                    properties => {
+                        body => { '$ref' => '#' },
+                    }
+                },
+                uri_schema    => {
+                    id => { type => 'string' }
+                }
+            },
+            {
+                relation      => 'edit',
+                href          => '/:id',
+                method        => 'PUT',
+                data_schema   => { '$ref' => '#' },
+                target_schema => {
+                    type       => 'object',
+                    extends    => { '$ref' => 'schema/web/resource' },
+                    properties => {
+                        body => { '$ref' => '#' },
+                    }
+                },
+                uri_schema    => {
+                    id => { type => 'string' }
+                }
+            },
+            {
+                relation      => 'delete',
+                href          => '/:id',
+                method        => 'DELETE',
+                uri_schema    => {
+                    id => { type => 'string' }
+                }
+            }
+        ]
+    };
 }
 
 ## ------------------------------------------------------------------

@@ -1,0 +1,18 @@
+[
+    {
+        "schema" : { "$ref" : "schema/web/service" },
+        "pass" : [
+            { "foo" : "bar" }
+        ],
+        "fail" : [
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            "Hello",
+            [],
+            [ 1, 5, 6 ]
+        ]
+    }
+]
