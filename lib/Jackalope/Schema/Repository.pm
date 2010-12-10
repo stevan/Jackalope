@@ -283,9 +283,15 @@ sub _resolve_refs {
         hash => sub {
             my ($v, $data) = @_;
             if (exists $data->{'$ref'} && $self->_is_ref( $data )) {
-                $_ = $self->_is_self_ref( $data )
-                        ? $schema->{'compiled'}
-                        : $self->_resolve_ref( $data, $schema_map )->{'compiled'}
+                if ($self->_is_self_ref( $data )) {
+                    $_ = $schema->{'compiled'};
+                }
+                else {
+                    my $s = $self->_resolve_ref( $data, $schema_map );
+                    (defined $s)
+                        || confess "Could not find schema for " . $data->{'$ref'};
+                    $_ = $s->{'compiled'};
+                }
             }
         }
     )->visit(
