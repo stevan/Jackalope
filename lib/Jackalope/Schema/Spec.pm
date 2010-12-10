@@ -68,7 +68,7 @@ sub _build_spec {
     my $typemap    = $self->typemap;
     my $schema_map = {};
 
-    foreach my $type ( keys %{ $self->typemap }, qw[ ref spec hyperlink xlink ] ) {
+    foreach my $type ( keys %{ $self->typemap }, qw[ ref spec hyperlink xlink resource ] ) {
         my $schema = $self->$type();
         $schema_map->{ $schema->{'id'} } = $schema;
     }
@@ -315,6 +315,71 @@ sub xlink {
             }
         }
     };
+}
+
+## ------------------------------------------------------------------
+## Resource Schema
+## ------------------------------------------------------------------
+## The Resource schema is a simple wrapper for web based resources
+## it is mostly intended to be used for extension where the body
+## property is overriden with the schema of your choice.
+## ------------------------------------------------------------------
+
+sub resource {
+    my $self = shift;
+    return +{
+        id          => "schema/web/resource",
+        title       => "The 'Resource' schema",
+        description => q[
+            The is a 'wrapper' of sorts for resources
+            as viewed from the concept of the web and
+            REST. It is mostly intended to be extended
+            where the 'body' property is overriden with
+            the schema of our choice.
+        ],
+        type        => "object",
+        properties  => {
+            id      => {
+                type        => "string",
+                description => q[
+                    This is the ID of the given resource, it is
+                    assumed to be some kind of string, which should
+                    still just work fine even for numeric values.
+                    This is expected to be the lookup key for
+                    resources in a resource repository.
+                ]
+            },
+            body    => {
+                type        => "any",
+                description => q[
+                    This is the body of the resource, it is of type
+                    'any' for now, but it as this schema is meant to
+                    be extended and this property overridden, this is
+                    basically whatever you need it to be.
+                ]
+            },
+            version => {
+                type        => "string",
+                'format'    => "uuid",
+                description => q[
+                    This is a UUID string representing the current
+                    version of the resource. When the resource is updated
+                    the version should be compared first, to make sure
+                    that it has not been updated by another.
+                ]
+            },
+            links   => {
+                type        => "array",
+                items       => { '$ref' => "schema/core/xlink" },
+                description => q[
+                    This is a list of links which represent the
+                    capabilities of given resource, the consumer of
+                    the resource can use these links to perform
+                    different actions.
+                ]
+            }
+        }
+    }
 }
 
 ## ------------------------------------------------------------------

@@ -1,0 +1,110 @@
+[
+    {
+        "schema" : { "$ref" : "schema/web/resource" },
+        "pass" : [
+            {
+                "id"      : "id:1010",
+                "body"    : "Data",
+                "version" : "4162F712-1DD2-11B2-B17E-C09EFE1DC403",
+                "links"   : []
+            },
+            {
+                "id"      : "id:something",
+                "body"    : {
+                    "first_name" : "Stevan",
+                    "last_name"  : "Little",
+                    "age"        : 37
+                },
+                "version" : "4162F712-1DD2-11B2-B17E-C09EFE1DC403",
+                "links" : [
+                    { "relation" : "self",   "href" : "/",  "method" : "GET"    },
+                    { "relation" : "create", "href" : "/",  "method" : "POST"   },
+                    { "relation" : "read",   "href" : "/1", "method" : "GET"    },
+                    { "relation" : "update", "href" : "/1", "method" : "PUT"    },
+                    { "relation" : "delete", "href" : "/1", "method" : "DELETE" }
+                ]
+            }
+        ],
+        "fail" : [
+            {
+                "id"      : "id:1010",
+                "body"    : "Data",
+                "version" : "4162F712-1DD2-11B2-B17E-C09EFE1DC403",
+                "links"   : {}
+            },
+            {
+                "id"      : [],
+                "body"    : "Data",
+                "version" : "4162F712-1DD2-11B2-B17E-C09EFE1DC403",
+                "links"   : []
+            },
+            {
+                "body"    : "Data",
+                "version" : "4162F712-1DD2-11B2-B17E-C09EFE1DC403",
+                "links"   : []
+            },
+            {
+                "id"      : "id:1010",
+                "version" : "4162F712-1DD2-11B2-B17E-C09EFE1DC403",
+                "links"   : []
+            },
+            {
+                "id"      : "id:1010",
+                "body"    : "Data",
+                "links"   : []
+            },
+            {
+                "id"      : "id:1010",
+                "body"    : "Data",
+                "version" : "4162F712-1DD2-11B2-B17E-C09EFE1DC403"
+            }
+        ]
+    },
+    {
+        "schema" : {
+            "extends"    : { "$ref" : "schema/web/resource" },
+            "properties" : {
+                "body" : {
+                    "type"       : "object",
+                    "properties" : {
+                        "first_name" : { "type" : "string" },
+                        "last_name"  : { "type" : "string" },
+                        "age"        : { "type" : "integer", "greater_than" : 0 }
+                    }
+                }
+            }
+        },
+        "pass" : [
+            {
+                "id"      : "id:something",
+                "body"    : {
+                    "first_name" : "Stevan",
+                    "last_name"  : "Little",
+                    "age"        : 37
+                },
+                "version" : "4162F712-1DD2-11B2-B17E-C09EFE1DC403",
+                "links" : [
+                    { "relation" : "self",   "href" : "/",  "method" : "GET"    },
+                    { "relation" : "create", "href" : "/",  "method" : "POST"   },
+                    { "relation" : "read",   "href" : "/1", "method" : "GET"    },
+                    { "relation" : "update", "href" : "/1", "method" : "PUT"    },
+                    { "relation" : "delete", "href" : "/1", "method" : "DELETE" }
+                ]
+            }
+        ],
+        "fail" : [
+            {
+                "id"      : "id:1010",
+                "body"    : "Data",
+                "version" : "4162F712-1DD2-11B2-B17E-C09EFE1DC403",
+                "links"   : []
+            },
+            {
+                "id"      : "id:1010",
+                "body"    : { "first_name" : "Stevan", "last_name" : "Little" },
+                "version" : "4162F712-1DD2-11B2-B17E-C09EFE1DC403",
+                "links"   : []
+            }
+        ]
+    }
+]
