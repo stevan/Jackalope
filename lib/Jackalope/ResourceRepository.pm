@@ -4,15 +4,42 @@ use Moose::Role;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+has 'serializer' => (
+    is       => 'ro',
+    isa      => 'Jackalope::Serializer',
+    required => 1,
+);
+
+# external API, for service objects
+# using an instance of the repository
+
+# internal API, for consumers of this role
+
 requires 'list';    # () => Array[ Data ]
 requires 'create';  # (Data) => Id
 requires 'read';    # (Id) => Data
 requires 'update';  # (Id, Data) => Data
 requires 'delete';  # (Id) => ()
 
+sub get_digest {
+    my ($self, $serialized_resource) = @_;
+}
+
+## error handlers
+
 sub resource_not_found {
     my ($self, $message) = @_;
-    die "Resource Not Found : $message"
+    die "404 Resource Not Found : $message"
+}
+
+sub conflict_detected {
+    my ($self, $message) = @_;
+    die "409 Conflict Detected : $message"
+}
+
+sub invalid_request {
+    my ($self, $message) = @_;
+    die "400 Bad Request : $message"
 }
 
 no Moose::Role; 1;
