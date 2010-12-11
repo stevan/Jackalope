@@ -1,47 +1,6 @@
 
 = TODOS =
 
-- ponder separating the web part of the schema, specifically resources and services
-    - how does the js handle it?
-
-- spec for REST API
-    - NOTE: This is heavily inspired by the ATOM publishing protocol
-    - CRUD actions
-        - listing
-            - listing is done by GETing to the URI of a collection
-            - the result is basically a list of resources, nothing more
-        - creation
-            - creation is done by POSTing to the URI of a collection
-            - returns a 201 status
-            - the response Location header should provide the link to read the resource
-            - the newly created resource should be in the body of the response
-                - the resource should include links that
-                  provide hrefs for the various other actions
-        - read
-            - reading is done by GETing the specified reading URI
-                - the resource id should be embedded in the URI
-        - update
-            - updating is done by PUTing to the specified update URI
-                - the resource id should be embedded in the URI
-                - this URI may or may not be the same as the read URI (API designers choice)
-                - you need only PUT the resource body data, which is not required to have an id
-                  the associated metadata (links, etc) are considered read-only and the
-                  responsibility of the server so there is no need for it to be returned
-            - the updated resource is sent back in the body of the request
-        - delete
-            - deletion is done by sending DELETE to the specified deletion URI
-                - the id should be embedded in the URI
-                - this URI may or may not be the same as the read URI (API designers choice)
-    - Caching options
-        - we should support eTags and conditional GETS, but this is more for the client end
-            - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#edit-no-lost-update
-            - this will allow us to do two things
-                1) cache more effectively
-                2) detect conflicts
-            - this should gel with the 'version' field in the resource spec
-    - Media (binary data)
-        - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#media-link-entries
-
 - Jackalope::ResourceRepository
     - this should take in and return serialized data
       and should be responsible for serializing and
@@ -85,6 +44,45 @@
       the version to be sure before we do anything
     - read about 201 Created in http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
+- spec for REST API
+    - NOTE: This is heavily inspired by the ATOM publishing protocol
+    - CRUD actions
+        - listing
+            - listing is done by GETing to the URI of a collection
+            - the result is basically a list of resources, nothing more
+        - creation
+            - creation is done by POSTing to the URI of a collection
+            - returns a 201 status
+            - the response Location header should provide the link to read the resource
+            - the newly created resource should be in the body of the response
+                - the resource should include links that
+                  provide hrefs for the various other actions
+        - read
+            - reading is done by GETing the specified reading URI
+                - the resource id should be embedded in the URI
+        - update
+            - updating is done by PUTing to the specified update URI
+                - the resource id should be embedded in the URI
+                - this URI may or may not be the same as the read URI (API designers choice)
+                - you need only PUT the resource body data, which is not required to have an id
+                  the associated metadata (links, etc) are considered read-only and the
+                  responsibility of the server so there is no need for it to be returned
+            - the updated resource is sent back in the body of the request
+        - delete
+            - deletion is done by sending DELETE to the specified deletion URI
+                - the id should be embedded in the URI
+                - this URI may or may not be the same as the read URI (API designers choice)
+    - Caching options
+        - we should support eTags and conditional GETS, but this is more for the client end
+            - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#edit-no-lost-update
+            - this will allow us to do two things
+                1) cache more effectively
+                2) detect conflicts
+            - this should gel with the 'version' field in the resource spec
+    - Media (binary data)
+        - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#media-link-entries
+
+
 - Jackalope::Web::Error::
     - a set of Throwable exceptions for the various
       HTTP status codes
@@ -99,6 +97,7 @@
     - refactor the compilation process
       to match the Perl version
         - the 003-web.t.js tests are broken because of this
+    - ponder separating the web part of the schema afects the JS
 
 == LOW PRIORITY ==
 

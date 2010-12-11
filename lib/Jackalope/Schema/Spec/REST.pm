@@ -61,7 +61,9 @@ sub resource {
                     the version should be compared first, to make sure
                     that it has not been updated by another.
                 ]
-            },
+            }
+        },
+        additional_properties => {
             links   => {
                 type        => "array",
                 items       => { '$ref' => "schema/core/xlink" },

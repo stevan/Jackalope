@@ -9,6 +9,11 @@
                 "links"   : []
             },
             {
+                "id"      : "id:1010",
+                "body"    : "Data",
+                "version" : "4162F712-1DD2-11B2-B17E-C09EFE1DC403"
+            },
+            {
                 "id"      : "id:something",
                 "body"    : {
                     "first_name" : "Stevan",
@@ -52,11 +57,6 @@
                 "id"      : "id:1010",
                 "body"    : "Data",
                 "links"   : []
-            },
-            {
-                "id"      : "id:1010",
-                "body"    : "Data",
-                "version" : "4162F712-1DD2-11B2-B17E-C09EFE1DC403"
             }
         ]
     },
