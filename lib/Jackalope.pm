@@ -16,11 +16,7 @@ extends 'Bread::Board::Container';
 
 has '+name' => ( default => sub { (shift)->meta->name } );
 
-has 'use_web_spec' => (
-    is      => 'ro',
-    isa     => 'Bool',
-    default => 0,
-);
+has 'schema_spec_class' => ( is => 'ro', isa => 'Str' );
 
 sub BUILD {
     my $self = shift;
@@ -43,11 +39,9 @@ sub BUILD {
             }
         );
 
-        if ($self->use_web_spec) {
-            load_class('Jackalope::Schema::Spec::REST');
-            typemap 'Jackalope::Schema::Spec' => infer(
-                class => 'Jackalope::Schema::Spec::REST'
-            );
+        if (my $spec_class = $self->schema_spec_class) {
+            load_class( $spec_class );
+            typemap 'Jackalope::Schema::Spec' => infer( class => $spec_class );
         }
 
         # schema repository, this infers

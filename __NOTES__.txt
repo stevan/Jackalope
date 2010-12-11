@@ -1,6 +1,11 @@
 
 = TODOS =
 
+- ponder separating the web part of the schema, specifically resources and services
+    - this would allow for clients to only load a certain amount
+    - this would allow for us to get more verbose about the web stuff
+    - this would also be a test for Spec subclassing
+
 - spec for REST API
     - NOTE: This is heavily inspired by the ATOM publishing protocol
     - CRUD actions
@@ -40,6 +45,8 @@
         - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#media-link-entries
 
 - Jackalope::ResourceRepository
+    - figure out how much we need to preserve of the
+      resource wrapper
     - ponder some kind of Resource wrapper that
       could be a default, but optional, something like
         - {

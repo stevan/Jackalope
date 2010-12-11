@@ -14,7 +14,7 @@ BEGIN {
 }
 
 my $repo = Jackalope->new(
-    use_web_spec => 1
+    schema_spec_class => 'Jackalope::Schema::Spec::REST'
 )->resolve(
     type => 'Jackalope::Schema::Repository'
 );
