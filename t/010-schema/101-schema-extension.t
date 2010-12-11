@@ -29,7 +29,7 @@ is(exception{
             },
             links => [
                 {
-                    relation      => 'self',
+                    rel      => 'self',
                     href          => '/:id/read',
                     method        => 'GET',
                     target_schema => { '$ref' => '#' }

@@ -3,26 +3,26 @@
         "schema" : { "$ref" : "schema/core/hyperlink" },
         "pass" : [
             {
-                "relation" : "self",
+                "rel" : "self",
                 "href"     : ":id"
             },
             {
-                "relation" : "describedby",
+                "rel" : "describedby",
                 "href"     : "schema/:type"
             },
             {
-                "relation"      : "self",
+                "rel"      : "self",
                 "href"          : "product/:id/view",
                 "target_schema" : { "$ref" : "#" }
             },
             {
-                "relation"    : "edit",
+                "rel"    : "edit",
                 "href"        : "product/:id/update",
                 "method"      : "POST",
                 "data_schema" : { "$ref" : "#" }
             },
             {
-                "relation"    : "create",
+                "rel"    : "create",
                 "href"        : "product/create",
                 "method"      : "POST",
                 "data_schema" : { "$ref" : "/my_schemas/product" },
@@ -34,7 +34,7 @@
                 }
             },
             {
-                "relation"   : "self",
+                "rel"   : "self",
                 "href"       : ":id",
                 "uri_schema" : {
                     "id" : { "type" : "integer" }
@@ -44,7 +44,7 @@
         "fail" : [
             { "$ref" : [] },
             { "$ref" : "test", "foo" : "bar" },
-            { "relation" : "self" },
+            { "rel" : "self" },
             { "href" : ":id" }
         ]
     }

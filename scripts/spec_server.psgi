@@ -71,7 +71,7 @@ my $c = container $j => as {
                     extends => { '$ref' => "schema/core/spec" },
                     links   => [
                         {
-                            relation      => "self",
+                            rel      => "self",
                             href          => "/spec",
                             method        => "GET",
                             target_schema => { '$ref' => '#' },
@@ -81,7 +81,7 @@ my $c = container $j => as {
                             }
                         },
                         {
-                            relation      => "self",
+                            rel      => "self",
                             href          => "/typemap",
                             method        => "GET",
                             target_schema => {
@@ -94,7 +94,7 @@ my $c = container $j => as {
                             }
                         },
                         {
-                            relation      => "self",
+                            rel      => "self",
                             href          => "/fetch/schema",
                             method        => 'GET',
                             schema        => {
@@ -110,7 +110,7 @@ my $c = container $j => as {
                             }
                         },
                         {
-                            relation      => "self",
+                            rel      => "self",
                             href          => "/fetch/:type/schema",
                             uri_schema    => {
                                 type       => "object",

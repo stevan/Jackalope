@@ -183,7 +183,7 @@ sub hyperlink {
         ],
         type        => "object",
         properties  => {
-            relation => {
+            rel => {
                 type        => "string",
                 description => q[
                     This string should in some way describe the relation
@@ -293,12 +293,12 @@ sub xlink {
         ],
         type        => "object",
         properties  => {
-            relation => {
+            rel => {
                 type        => "string",
                 description => q[
                     This string describes the relation of the link
                     to the actual resource it points to. For more
-                    details see the docs for the 'relation' element
+                    details see the docs for the 'rel' element
                     in the schema/core/hyperlink schema.
                 ]
             },

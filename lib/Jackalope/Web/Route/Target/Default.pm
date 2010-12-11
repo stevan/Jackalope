@@ -95,7 +95,7 @@ sub execute {
     # creation should not return data
     # but should just return the status
     # of '201 Created'
-    if ( $link->{relation} eq 'create' ) {
+    if ( $link->{rel} eq 'create' ) {
         # 201 Created
         return [ 201, [], [] ];
     }

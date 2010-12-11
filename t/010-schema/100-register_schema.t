@@ -32,12 +32,12 @@ is(exception{
             },
             "links"=> [
                 {
-                    "relation"      => "self",
+                    "rel"      => "self",
                     "href"          => "product/{id}/view",
                     "target_schema" => { '$ref' => "#" }
                 },
                 {
-                    "relation"    => "edit",
+                    "rel"    => "edit",
                     "href"        => "product/{id}/update",
                     "method"      => "POST",
                     "data_schema" => { '$ref' => "#" }
@@ -58,12 +58,12 @@ is(exception{
             },
             "links" => [
                 {
-                    "relation"      => "/my_schemas/links/product_listing",
+                    "rel"      => "/my_schemas/links/product_listing",
                     "href"          => "product/list",
                     "target_schema" => { '$ref' => "#" }
                 },
                 {
-                    "relation"    => "create",
+                    "rel"    => "create",
                     "href"        => "product/create",
                     "method"      => "POST",
                     "data_schema" => { '$ref' => "/my_schemas/product" }

@@ -29,7 +29,7 @@ is(exception{
             },
             links => [
                 {
-                    relation    => 'create',
+                    rel    => 'create',
                     href        => '/create',
                     method      => 'PUT',
                     data_schema => {

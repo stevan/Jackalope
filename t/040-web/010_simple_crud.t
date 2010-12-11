@@ -158,11 +158,11 @@ test_psgi
                         },
                         version => '...',
                         links => [
-                            { relation => "self",   href => "/",  method => "GET"    },
-                            { relation => "create", href => "/",  method => "POST"   },
-                            { relation => "read",   href => "/1", method => "GET"    },
-                            { relation => "update", href => "/1", method => "PUT"    },
-                            { relation => "delete", href => "/1", method => "DELETE" },
+                            { rel => "self",   href => "/",  method => "GET"    },
+                            { rel => "create", href => "/",  method => "POST"   },
+                            { rel => "read",   href => "/1", method => "GET"    },
+                            { rel => "update", href => "/1", method => "PUT"    },
+                            { rel => "delete", href => "/1", method => "DELETE" },
                         ]
                     }
                  ],
