@@ -21,7 +21,7 @@ has 'formatters' => (
             uri_template => 1,
             regex        => 1,
             uuid         => 1,
-            hash         => 1,
+            digest       => 1,
         }
     },
     handles => {

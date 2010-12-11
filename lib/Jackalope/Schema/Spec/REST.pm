@@ -54,9 +54,9 @@ sub resource {
             },
             version => {
                 type        => "string",
-                'format'    => "hash",
+                'format'    => "digest",
                 description => q[
-                    This is a hash string (SHA1?) representing the current
+                    This is a digest string (SHA1?) representing the current
                     version of the resource. When the resource is updated
                     the version should be compared first, to make sure
                     that it has not been updated by another.

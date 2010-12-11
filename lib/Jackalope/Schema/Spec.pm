@@ -15,7 +15,7 @@ has 'valid_formatters' => (
             uri_template
             regex
             uuid
-            hash
+            digest
         ]]
     },
 );
