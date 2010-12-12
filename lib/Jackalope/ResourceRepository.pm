@@ -4,25 +4,68 @@ use Moose::Role;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use Digest;
+
 has 'serializer' => (
     is       => 'ro',
     isa      => 'Jackalope::Serializer',
     required => 1,
+    handles  => [qw[ serialize deserialize ]]
 );
-
-# external API, for service objects
-# using an instance of the repository
 
 # internal API, for consumers of this role
 
 requires 'list';    # () => Array[ Data ]
 requires 'create';  # (Data) => Id
-requires 'read';    # (Id) => Data
+requires 'get';     # (Id) => Data
 requires 'update';  # (Id, Data) => Data
 requires 'delete';  # (Id) => ()
 
-sub get_digest {
-    my ($self, $serialized_resource) = @_;
+sub calculate_data_digest {
+    my ($self, $data) = @_;
+    Digest->new("SHA-256")
+          ->add( $self->serialize( $data, { canonical => 1 } ) )
+          ->hexdigest
+}
+
+sub wrap_data {
+    my ($self, $id, $data) = @_;
+    return +{
+        id      => $id,
+        version => $self->calculate_data_digest( $data ),
+        body    => $data,
+        links   => []
+    };
+}
+
+# external API, for service objects
+# using an instance of the repository
+
+sub list_resources {
+    my ($self) = @_;
+    return [  map { $self->wrap_data( @$_ ) } @{ $self->list } ];
+}
+
+sub create_resource {
+    my ($self, $raw_data) = @_;
+    my ($id, $data) = $self->create( $raw_data );
+    return $self->wrap_data( $id, $data );
+}
+
+sub get_resource {
+    my ($self, $id) = @_;
+    return $self->wrap_data( $id, $self->get( $id ) );
+}
+
+sub update_resource {
+    my ($self, $id, $new_data) = @_;
+    return $self->wrap_data( $id, $self->update( $id, $new_data ) );
+}
+
+sub delete_resource {
+    my ($self, $id) = @_;
+    $self->delete( $id );
+    return;
 }
 
 ## error handlers

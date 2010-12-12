@@ -2,26 +2,42 @@
 = TODOS =
 
 - Jackalope::ResourceRepository
-    - this should take in and return serialized data
-      and should be responsible for serializing and
-      deserializing things. This will make it easier
-      for us to handle the content hashes too.
-        - this means the serialization needs to
-          use the canonical flag
-            - it actually doesn't slow stuff down too much, here
-              is the benchmark for encoding the entire spec
-              (585 lines of JSON) in both the canonical and
-              non-canonical, and it isnt that bad
-                              Rate     canonical non-canonical
-              canonical     6270/s            --           -8%
-              non-canonical 6817/s            9%            --
+    - should this be renamed Jackalope::Web::ResourceRepository??
+    - this should return perl data structures to the web-service
+      which should be the resource wrapper, minus the links, which
+      are to be filled in by the web-service
+    - &list should optionally take some parameters
+        - search term(s)
+        - start/end for paging of results
+        - add this to the corresponding schema/web/service as well
     - Resource wrapper notes
+        - how smart should I make the resource??
+            - should it be a class?
+            - should it know how to compare itself?
         - the elements of the link are also the elements
           that the Router would use to construct the URLs
           so that fits together nicely
         - the version string is a SHA1 of the content, so that we can
           take advantage of ETags
             - read up on http://en.wikipedia.org/wiki/HTTP_ETag
+            - this means the serialization needs to
+              use the canonical flag
+                - using canonical JSON also means that it will be
+                  easy to add digital sigs if we want too.
+                - it actually doesn't slow stuff down too much, here
+                  is the benchmark for encoding the entire spec
+                  (585 lines of JSON) in both the canonical and
+                  non-canonical, and it isnt that bad
+                    |                 Rate     canonical non-canonical
+                    | canonical     6270/s            --           -8%
+                    | non-canonical 6817/s            9%            --
+
+- Jackalope::Web::Error::
+    - a set of Throwable exceptions for the various HTTP status codes
+        - 400 Bad Request
+        - 404 Not Found
+        - 409 Conflict
+        - 500 server error
 
 - Jackalope::Web::Service
     - we should pass in a Factory to the Web::Service and the factory
@@ -50,6 +66,7 @@
         - listing
             - listing is done by GETing to the URI of a collection
             - the result is basically a list of resources, nothing more
+            - this should take search params and paging params as well
         - creation
             - creation is done by POSTing to the URI of a collection
             - returns a 201 status
@@ -82,22 +99,29 @@
     - Media (binary data)
         - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#media-link-entries
 
-
-- Jackalope::Web::Error::
-    - a set of Throwable exceptions for the various
-      HTTP status codes
-        - 400 Bad Request
-        - 404 Not Found
-        - 409 Conflict
-        - 500 server error
-    - these can be thrown by the Model classes to
-      communicate with the Route::Target classes
-
 - Jackalope.Schema.Repository
     - refactor the compilation process
       to match the Perl version
         - the 003-web.t.js tests are broken because of this
     - ponder separating the web part of the schema afects the JS
+
+- ponder spliting things up
+    - Jackalope
+    - Jackalope::Web::REST
+    - Jackalope::JS
+    - the reasoning being that some parts are
+      more opinionated then others and it would
+      be nice to give people flexibility
+
+- think about renaming the schema URIs
+  to something more sensible, like ...
+    - jackalope/core/ref
+    - jackalope/core/type/any, etc...
+    - jackalope/core/hypermedia/hyperlink
+    - jackalope/core/hypermedia/xlink
+    - jackalope/web/rest/resource
+    - jackalope/web/rest/service
+
 
 == LOW PRIORITY ==
 
