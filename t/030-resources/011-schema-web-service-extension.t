@@ -12,7 +12,7 @@ BEGIN {
 }
 
 my $repo = Jackalope->new(
-    schema_spec_class => 'Jackalope::Schema::Spec::REST'
+    schema_spec_class => 'Jackalope::REST::Schema::Spec'
 )->resolve(
     type => 'Jackalope::Schema::Repository'
 );

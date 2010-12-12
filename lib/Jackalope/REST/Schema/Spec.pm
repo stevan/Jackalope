@@ -1,4 +1,4 @@
-package Jackalope::Schema::Spec::REST;
+package Jackalope::REST::Schema::Spec;
 use Moose;
 
 our $VERSION   = '0.01';
@@ -174,11 +174,11 @@ __END__
 
 =head1 NAME
 
-Jackalope::Schema::Spec::REST - A Moosey solution to this problem
+Jackalope::REST::Schema::Spec - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use Jackalope::Schema::Spec::REST;
+  use Jackalope::REST::Schema::Spec;
 
 =head1 DESCRIPTION
 
