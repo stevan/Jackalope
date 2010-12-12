@@ -1,21 +1,22 @@
 package Jackalope::ResourceRepository;
 use Moose::Role;
+use Moose::Util::TypeConstraints;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use Digest;
+use Jackalope::Serializer;
 
 has 'serializer' => (
     is       => 'ro',
-    isa      => 'Jackalope::Serializer',
+    isa      => subtype(
+        'Jackalope::Serializer'
+            => where { $_->has_canonical_support }
+            => message { "Serializer must have canonical support" }
+    ),
     required => 1,
-    handles  => [qw[ serialize deserialize ]],
-    trigger  => sub {
-        my (undef, $serializer) = @_;
-        $serialzier->has_canonical_support
-            || confess "The serializer must support canonicalization to be used by the Resource Repository";
-    }
+    handles  => [qw[ serialize deserialize ]]
 );
 
 # internal API, for consumers of this role
@@ -35,13 +36,27 @@ sub calculate_data_digest {
           ->hexdigest
 }
 
+sub detect_conflict {
+    my ($self, $old_version, $new_version) = @_;
+
+    $old_version = $old_version->{'version'} if ref $old_version eq 'HASH';
+    $new_version = $new_version->{'version'} if ref $new_version eq 'HASH';
+
+    # check it to make sure that the
+    # new still has the old version string
+    # so we know it has not gone out
+    # of sync
+    ($old_version eq $new_version)
+        || confess "409 Conflict Detected, resource submitted has out of date version";
+}
+
 sub wrap_data {
     my ($self, $id, $data) = @_;
     return +{
         id      => $id,
         version => $self->calculate_data_digest( $data ),
         body    => $data,
-        links   => [] # leave this empty for the
+        links   => [] # leave this empty for the service to fill in
     };
 }
 
@@ -61,38 +76,65 @@ sub create_resource {
 
 sub get_resource {
     my ($self, $id) = @_;
-    return $self->wrap_data( $id, $self->get( $id ) );
+    my $data = $self->get( $id );
+    (defined $data)
+        || confess "404 Resource Not Found for $id";
+    return $self->wrap_data( $id, $data );
 }
 
 sub update_resource {
-    my ($self, $id, $new_data) = @_;
-    return $self->wrap_data( $id, $self->update( $id, $new_data ) );
+    my ($self, $id, $updated_resource) = @_;
+
+    ($id eq $updated_resource->{'id'})
+        || confess "400 Bad Request : The id does not match the id of the updated resource";
+
+    # grab the old resource at this id ...
+    my $old_resource = $self->get_resource( $id );
+
+    # check for a conflict
+    $self->detect_conflict(
+        $old_resource,
+        $updated_resource
+    );
+
+    # commit the data and re-wrap it
+    return $self->wrap_data(
+        $id,
+        $self->update(
+            $id,
+            $updated_resource->{'body'}
+        )
+    );
 }
 
 sub delete_resource {
-    my ($self, $id) = @_;
-    $self->delete( $id );
+    my ($self, $id, $params) = @_;
+
+    # this is an optional param ...
+    if ( my $version_to_check = $params->{'if_matches'} ) {
+        # grab the old resource at this id ...
+        my $old_resource = $self->get_resource( $id );
+
+        # check it to make sure that the
+        # updated resource still has the
+        # same version string
+        $self->detect_conflict(
+            $old_resource,
+            $version_to_check
+        );
+    }
+
+    # check the return value
+    # it should be a defined
+    # value, undef means the
+    # $id was not found
+    (defined $self->delete( $id ))
+        || confess "404 Resource Not Found for $id";
+
     return;
 }
 
-## error handlers
-
-sub resource_not_found {
-    my ($self, $message) = @_;
-    die "404 Resource Not Found : $message"
-}
-
-sub conflict_detected {
-    my ($self, $message) = @_;
-    die "409 Conflict Detected : $message"
-}
-
-sub invalid_request {
-    my ($self, $message) = @_;
-    die "400 Bad Request : $message"
-}
-
-no Moose::Role; 1;
+no Moose::Role; no Moose::Util::TypeConstraints; 1;
 
 __END__
 

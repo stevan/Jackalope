@@ -41,24 +41,17 @@ use Jackalope::Serializer::JSON;
 
     sub get {
         my ($self, $id) = @_;
-        (exists $self->db->{ $id })
-            || $self->resource_not_found;
         return $self->db->{ $id };
     }
 
     sub update {
         my ($self, $id, $updated_data) = @_;
-        (exists $self->db->{ $id })
-            || $self->resource_not_found("Cannot Update");
         $self->db->{ $id } = $updated_data;
     }
 
     sub delete {
         my ($self, $id) = @_;
-        (exists $self->db->{ $id })
-            || $self->resource_not_found("Cannot delete");
         delete $self->db->{ $id };
-        return;
     }
 }
 
@@ -79,6 +72,8 @@ is( scalar @{ $repo->list_resources }, 2, '... 2 resources found');
 $repo->create_resource( { baz => 'foo' } );
 is( scalar @{ $repo->list_resources }, 3, '... 3 resources found');
 
+my $resource_to_delete;
+
 {
     my $resources = $repo->list_resources;
 
@@ -97,16 +92,28 @@ is( scalar @{ $repo->list_resources }, 3, '... 3 resources found');
     is_deeply($resources->[0], $repo->get_resource(1), '... got the same resource');
     is($resources->[0]->{version}, $repo->get_resource(1)->{version}, '... got the same resource digest');
 
-    my $updated = $repo->update_resource( 1, { foo => 'bar', bling => 'bling' } );
+    $resources->[0]->{body} = { foo => 'bar', bling => 'bling' };
+
+    my $updated = $repo->update_resource( 1, $resources->[0] );
 
     is_deeply($updated, $repo->get_resource(1), '... got the updated resource');
     is($updated->{version}, $repo->get_resource(1)->{version}, '... got the same resource digest');
     isnt($resources->[0]->{version}, $updated->{version}, '... is a different resource digest now');
     is( scalar @{ $repo->list_resources }, 3, '... still 3 resources found');
+
+    like(exception { $repo->get_resource(10) }, qr/404 Resource Not Found/, '... got the exception like we expected');
+    like(exception { $repo->update_resource(10, $resources->[0]) }, qr/400 Bad Request/, '... got the exception like we expected');
+    like(exception { $repo->update_resource(1, $resources->[0]) }, qr/409 Conflict Detected/, '... got the exception like we expected');
+    like(exception { $repo->delete_resource(10) }, qr/404 Resource Not Found/, '... got the exception like we expected');
+
+    $resource_to_delete = $resources->[1];
 }
 
 $repo->delete_resource( 2 );
 is( scalar @{ $repo->list_resources }, 2, '... now 2 resources found');
+
+like(exception { $repo->get_resource(2) }, qr/404 Resource Not Found/, '... got the exception like we expected');
+like(exception { $repo->update_resource(2, $resource_to_delete) }, qr/404 Resource Not Found/, '... got the exception like we expected');
 
 {
     my $resources = $repo->list_resources;
@@ -118,6 +125,17 @@ is( scalar @{ $repo->list_resources }, 2, '... now 2 resources found');
     is($resources->[1]->{id}, 3, '... got the right id');
     is_deeply($resources->[1]->{body}, { baz => 'foo' }, '... got the right body');
     like($resources->[1]->{version}, qr/[a-f0-9]{64}/, '... got the right digest');
+
+    is(exception {
+        $repo->delete_resource( 1, { if_matches => $resources->[0]->{'version'} }  )
+    }, undef, '... deletion succeed');
+    is( scalar @{ $repo->list_resources }, 1, '... now 1 resource found');
+
+    like(exception {
+        $repo->delete_resource( 3, { if_matches => $resources->[0]->{'version'} }  )
+    }, qr/409 Conflict Detected/, '... deletion failed (like we wanted it to)');
+
+    is( scalar @{ $repo->list_resources }, 1, '... still 1 resource found (because deletion failed)');
 }
 
 done_testing;
