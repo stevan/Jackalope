@@ -11,8 +11,6 @@ BEGIN {
     use_ok('Jackalope');
 }
 
-use Jackalope::Serializer::JSON;
-
 {
     package Simple::DataRepo;
     use Moose;
@@ -55,9 +53,7 @@ use Jackalope::Serializer::JSON;
     }
 }
 
-my $repo = Simple::DataRepo->new(
-    serializer => Jackalope::Serializer::JSON->new,
-);
+my $repo = Simple::DataRepo->new;
 isa_ok($repo, 'Simple::DataRepo');
 does_ok($repo, 'Jackalope::REST::Resource::Repository');
 
@@ -92,7 +88,9 @@ my $resource_to_delete;
     is_deeply($resources->[0], $repo->get_resource(1), '... got the same resource');
     is($resources->[0]->version, $repo->get_resource(1)->version, '... got the same resource digest');
 
-    my $updated = $repo->update_resource( 1, $resources->[0]->clone( body => { foo => 'bar', bling => 'bling' } ) );
+    $resources->[0]->body( { foo => 'bar', bling => 'bling' } );
+
+    my $updated = $repo->update_resource( 1, $resources->[0] );
 
     is_deeply($updated, $repo->get_resource(1), '... got the updated resource');
     is($updated->version, $repo->get_resource(1)->version, '... got the same resource digest');

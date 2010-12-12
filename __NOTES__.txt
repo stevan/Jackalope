@@ -2,7 +2,6 @@
 = TODOS =
 
 - Jackalope::REST::Resource::Repository
-    - should this be renamed Jackalope::Web::ResourceRepository??
     - this should return perl data structures to the web-service
       which should be the resource wrapper, minus the links, which
       are to be filled in by the web-service
@@ -11,9 +10,6 @@
         - start/end for paging of results
         - add this to the corresponding schema/web/service as well
     - Resource wrapper notes
-        - how smart should I make the resource??
-            - should it be a class?
-            - should it know how to compare itself?
         - the elements of the link are also the elements
           that the Router would use to construct the URLs
           so that fits together nicely

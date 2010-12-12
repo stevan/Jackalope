@@ -5,20 +5,7 @@ use Moose::Util::TypeConstraints;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use Digest;
-use Jackalope::Serializer;
 use Jackalope::REST::Resource;
-
-has 'serializer' => (
-    is       => 'ro',
-    isa      => subtype(
-        'Jackalope::Serializer'
-            => where { $_->has_canonical_support }
-            => message { "Serializer must have canonical support" }
-    ),
-    required => 1,
-    handles  => [qw[ serialize deserialize ]]
-);
 
 has 'resource_class' => (
     is      => 'ro',
@@ -34,45 +21,21 @@ requires 'get';     # (Id) => Data
 requires 'update';  # (Id, Data) => Data
 requires 'delete';  # (Id) => ()
 
-## override-able methods
+# internal provided methods
 
-# if you want to calculate the digest in some other way
-# then you can override the two methods below to both
-# generate and compare versions in a different way.
-
-sub calculate_version {
-    my ($self, $data) = @_;
-    Digest->new("SHA-256")
-          ->add( $self->serialize( $data, { canonical => 1 } ) )
-          ->hexdigest
+sub wrap_data {
+    my ($self, $id, $data) = @_;
+    return $self->resource_class->new( id => $id, body => $data );
 }
 
 sub detect_conflict {
-    my ($self, $old_version, $new_version) = @_;
-
-    $old_version = $old_version->version if blessed $old_version;
-    $new_version = $new_version->version if blessed $new_version;
-
+    my ($self, $old, $new) = @_;
     # check it to make sure that the
     # new still has the old version string
     # so we know it has not gone out
     # of sync
-    ($old_version eq $new_version)
+    ($old->compare_version( $new ))
         || confess "409 Conflict Detected, resource submitted has out of date version";
-}
-
-# parameterizable resource_class should be
-# enough in most cases, but if you need to
-# do extra data munging or something, then
-# override this method
-
-sub wrap_data {
-    my ($self, $id, $data) = @_;
-    return $self->resource_class->new(
-        id      => $id,
-        body    => $data,
-        version => $self->calculate_version( $data ),
-    );
 }
 
 # external API, for service objects
@@ -106,11 +69,8 @@ sub update_resource {
     # grab the old resource at this id ...
     my $old_resource = $self->get_resource( $id );
 
-    # check for a conflict
-    $self->detect_conflict(
-        $old_resource,
-        $updated_resource
-    );
+    ($old_resource->compare_version( $updated_resource ))
+        || confess "409 Conflict Detected, resource submitted has out of date version";
 
     # commit the data and re-wrap it
     return $self->wrap_data(
@@ -133,10 +93,8 @@ sub delete_resource {
         # check it to make sure that the
         # updated resource still has the
         # same version string
-        $self->detect_conflict(
-            $old_resource,
-            $version_to_check
-        );
+        ($old_resource->compare_version( $version_to_check ))
+            || confess "409 Conflict Detected, resource submitted has out of date version";
     }
 
     # check the return value

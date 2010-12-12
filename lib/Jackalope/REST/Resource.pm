@@ -4,7 +4,8 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-with 'MooseX::Clone';
+use Digest;
+use Jackalope::Util 'encode_json';
 
 has 'id' => (
     is       => 'ro',
@@ -13,15 +14,16 @@ has 'id' => (
 );
 
 has 'body' => (
-    is       => 'ro',
+    is       => 'rw',
     isa      => 'Any',
     required => 1,
 );
 
 has 'version' => (
-    is       => 'ro',
-    isa      => 'Str',
-    required => 1,
+    is      => 'ro',
+    isa     => 'Str',
+    lazy    => 1,
+    builder => 'generate_version'
 );
 
 has 'links' => (
@@ -34,6 +36,24 @@ has 'links' => (
         'add_links' => 'push'
     }
 );
+
+# force the generation
+# of the version
+sub BUILD { (shift)->version }
+
+sub generate_version {
+    my $self = shift;
+    Digest->new("SHA-256")
+          ->add( encode_json( $self->body, { canonical => 1 } ) )
+          ->hexdigest
+}
+
+sub compare_version {
+    my ($self, $other) = @_;
+    # accept strings as well, we won't
+    # always have the full object
+    ($self->version eq (blessed $other ? $other->version : $other)) ? 1 : 0
+}
 
 sub pack {
     my $self = shift;

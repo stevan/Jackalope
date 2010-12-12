@@ -18,3 +18,5 @@ my $resource = Jackalope::REST::Resource->new(
     version => 'v1'
 );
 isa_ok($resource, 'Jackalope::REST::Resource');
+
+done_testing;
