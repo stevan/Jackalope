@@ -10,16 +10,23 @@ has 'serializer' => (
     is       => 'ro',
     isa      => 'Jackalope::Serializer',
     required => 1,
-    handles  => [qw[ serialize deserialize ]]
+    handles  => [qw[ serialize deserialize ]],
+    trigger  => sub {
+        my (undef, $serializer) = @_;
+        $serialzier->has_canonical_support
+            || confess "The serializer must support canonicalization to be used by the Resource Repository";
+    }
 );
 
 # internal API, for consumers of this role
 
-requires 'list';    # () => Array[ Data ]
+requires 'list';    # () => Array of [ Id, Data ]
 requires 'create';  # (Data) => Id
 requires 'get';     # (Id) => Data
 requires 'update';  # (Id, Data) => Data
 requires 'delete';  # (Id) => ()
+
+# override-able methods
 
 sub calculate_data_digest {
     my ($self, $data) = @_;
@@ -34,7 +41,7 @@ sub wrap_data {
         id      => $id,
         version => $self->calculate_data_digest( $data ),
         body    => $data,
-        links   => []
+        links   => [] # leave this empty for the
     };
 }
 

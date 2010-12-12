@@ -15,6 +15,8 @@ requires 'content_type';
 requires 'serialize';
 requires 'deserialize';
 
+requires 'has_canonical_support';
+
 no Moose::Role; 1;
 
 __END__

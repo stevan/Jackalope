@@ -11,6 +11,7 @@ use Jackalope::Util;
 with 'Jackalope::Serializer';
 
 sub content_type { 'application/json' };
+sub has_canonical_support { 1 }
 
 sub serialize {
     my ($self, $data, $params) = @_;
