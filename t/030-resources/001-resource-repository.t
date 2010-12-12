@@ -17,7 +17,7 @@ use Jackalope::Serializer::JSON;
     package Simple::DataRepo;
     use Moose;
 
-    with 'Jackalope::ResourceRepository';
+    with 'Jackalope::REST::Resource::Repository';
 
     my $ID_COUNTER = 0;
 
@@ -59,7 +59,7 @@ my $repo = Simple::DataRepo->new(
     serializer => Jackalope::Serializer::JSON->new,
 );
 isa_ok($repo, 'Simple::DataRepo');
-does_ok($repo, 'Jackalope::ResourceRepository');
+does_ok($repo, 'Jackalope::REST::Resource::Repository');
 
 is( scalar @{ $repo->list_resources }, 0, '... no resources found');
 
@@ -77,28 +77,26 @@ my $resource_to_delete;
 {
     my $resources = $repo->list_resources;
 
-    is($resources->[0]->{id}, 1, '... got the right id');
-    is_deeply($resources->[0]->{body}, { foo => 'bar' }, '... got the right body');
-    like($resources->[0]->{version}, qr/[a-f0-9]{64}/, '... got the right digest');
+    is($resources->[0]->id, 1, '... got the right id');
+    is_deeply($resources->[0]->body, { foo => 'bar' }, '... got the right body');
+    like($resources->[0]->version, qr/[a-f0-9]{64}/, '... got the right digest');
 
-    is($resources->[1]->{id}, 2, '... got the right id');
-    is_deeply($resources->[1]->{body}, { bar => 'baz' }, '... got the right body');
-    like($resources->[1]->{version}, qr/[a-f0-9]{64}/, '... got the right digest');
+    is($resources->[1]->id, 2, '... got the right id');
+    is_deeply($resources->[1]->body, { bar => 'baz' }, '... got the right body');
+    like($resources->[1]->version, qr/[a-f0-9]{64}/, '... got the right digest');
 
-    is($resources->[2]->{id}, 3, '... got the right id');
-    is_deeply($resources->[2]->{body}, { baz => 'foo' }, '... got the right body');
-    like($resources->[2]->{version}, qr/[a-f0-9]{64}/, '... got the right digest');
+    is($resources->[2]->id, 3, '... got the right id');
+    is_deeply($resources->[2]->body, { baz => 'foo' }, '... got the right body');
+    like($resources->[2]->version, qr/[a-f0-9]{64}/, '... got the right digest');
 
     is_deeply($resources->[0], $repo->get_resource(1), '... got the same resource');
-    is($resources->[0]->{version}, $repo->get_resource(1)->{version}, '... got the same resource digest');
+    is($resources->[0]->version, $repo->get_resource(1)->version, '... got the same resource digest');
 
-    $resources->[0]->{body} = { foo => 'bar', bling => 'bling' };
-
-    my $updated = $repo->update_resource( 1, $resources->[0] );
+    my $updated = $repo->update_resource( 1, $resources->[0]->clone( body => { foo => 'bar', bling => 'bling' } ) );
 
     is_deeply($updated, $repo->get_resource(1), '... got the updated resource');
-    is($updated->{version}, $repo->get_resource(1)->{version}, '... got the same resource digest');
-    isnt($resources->[0]->{version}, $updated->{version}, '... is a different resource digest now');
+    is($updated->version, $repo->get_resource(1)->version, '... got the same resource digest');
+    isnt($resources->[0]->version, $updated->version, '... is a different resource digest now');
     is( scalar @{ $repo->list_resources }, 3, '... still 3 resources found');
 
     like(exception { $repo->get_resource(10) }, qr/404 Resource Not Found/, '... got the exception like we expected');
@@ -118,13 +116,13 @@ like(exception { $repo->update_resource(2, $resource_to_delete) }, qr/404 Resour
 {
     my $resources = $repo->list_resources;
 
-    is($resources->[0]->{id}, 1, '... got the right id');
-    is_deeply($resources->[0]->{body}, { foo => 'bar', bling => 'bling' }, '... got the right body');
-    like($resources->[0]->{version}, qr/[a-f0-9]{64}/, '... got the right digest');
+    is($resources->[0]->id, 1, '... got the right id');
+    is_deeply($resources->[0]->body, { foo => 'bar', bling => 'bling' }, '... got the right body');
+    like($resources->[0]->version, qr/[a-f0-9]{64}/, '... got the right digest');
 
-    is($resources->[1]->{id}, 3, '... got the right id');
-    is_deeply($resources->[1]->{body}, { baz => 'foo' }, '... got the right body');
-    like($resources->[1]->{version}, qr/[a-f0-9]{64}/, '... got the right digest');
+    is($resources->[1]->id, 3, '... got the right id');
+    is_deeply($resources->[1]->body, { baz => 'foo' }, '... got the right body');
+    like($resources->[1]->version, qr/[a-f0-9]{64}/, '... got the right digest');
 
     is(exception {
         $repo->delete_resource( 1, { if_matches => $resources->[0]->{'version'} }  )

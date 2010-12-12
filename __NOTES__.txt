@@ -1,7 +1,7 @@
 
 = TODOS =
 
-- Jackalope::ResourceRepository
+- Jackalope::REST::Resource::Repository
     - should this be renamed Jackalope::Web::ResourceRepository??
     - this should return perl data structures to the web-service
       which should be the resource wrapper, minus the links, which
@@ -52,7 +52,7 @@
       can be idenfified from the outside and URIs can be created
         - the method and relation should do enough
     - it can make some assumptions about the repository
-      knowing that it is going to use the Jackalope::ResourceRepository
+      knowing that it is going to use the Jackalope::REST::Resource::Repository
       role, this should simplify the metadata even more
       if not eliminate the metadata completely
     - Remember, PUT actions are Idempotent, you should always return

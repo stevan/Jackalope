@@ -1,4 +1,4 @@
-package Jackalope::ResourceRepository;
+package Jackalope::REST::Resource::Repository;
 use Moose::Role;
 use Moose::Util::TypeConstraints;
 
@@ -7,6 +7,7 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 use Digest;
 use Jackalope::Serializer;
+use Jackalope::REST::Resource;
 
 has 'serializer' => (
     is       => 'ro',
@@ -19,7 +20,13 @@ has 'serializer' => (
     handles  => [qw[ serialize deserialize ]]
 );
 
-# internal API, for consumers of this role
+has 'resource_class' => (
+    is      => 'ro',
+    isa     => 'ClassName',
+    default => 'Jackalope::REST::Resource',
+);
+
+## internal API, for consumers of this role
 
 requires 'list';    # () => Array of [ Id, Data ]
 requires 'create';  # (Data) => Id
@@ -27,9 +34,13 @@ requires 'get';     # (Id) => Data
 requires 'update';  # (Id, Data) => Data
 requires 'delete';  # (Id) => ()
 
-# override-able methods
+## override-able methods
 
-sub calculate_data_digest {
+# if you want to calculate the digest in some other way
+# then you can override the two methods below to both
+# generate and compare versions in a different way.
+
+sub calculate_version {
     my ($self, $data) = @_;
     Digest->new("SHA-256")
           ->add( $self->serialize( $data, { canonical => 1 } ) )
@@ -39,8 +50,8 @@ sub calculate_data_digest {
 sub detect_conflict {
     my ($self, $old_version, $new_version) = @_;
 
-    $old_version = $old_version->{'version'} if ref $old_version eq 'HASH';
-    $new_version = $new_version->{'version'} if ref $new_version eq 'HASH';
+    $old_version = $old_version->version if blessed $old_version;
+    $new_version = $new_version->version if blessed $new_version;
 
     # check it to make sure that the
     # new still has the old version string
@@ -50,14 +61,18 @@ sub detect_conflict {
         || confess "409 Conflict Detected, resource submitted has out of date version";
 }
 
+# parameterizable resource_class should be
+# enough in most cases, but if you need to
+# do extra data munging or something, then
+# override this method
+
 sub wrap_data {
     my ($self, $id, $data) = @_;
-    return +{
+    return $self->resource_class->new(
         id      => $id,
-        version => $self->calculate_data_digest( $data ),
         body    => $data,
-        links   => [] # leave this empty for the service to fill in
-    };
+        version => $self->calculate_version( $data ),
+    );
 }
 
 # external API, for service objects
@@ -85,7 +100,7 @@ sub get_resource {
 sub update_resource {
     my ($self, $id, $updated_resource) = @_;
 
-    ($id eq $updated_resource->{'id'})
+    ($id eq $updated_resource->id)
         || confess "400 Bad Request : The id does not match the id of the updated resource";
 
     # grab the old resource at this id ...
@@ -102,7 +117,7 @@ sub update_resource {
         $id,
         $self->update(
             $id,
-            $updated_resource->{'body'}
+            $updated_resource->body
         )
     );
 }
@@ -142,11 +157,11 @@ __END__
 
 =head1 NAME
 
-Jackalope::ResourceRepository - A Moosey solution to this problem
+Jackalope::REST::Resource::Repository - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use Jackalope::ResourceRepository;
+  use Jackalope::REST::Resource::Repository;
 
 =head1 DESCRIPTION
 
