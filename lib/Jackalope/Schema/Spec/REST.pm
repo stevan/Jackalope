@@ -94,7 +94,7 @@ sub service {
         type  => 'object',
         links => [
             {
-                rel      => 'list',
+                rel           => 'list',
                 href          => '/',
                 method        => 'GET',
                 target_schema => {
@@ -109,7 +109,7 @@ sub service {
                 },
             },
             {
-                rel      => 'create',
+                rel           => 'create',
                 href          => '/',
                 method        => 'POST',
                 data_schema   => { '$ref' => '#' },
@@ -122,7 +122,7 @@ sub service {
                 },
             },
             {
-                rel      => 'read',
+                rel           => 'read',
                 href          => '/:id',
                 method        => 'GET',
                 target_schema => {
@@ -137,7 +137,7 @@ sub service {
                 }
             },
             {
-                rel      => 'edit',
+                rel           => 'edit',
                 href          => '/:id',
                 method        => 'PUT',
                 data_schema   => { '$ref' => '#' },
@@ -153,7 +153,7 @@ sub service {
                 }
             },
             {
-                rel      => 'delete',
+                rel           => 'delete',
                 href          => '/:id',
                 method        => 'DELETE',
                 uri_schema    => {
