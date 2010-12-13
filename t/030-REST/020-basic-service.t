@@ -94,7 +94,6 @@ isa_ok($service, 'Jackalope::REST::Service');
 isa_ok($service->schema_repository, 'Jackalope::Schema::Repository');
 isa_ok($service->resource_repository, 'My::DataRepo');
 does_ok($service->resource_repository, 'Jackalope::REST::Resource::Repository');
-
 is_deeply($service->schemas, [
     {
         id         => 'simple/person',
@@ -107,7 +106,6 @@ is_deeply($service->schemas, [
         }
     }
 ], '... got the schema we expected');
-
 isa_ok($service->router, 'Path::Router');
 
 my $app = Plack::App::Path::Router->new( router => $service->router );

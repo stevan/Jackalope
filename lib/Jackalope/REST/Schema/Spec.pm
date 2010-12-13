@@ -34,7 +34,7 @@ sub resource {
         type        => "object",
         properties  => {
             id      => {
-                type        => "any",
+                type        => "string",
                 description => q[
                     This is the ID of the given resource, it is
                     assumed to be some kind of string, which should

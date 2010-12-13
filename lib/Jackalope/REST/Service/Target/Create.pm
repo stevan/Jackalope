@@ -18,8 +18,8 @@ sub execute {
 
         $resource = $self->call_repository_operation( 'create_resource' => ( @args, $params ) );
 
-        $self->check_target_schema( $resource->pack );
         $self->generate_links_for_resource( $resource );
+        $self->check_target_schema( $resource->pack );
 
         $resource;
     } catch {

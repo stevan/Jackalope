@@ -9,6 +9,7 @@ use Try::Tiny;
 use Scalar::Util       ();
 use List::AllUtils     ();
 use Devel::PartialDump ();
+use Data::Peek         ();
 
 has 'formatters' => (
     traits  => [ 'Hash' ],
@@ -97,12 +98,13 @@ sub string {
     } unless defined $data;
 
     return {
-        error => 'string look more like a number'
-    } if Scalar::Util::looks_like_number $data;
-
-    return {
         error => 'string data is a reference'
     } if ref $data;
+
+    my ($is_string) = Data::Peek::DDual( $data );
+    return {
+        error => 'string look more like a number'
+    } unless defined $is_string;
 
     if (exists $schema->{min_length}) {
         return {
