@@ -1,39 +1,14 @@
-package Jackalope::REST::Error;
+package Jackalope::REST;
 use Moose;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-extends 'Throwable::Error';
+extends 'Jackalope';
 
-has 'code' => (
-    is       => 'ro',
-    isa      => 'Int',
-    required => 1,
-);
+has '+schema_spec_class' => ( default => 'Jackalope::REST::Schema::Spec' );
 
-has 'desc' => (
-    is       => 'ro',
-    isa      => 'Str',
-    required => 1,
-);
-
-around 'as_string' => sub {
-    my $next = shift;
-    my $self = shift;
-    $self->code . " " . $self->desc . " : " . $self->$next;
-};
-
-sub to_psgi {
-    my $self = shift;
-    [
-        $self->code,
-        [],
-        [ $self->as_string ]
-    ];
-}
-
-__PACKAGE__->meta->make_immutable( inline_constructor => 0 );
+__PACKAGE__->meta->make_immutable;
 
 no Moose; 1;
 
@@ -43,11 +18,11 @@ __END__
 
 =head1 NAME
 
-Jackalope::REST::Error - A Moosey solution to this problem
+Jackalope::REST - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use Jackalope::REST::Error;
+  use Jackalope::REST;
 
 =head1 DESCRIPTION
 

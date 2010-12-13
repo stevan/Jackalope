@@ -8,12 +8,10 @@ use Test::Fatal;
 use Test::Moose;
 
 BEGIN {
-    use_ok('Jackalope');
+    use_ok('Jackalope::REST');
 }
 
-my $repo = Jackalope->new(
-    schema_spec_class => 'Jackalope::REST::Schema::Spec'
-)->resolve(
+my $repo = Jackalope::REST->new->resolve(
     type => 'Jackalope::Schema::Repository'
 );
 isa_ok($repo, 'Jackalope::Schema::Repository');

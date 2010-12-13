@@ -34,7 +34,7 @@ sub resource {
         type        => "object",
         properties  => {
             id      => {
-                type        => "string",
+                type        => "any",
                 description => q[
                     This is the ID of the given resource, it is
                     assumed to be some kind of string, which should
@@ -110,7 +110,7 @@ sub service {
             },
             {
                 rel           => 'create',
-                href          => '/',
+                href          => '/create',
                 method        => 'POST',
                 data_schema   => { '$ref' => '#' },
                 target_schema => {
@@ -138,7 +138,7 @@ sub service {
             },
             {
                 rel           => 'edit',
-                href          => '/:id',
+                href          => '/:id/edit',
                 method        => 'PUT',
                 data_schema   => { '$ref' => '#' },
                 target_schema => {
@@ -154,7 +154,7 @@ sub service {
             },
             {
                 rel           => 'delete',
-                href          => '/:id',
+                href          => '/:id/delete',
                 method        => 'DELETE',
                 uri_schema    => {
                     id => { type => 'string' }
