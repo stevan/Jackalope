@@ -16,26 +16,8 @@
         - the version string is a SHA1 of the content, so that we can
           take advantage of ETags
             - read up on http://en.wikipedia.org/wiki/HTTP_ETag
-            - this means the serialization needs to
-              use the canonical flag
-                - using canonical JSON also means that it will be
-                  easy to add digital sigs if we want too.
-                - it actually doesn't slow stuff down too much, here
-                  is the benchmark for encoding the entire spec
-                  (585 lines of JSON) in both the canonical and
-                  non-canonical, and it isnt that bad
-                    |                 Rate     canonical non-canonical
-                    | canonical     6270/s            --           -8%
-                    | non-canonical 6817/s            9%            --
 
-- Jackalope::Web::Error::
-    - a set of Throwable exceptions for the various HTTP status codes
-        - 400 Bad Request
-        - 404 Not Found
-        - 409 Conflict
-        - 500 server error
-
-- Jackalope::Web::Service
+- Jackalope::REST::Service
     - we should pass in a Factory to the Web::Service and the factory
       can choose which type of target object based on patterns
       if no pattern exists then ...
@@ -43,7 +25,7 @@
           +Some::Full::Path => is handled straight
           Another           => becomes Jackalope::Route::Target::Another
 
-- Jackalope::Web::Route::Target::REST::
+- Jackalope::REST::Route::Target::
     - we need to write defaults into the route so that they
       can be idenfified from the outside and URIs can be created
         - the method and relation should do enough

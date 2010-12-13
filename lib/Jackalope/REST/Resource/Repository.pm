@@ -6,6 +6,9 @@ our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use Jackalope::REST::Resource;
+use Jackalope::REST::Error::ResourceNotFound;
+use Jackalope::REST::Error::BadRequest;
+use Jackalope::REST::Error::ConflictDetected;
 
 has 'resource_class' => (
     is      => 'ro',
@@ -35,7 +38,7 @@ sub detect_conflict {
     # so we know it has not gone out
     # of sync
     ($old->compare_version( $new ))
-        || confess "409 Conflict Detected, resource submitted has out of date version";
+        || Jackalope::REST::Error::ConflictDetected->throw("resource submitted has out of date version");
 }
 
 # external API, for service objects
@@ -56,7 +59,7 @@ sub get_resource {
     my ($self, $id) = @_;
     my $data = $self->get( $id );
     (defined $data)
-        || confess "404 Resource Not Found for $id";
+        || Jackalope::REST::Error::ResourceNotFound->throw("no resource for id ($id)");
     return $self->wrap_data( $id, $data );
 }
 
@@ -64,13 +67,13 @@ sub update_resource {
     my ($self, $id, $updated_resource) = @_;
 
     ($id eq $updated_resource->id)
-        || confess "400 Bad Request : The id does not match the id of the updated resource";
+        || Jackalope::REST::Error::BadRequest->throw("the id does not match the id of the updated resource");
 
     # grab the old resource at this id ...
     my $old_resource = $self->get_resource( $id );
 
     ($old_resource->compare_version( $updated_resource ))
-        || confess "409 Conflict Detected, resource submitted has out of date version";
+        || Jackalope::REST::Error::ConflictDetected->throw("resource submitted has out of date version");
 
     # commit the data and re-wrap it
     return $self->wrap_data(
@@ -94,7 +97,7 @@ sub delete_resource {
         # updated resource still has the
         # same version string
         ($old_resource->compare_version( $version_to_check ))
-            || confess "409 Conflict Detected, resource submitted has out of date version";
+            || Jackalope::REST::Error::ConflictDetected->throw("resource submitted has out of date version");
     }
 
     # check the return value
@@ -102,7 +105,7 @@ sub delete_resource {
     # value, undef means the
     # $id was not found
     (defined $self->delete( $id ))
-        || confess "404 Resource Not Found for $id";
+        || Jackalope::REST::Error::ResourceNotFound->throw("no resource for id ($id)");
 
     return;
 }
