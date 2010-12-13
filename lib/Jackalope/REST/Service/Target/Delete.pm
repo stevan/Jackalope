@@ -8,9 +8,20 @@ with 'Jackalope::REST::Service::Target';
 
 sub execute {
     my ($self, $r, @args) = @_;
-
-    return [ 500, [], [] ];
+    my ($resource, $error) = $self->process_operation( 'delete_resource' => ( $r, @args ) );
+    return $error if $error;
+    return $self->process_psgi_output([ 204, [], [] ]);
 }
+
+around 'sanitize_and_prepare_input' => sub {
+    my $next = shift;
+    my ($self, $r ) = @_;
+    $self->$next( $r );
+    if ( my $if_matches = $r->headers->header('If-Matches') ) {
+        return { if_matches => $if_matches };
+    }
+    return;
+};
 
 __PACKAGE__->meta->make_immutable;
 

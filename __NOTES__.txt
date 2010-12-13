@@ -18,17 +18,9 @@
             - read up on http://en.wikipedia.org/wiki/HTTP_ETag
 
 - Jackalope::REST::Service
-    - we should pass in a Factory to the Web::Service and the factory
-      can choose which type of target object based on patterns
-      if no pattern exists then ...
-      - target_class in the link->metadata should handle names like Moose Traits and Catalyst plugins
-          +Some::Full::Path => is handled straight
-          Another           => becomes Jackalope::Route::Target::Another
-
-- Jackalope::REST::Route::Target::
     - we need to write defaults into the route so that they
       can be idenfified from the outside and URIs can be created
-        - the method and relation should do enough
+        - the method and rel should do enough
     - it can make some assumptions about the repository
       knowing that it is going to use the Jackalope::REST::Resource::Repository
       role, this should simplify the metadata even more
@@ -41,32 +33,36 @@
 - spec for REST API
     - NOTE: This is heavily inspired by the ATOM publishing protocol
     - CRUD actions
+        - describedby
+            - return the schema that it is created with
         - listing
             - listing is done by GETing to the URI of a collection
             - the result is basically a list of resources, nothing more
             - this should take search params and paging params as well
+            - returns 200 status
         - creation
-            - creation is done by POSTing to the URI of a collection
+            - creation is done by POSTing to the specified creation URI
             - returns a 201 status
             - the response Location header should provide the link to read the resource
             - the newly created resource should be in the body of the response
                 - the resource should include links that
                   provide hrefs for the various other actions
         - read
+            - returns 200 status
             - reading is done by GETing the specified reading URI
                 - the resource id should be embedded in the URI
         - update
+            - returns 202 status
             - updating is done by PUTing to the specified update URI
                 - the resource id should be embedded in the URI
-                - this URI may or may not be the same as the read URI (API designers choice)
-                - you need only PUT the resource body data, which is not required to have an id
-                  the associated metadata (links, etc) are considered read-only and the
-                  responsibility of the server so there is no need for it to be returned
+                - you need to PUT the full wrapped resource (minus the links metadata)
+                  so that we can also test the version string to make sure it is in sync
             - the updated resource is sent back in the body of the request
         - delete
+            - returns 204 status
             - deletion is done by sending DELETE to the specified deletion URI
                 - the id should be embedded in the URI
-                - this URI may or may not be the same as the read URI (API designers choice)
+                - an optional If-Matches header is supported for version checking
     - Caching options
         - we should support eTags and conditional GETS, but this is more for the client end
             - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#edit-no-lost-update

@@ -8,8 +8,9 @@ with 'Jackalope::REST::Service::Target';
 
 sub execute {
     my ($self, $r, @args) = @_;
-
-    return [ 500, [], [] ];
+    my ($resources, $error) = $self->process_operation( 'list_resources' => ( $r, @args ) );
+    return $error if $error;
+    return $self->process_psgi_output([ 200, [], [ $resources ] ]);
 }
 
 __PACKAGE__->meta->make_immutable;

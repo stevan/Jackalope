@@ -33,12 +33,12 @@ is(exception{
 
 my $person = $repo->get_compiled_schema_by_uri('simple/person');
 
-is($person->{'links'}->[0]->{'target_schema'}->{'items'}->{'properties'}->{'body'}, $person, '... self referring schema for LIST');
-is($person->{'links'}->[1]->{'data_schema'}, $person, '... self referring schema for POST');
-is($person->{'links'}->[1]->{'target_schema'}->{'properties'}->{'body'}, $person, '... self referring schema for POST');
-is($person->{'links'}->[2]->{'target_schema'}->{'properties'}->{'body'}, $person, '... self referring schema for GET');
-is($person->{'links'}->[3]->{'data_schema'}, $person, '... self referring schema for UPDATE');
-is($person->{'links'}->[3]->{'target_schema'}->{'properties'}->{'body'}, $person, '... self referring schema for UPDATE');
+is($person->{'links'}->[1]->{'target_schema'}->{'items'}->{'properties'}->{'body'}, $person, '... self referring schema for LIST');
+is($person->{'links'}->[2]->{'data_schema'}, $person, '... self referring schema for POST');
+is($person->{'links'}->[2]->{'target_schema'}->{'properties'}->{'body'}, $person, '... self referring schema for POST');
+is($person->{'links'}->[3]->{'target_schema'}->{'properties'}->{'body'}, $person, '... self referring schema for GET');
+is($person->{'links'}->[4]->{'data_schema'}->{'properties'}->{'body'}, $person, '... self referring schema for UPDATE');
+is($person->{'links'}->[4]->{'target_schema'}->{'properties'}->{'body'}, $person, '... self referring schema for UPDATE');
 
 
 done_testing;

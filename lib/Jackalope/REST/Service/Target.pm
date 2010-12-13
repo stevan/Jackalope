@@ -31,6 +31,79 @@ sub throw_server_error {
     Jackalope::REST::Error::InternalServerError->throw( @_ )
 }
 
+sub process_operation {
+    my ($self, $operation, $r, @args) = @_;
+
+    my ($result, $error);
+    try {
+        my $params = $self->sanitize_and_prepare_input( $r );
+        $result = $self->call_repository_operation( $operation => ( @args, $params ) );
+        $self->verify_and_prepare_output( $result );
+    } catch {
+        $error = $_;
+    };
+
+    if ( $error ) {
+        if ( $error->isa('Jackalope::REST::Error') ) {
+            $error = $error->to_psgi;
+        }
+        else {
+            $error = [ 500, [], [ "Unknown Server Error : $error" ]]
+        }
+    }
+
+    return ($result, $error);
+}
+
+sub sanitize_and_prepare_input {
+    my ($self, $r ) = @_;
+    $self->check_uri_schema( $r );
+    $self->check_data_schema( $r );
+}
+
+sub verify_and_prepare_output {
+    my ($self, $result) = @_;
+
+    if (ref $result eq 'ARRAY') {
+        foreach my $resource ( @$result) {
+            $self->generate_links_for_resource( $resource );
+        }
+        $self->check_target_schema( [ map { $_->pack } @$result ] );
+    }
+    elsif (blessed $result) {
+        $self->generate_links_for_resource( $result );
+        $self->check_target_schema( $result->pack );
+    }
+
+    $result;
+}
+
+# TODO:
+# need to make this also support ETags
+# - SL
+sub process_psgi_output {
+    my ($self, $psgi) = @_;
+    if ( scalar @{ $psgi->[2] } ) {
+
+        push @{ $psgi->[1] } => ('Content-Type' => $self->serializer->content_type);
+
+        if (ref $psgi->[2]->[0] eq 'ARRAY') {
+            # an array of resources
+            $psgi->[2]->[0] = $self->serializer->serialize( [ map { $_->pack } @{ $psgi->[2]->[0] } ] );
+        }
+        elsif (blessed $psgi->[2]->[0]) {
+            # a resource
+            $psgi->[2]->[0] = $self->serializer->serialize( $psgi->[2]->[0]->pack );
+        }
+        else {
+            # just leave it alone ...
+        }
+    }
+    $psgi;
+}
+
+# ...
+
 sub check_uri_schema {
     my ($self, $r) = @_;
     # look for a uri-schema ...
@@ -125,6 +198,11 @@ sub generate_links_for_resource {
     # doing this more dynamically.
     # - SL
     $resource->add_links(
+        {
+            rel    => 'describedby',
+            method => 'GET',
+            href   => $self->router->uri_for( rel => 'describedby', method => 'GET' )
+        },
         {
             rel    => 'list',
             method => 'GET',

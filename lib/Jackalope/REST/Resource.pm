@@ -58,7 +58,11 @@ sub compare_version {
 sub pack {
     my $self = shift;
     return +{
-        id      => $self->id,
+        # NOTE:
+        # make sure to force a string here,
+        # not sure we actually need it though
+        # - SL
+        id      => "" . $self->id,
         body    => $self->body,
         version => $self->version,
         links   => $self->links

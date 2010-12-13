@@ -4,42 +4,17 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use Try::Tiny;
-
 with 'Jackalope::REST::Service::Target';
 
 sub execute {
     my ($self, $r, @args) = @_;
-
-    my ($resource, $error);
-    try {
-        $self->check_uri_schema( $r );
-        my $params = $self->check_data_schema( $r );
-
-        $resource = $self->call_repository_operation( 'create_resource' => ( @args, $params ) );
-
-        $self->generate_links_for_resource( $resource );
-        $self->check_target_schema( $resource->pack );
-
-        $resource;
-    } catch {
-        $error = $_;
-    };
-
-    if ( $error ) {
-        if ( $error->isa('Jackalope::REST::Error') ) {
-            return $error->to_psgi;
-        }
-        else {
-            return [ 500, [], [ "Unknown Server Error : $error" ]]
-        }
-    }
-
-    return [
+    my ($resource, $error) = $self->process_operation( 'create_resource' => ( $r, @args ) );
+    return $error if $error;
+    return $self->process_psgi_output([
         201,
-        [  'Location' => $self->generate_read_link_for_resource( $resource ) ],
-        [ $self->serializer->serialize( $resource->pack ) ]
-    ];
+        [ 'Location' => $self->generate_read_link_for_resource( $resource ) ],
+        [ $resource ]
+    ]);
 }
 
 __PACKAGE__->meta->make_immutable;

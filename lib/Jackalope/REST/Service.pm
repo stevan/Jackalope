@@ -26,13 +26,20 @@ has 'serializer' => (
     required => 1
 );
 
-has 'schemas' => (
+has 'schema' => (
     is       => 'ro',
-    isa      => 'ArrayRef[HashRef]',
+    isa      => 'HashRef',
     required => 1
 );
 
-has 'compiled_schemas' => ( is => 'ro', writer => '_set_compiled_schemas' );
+has 'compiled_schema' => (
+    is      => 'ro',
+    lazy    => 1,
+    default => sub {
+        my $self = shift;
+        $self->schema_repository->register_schema( $self->schema )
+    }
+);
 
 has 'router' => (
     is      => 'ro',
@@ -41,41 +48,45 @@ has 'router' => (
     builder => 'build_router'
 );
 
-sub BUILD {
-    my ($self, $params) = @_;
+my %REL_TO_TARGET_CLASS = (
+    create      => 'Jackalope::REST::Service::Target::Create',
+    edit        => 'Jackalope::REST::Service::Target::Edit',
+    list        => 'Jackalope::REST::Service::Target::List',
+    read        => 'Jackalope::REST::Service::Target::Read',
+    delete      => 'Jackalope::REST::Service::Target::Delete',
+    describedby => 'Jackalope::REST::Service::Target::DescribedBy',
+);
 
-    my @schemas;
-    my $repo = $self->schema_repository;
-    foreach my $schema (@{ $self->schemas }) {
-        push @schemas => $repo->register_schema( $schema );
-    }
+sub get_target_class_for_link {
+    my ($self, $link) = @_;
+    # TODO:
+    # add support for putting the target_class
+    # in the metadata as well
+    # - SL
+    (exists $REL_TO_TARGET_CLASS{ lc $link->{'rel'} })
+        || confess "No target class found for rel (" . $link->{'rel'} . ")";
 
-    $self->_set_compiled_schemas(\@schemas);
+    my $target_class = $REL_TO_TARGET_CLASS{ lc $link->{'rel'} };
+    load_class( $target_class );
+    return $target_class;
 }
 
 sub build_router {
     my $self   = shift;
     my $router = Path::Router->new;
 
-    foreach my $schema (@{ $self->compiled_schemas }) {
-        next unless exists $schema->{'links'};
-        foreach my $link ( @{ $schema->{'links'} }) {
-
-            my $target_class = 'Jackalope::REST::Service::Target::' . (ucfirst $link->{'rel'});
-            load_class($target_class);
-
-            $router->add_route(
-                $link->{'href'},
-                defaults => {
-                    rel    => $link->{'rel'},
-                    method => $link->{'method'} || 'GET',
-                },
-                target  => $target_class->new(
-                    service => $self,
-                    link    => $link
-                )
-            );
-        }
+    foreach my $link ( @{ $self->compiled_schema->{'links'} }) {
+        $router->add_route(
+            $link->{'href'},
+            defaults => {
+                rel    => $link->{'rel'},
+                method => $link->{'method'},
+            },
+            target  => $self->get_target_class_for_link( $link )->new(
+                service => $self,
+                link    => $link
+            )
+        );
     }
 
     $router;

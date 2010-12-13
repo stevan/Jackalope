@@ -1,4 +1,4 @@
-package Jackalope::REST::Service::Target::Edit;
+package Jackalope::REST::Service::Target::DescribedBy;
 use Moose;
 
 our $VERSION   = '0.01';
@@ -8,17 +8,12 @@ with 'Jackalope::REST::Service::Target';
 
 sub execute {
     my ($self, $r, @args) = @_;
-    my ($resource, $error) = $self->process_operation( 'update_resource' => ( $r, @args ) );
-    return $error if $error;
-    return $self->process_psgi_output([ 202, [], [ $resource ] ]);
+    return $self->process_psgi_output([
+        200,
+        [],
+        [ $self->serializer->serialize( $self->service->schema ) ]
+    ]);
 }
-
-around 'sanitize_and_prepare_input' => sub {
-    my $next = shift;
-    my $self = shift;
-    my $input = $self->$next( @_ );
-    $self->resource_repository->resource_class->new( $input );
-};
 
 __PACKAGE__->meta->make_immutable;
 
@@ -30,11 +25,11 @@ __END__
 
 =head1 NAME
 
-Jackalope::REST::Service::Target::Edit - A Moosey solution to this problem
+Jackalope::REST::Service::Target::DescribedBy - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use Jackalope::REST::Service::Target::Edit;
+  use Jackalope::REST::Service::Target::DescribedBy;
 
 =head1 DESCRIPTION
 

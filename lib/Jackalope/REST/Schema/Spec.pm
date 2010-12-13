@@ -94,6 +94,12 @@ sub service {
         type  => 'object',
         links => [
             {
+                rel           => 'describedby',
+                href          => '/schema',
+                method        => 'GET',
+                target_schema => { '$ref' => 'schema/types/schema' },
+            },
+            {
                 rel           => 'list',
                 href          => '/',
                 method        => 'GET',
@@ -140,7 +146,13 @@ sub service {
                 rel           => 'edit',
                 href          => '/:id/edit',
                 method        => 'PUT',
-                data_schema   => { '$ref' => '#' },
+                data_schema   => {
+                    type       => 'object',
+                    extends    => { '$ref' => 'schema/web/resource' },
+                    properties => {
+                        body => { '$ref' => '#' },
+                    }
+                },
                 target_schema => {
                     type       => 'object',
                     extends    => { '$ref' => 'schema/web/resource' },
