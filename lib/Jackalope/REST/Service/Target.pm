@@ -4,6 +4,7 @@ use Moose::Role;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use List::AllUtils 'first';
 use Try::Tiny;
 use Data::Dump;
 use Jackalope::REST::Error::InternalServerError;
@@ -184,50 +185,32 @@ sub check_target_schema {
 
 sub generate_read_link_for_resource {
     my ($self, $resource) = @_;
-    # TODO:
-    # this should be more dynamic too
+    my $link = first { $_->{'rel'} eq 'read' } @{ $self->service->compiled_schema->{'links'} };
+    # FIXME
+    # This should just return undef or something
+    # throwing an exception is kinda extreme
     # - SL
-    $self->router->uri_for( rel => 'read', method => 'GET', id => $resource->id )
+    (defined $link)
+        || $self->throw_server_error("Could not generate read link for id (" . $resource->id . ")");
+    $self->router->uri_for( rel => $link->{'rel'}, method => $link->{'method'}, id => $resource->id )
 }
 
 sub generate_links_for_resource {
     my ($self, $resource) = @_;
-    # TODO:
-    # pull this information out of the
-    # schema instead, we should be
-    # doing this more dynamically.
-    # - SL
     $resource->add_links(
-        {
-            rel    => 'describedby',
-            method => 'GET',
-            href   => $self->router->uri_for( rel => 'describedby', method => 'GET' )
-        },
-        {
-            rel    => 'list',
-            method => 'GET',
-            href   => $self->router->uri_for( rel => 'list', method => 'GET' )
-        },
-        {
-            rel    => 'create',
-            method => 'POST',
-            href   => $self->router->uri_for( rel => 'create', method => 'POST' )
-        },
-        {
-            rel    => 'read',
-            method => 'GET',
-            href   => $self->router->uri_for( rel => 'read', method => 'GET', id => $resource->id )
-        },
-        {
-            rel    => 'edit',
-            method => 'PUT',
-            href   => $self->router->uri_for( rel => 'edit', method => 'PUT', id => $resource->id )
-        },
-        {
-            rel    => 'delete',
-            method => 'DELETE',
-            href   => $self->router->uri_for( rel => 'delete', method => 'DELETE', id => $resource->id )
-        }
+        map {
+            +{
+                rel    => $_->{'rel'},
+                method => $_->{'method'},
+                href   => $self->router->uri_for(
+                    rel    => $_->{'rel'},
+                    method => $_->{'method'},
+                    (exists $_->{'uri_schema'}
+                        ? ( id => $resource->id )
+                        : ())
+                )
+            }
+        } @{ $self->service->compiled_schema->{'links'} }
     );
 }
 
