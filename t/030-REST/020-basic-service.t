@@ -16,45 +16,11 @@ BEGIN {
     use_ok('Jackalope::REST');
 }
 
+use Jackalope::REST::Resource::Repository::Simple;
+
 use Plack;
 use Plack::Builder;
 use Plack::App::Path::Router;
-
-{
-    package My::DataRepo;
-    use Moose;
-    with 'Jackalope::REST::Resource::Repository';
-
-    my $ID_COUNTER = 0;
-    has 'db' => ( is => 'ro', isa => 'HashRef', default => sub { +{} } );
-
-    sub list {
-        my $self = shift;
-        return [ map { [ $_, $self->db->{ $_ } ] } sort keys %{ $self->db } ]
-    }
-
-    sub create {
-        my ($self, $data) = @_;
-        my $id = ++$ID_COUNTER;
-        $self->db->{ $id } = $data;
-        return ( $id, $data );
-    }
-
-    sub get {
-        my ($self, $id) = @_;
-        return $self->db->{ $id };
-    }
-
-    sub update {
-        my ($self, $id, $updated_data) = @_;
-        $self->db->{ $id } = $updated_data;
-    }
-
-    sub delete {
-        my ($self, $id) = @_;
-        delete $self->db->{ $id };
-    }
-}
 
 my $j = Jackalope::REST->new;
 my $c = container $j => as {
@@ -70,12 +36,13 @@ my $c = container $j => as {
         }
     };
 
-    typemap 'My::DataRepo' => infer;
+    typemap 'Jackalope::REST::Resource::Repository::Simple' => infer;
+
     service 'MyService' => (
         class        => 'Jackalope::REST::Service',
         dependencies => {
             schema_repository   => 'type:Jackalope::Schema::Repository',
-            resource_repository => 'type:My::DataRepo',
+            resource_repository => 'type:Jackalope::REST::Resource::Repository::Simple',
             schema              => 'MySchema',
             serializer          => {
                 'Jackalope::Serializer' => {
@@ -90,7 +57,7 @@ my $service = $c->resolve( service => 'MyService' );
 isa_ok($service, 'Jackalope::REST::Service');
 
 isa_ok($service->schema_repository, 'Jackalope::Schema::Repository');
-isa_ok($service->resource_repository, 'My::DataRepo');
+isa_ok($service->resource_repository, 'Jackalope::REST::Resource::Repository::Simple');
 does_ok($service->resource_repository, 'Jackalope::REST::Resource::Repository');
 is_deeply($service->schema, {
     id         => 'simple/person',
