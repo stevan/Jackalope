@@ -163,7 +163,12 @@ sub call_repository_operation {
     };
 
     if ( $error ) {
-        $self->throw_server_error("repository operation ($operation) failed, because $error")
+        if ( $error->isa('Jackalope::REST::Error') ) {
+            die $error;
+        }
+        else {
+            $self->throw_server_error("repository operation ($operation) failed, because $error")
+        }
     }
 
     return $result;

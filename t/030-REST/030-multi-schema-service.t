@@ -36,30 +36,24 @@ use Plack::App::Path::Router;
         required => 1,
     );
 
-    sub list { die "Not supported" }
+    sub list   { die "Not supported" }
+    sub update { die "Not supported" }
 
     sub create {
         my ($self, $data) = @_;
-
-        my $data_to_store = clone( $data );
-
-        $data_to_store->{'user'} = { '$ref' => $data_to_store->{'user'}->{'id'} };
-        $data_to_store->{'items'} = [
-            map {
-                { '$ref' => $_->{'id'} }
-            } @{$data_to_store->{'items'}}
-        ];
-
         my $id = $self->get_next_id;
-        $self->db->{ $id } = $data_to_store;
-        return ( $id, $data );
+        $self->db->{ $id } = $data;
+        return ( $id, $self->inflate_user_and_items( clone( $data ) ) );
     }
 
     sub get {
         my ($self, $id) = @_;
+        return unless $self->db->{ $id };
+        return $self->inflate_user_and_items( clone( $self->db->{ $id } ) );
+    }
 
-        # don't want to alter the value stored ...
-        my $cart = clone( $self->db->{ $id } );
+    sub inflate_user_and_items {
+        my ($self, $cart) = @_;
 
         my $user = $self->user_service->resource_repository->get_resource( $cart->{'user'}->{'$ref'} );
         $self->user_service->generate_links_for_resource( $user );
@@ -73,12 +67,7 @@ use Plack::App::Path::Router;
             } @{ $cart->{'items'} }
         ];
 
-        return $cart;
-    }
-
-    sub update {
-        my ($self, $id, $updated_data) = @_;
-
+        $cart;
     }
 }
 
@@ -136,24 +125,68 @@ my $c = container $j => as {
 
     service 'ShoppingCartSchema' => {
         id         => "test/shoppingcart",
-        extends    => { '$ref' => 'schema/web/service' },
+        type       => "object",
         properties => {
             user => {
                 extends    => { '$ref' => "schema/web/resource" },
-                properties => {
-                    body => { '$ref' => "test/user" },
-                }
+                properties => { body => { '$ref' => "test/user" } }
             },
             items  => {
                 type  => "array",
                 items => {
                     extends    => { '$ref' => "schema/web/resource" },
-                    properties => {
-                        body => { '$ref' => "test/product" },
-                    }
+                    properties => { body => { '$ref' => "test/product" } }
                 }
             }
-        }
+        },
+        links => [
+            # skipping the described-by, which you would do in real life ...
+            {
+                rel           => 'create',
+                href          => '/create',
+                method        => 'POST',
+                data_schema   => {
+                    type       => 'object',
+                    properties => {
+                        user  => { '$ref' => 'schema/core/ref' },
+                        items => {
+                            type  => 'array',
+                            items => { '$ref' => 'schema/core/ref' }
+                        },
+                    }
+                },
+                target_schema => {
+                    type       => 'object',
+                    extends    => { '$ref' => 'schema/web/resource' },
+                    properties => {
+                        body => { '$ref' => '#' },
+                    }
+                },
+            },
+            {
+                rel           => 'read',
+                href          => '/:id',
+                method        => 'GET',
+                target_schema => {
+                    type       => 'object',
+                    extends    => { '$ref' => 'schema/web/resource' },
+                    properties => {
+                        body => { '$ref' => '#' },
+                    }
+                },
+                uri_schema    => {
+                    id => { type => 'string' }
+                }
+            },
+            {
+                rel           => 'delete',
+                href          => '/:id/delete',
+                method        => 'DELETE',
+                uri_schema    => {
+                    id => { type => 'string' }
+                }
+            }
+        ]
     };
 
     service 'MyShoppingCartRepo' => (
@@ -204,9 +237,7 @@ my $serializer = $c->resolve(
 test_psgi( app => $app, client => sub {
     my $cb = shift;
 
-    my ($user, @products);
-
-    diag("POSTing user");
+    diag("POST-ing user");
     {
         my $req = POST("http://localhost/user/create" => (
             Content => '{"username":"stevan"}'
@@ -214,12 +245,8 @@ test_psgi( app => $app, client => sub {
         my $res = $cb->($req);
         is($res->code, 201, '... got the right status for creation');
         is($res->header('Location'), 'user/1', '... got the right URL for the item');
-
-        # save this for later ...
-        $user = $serializer->deserialize( $res->content );
-
         is_deeply(
-            $user,
+            $serializer->deserialize( $res->content ),
             {
                 id   => 1,
                 body => {
@@ -239,7 +266,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("POSTing user");
+    diag("GET-ing user");
     {
         my $req = GET("http://localhost/user/1");
         my $res = $cb->($req);
@@ -265,7 +292,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("POSTing product");
+    diag("POST-ing product");
     {
         my $req = POST("http://localhost/product/create" => (
             Content => '{"sku":"123456","desc":"disco-ball"}'
@@ -273,12 +300,8 @@ test_psgi( app => $app, client => sub {
         my $res = $cb->($req);
         is($res->code, 201, '... got the right status for creation');
         is($res->header('Location'), 'product/1', '... got the right URL for the item');
-
-        # save this for later ...
-        push @products => $serializer->deserialize( $res->content );
-
         is_deeply(
-            $products[ $#products ],
+            $serializer->deserialize( $res->content ),
             {
                 id   => 1,
                 body => {
@@ -299,7 +322,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("POSTing product");
+    diag("POST-ing product");
     {
         my $req = POST("http://localhost/product/create" => (
             Content => '{"sku":"227272","desc":"dancin-shoes"}'
@@ -307,12 +330,8 @@ test_psgi( app => $app, client => sub {
         my $res = $cb->($req);
         is($res->code, 201, '... got the right status for creation');
         is($res->header('Location'), 'product/2', '... got the right URL for the item');
-
-        # save this for later ...
-        push @products => $serializer->deserialize( $res->content );
-
         is_deeply(
-            $products[ $#products ],
+            $serializer->deserialize( $res->content ),
             {
                 id   => 2,
                 body => {
@@ -333,10 +352,16 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("POSTing cart");
+    diag("POST-ing cart");
     {
         my $req = POST("http://localhost/cart/create" => (
-            Content => $serializer->serialize({ user => $user, items => [ @products ] })
+            Content => $serializer->serialize({
+                user  => { '$ref' => '1' },
+                items => [
+                    { '$ref' => '1' },
+                    { '$ref' => '2' }
+                ]
+            })
         ));
         my $res = $cb->($req);
         is($res->code, 201, '... got the right status for creation');
@@ -398,11 +423,8 @@ test_psgi( app => $app, client => sub {
                 },
                 version => '6f2b0ecaeb1dfc8fc50c2bb0cae7c685969793ea2aee5016dd2075c76ae40a94',
                 links => [
-                    { rel => "describedby", href => "cart/schema",   method => "GET"    },
-                    { rel => "list",        href => "cart",          method => "GET"    },
                     { rel => "create",      href => "cart/create",   method => "POST"   },
                     { rel => "read",        href => "cart/1",        method => "GET"    },
-                    { rel => "edit",        href => "cart/1/edit",   method => "PUT"    },
                     { rel => "delete",      href => "cart/1/delete", method => "DELETE" },
                 ]
             },
@@ -410,7 +432,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("GETing cart");
+    diag("GET-ing cart");
     {
         my $req = GET("http://localhost/cart/1");
         my $res = $cb->($req);
@@ -472,11 +494,8 @@ test_psgi( app => $app, client => sub {
                 },
                 version => '6f2b0ecaeb1dfc8fc50c2bb0cae7c685969793ea2aee5016dd2075c76ae40a94',
                 links => [
-                    { rel => "describedby", href => "cart/schema",   method => "GET"    },
-                    { rel => "list",        href => "cart",          method => "GET"    },
                     { rel => "create",      href => "cart/create",   method => "POST"   },
                     { rel => "read",        href => "cart/1",        method => "GET"    },
-                    { rel => "edit",        href => "cart/1/edit",   method => "PUT"    },
                     { rel => "delete",      href => "cart/1/delete", method => "DELETE" },
                 ]
             },
@@ -484,7 +503,23 @@ test_psgi( app => $app, client => sub {
         );
     }
 
+    diag("DELETE-ing cart (with conditional match)");
+    {
+        my $req = GET("http://localhost/cart/1/delete" => (
+            'If-Matches' => '6f2b0ecaeb1dfc8fc50c2bb0cae7c685969793ea2aee5016dd2075c76ae40a94'
+        ));
+        my $res = $cb->($req);
+        is($res->code, 204, '... got the right status for delete');
+        is( $res->content, '', '... got the right value for delete' );
+    }
 
+    diag("GET-ing cart (but get 404 because we deleted it)");
+    {
+        my $req = GET("http://localhost/cart/1");
+        my $res = $cb->($req);
+        is($res->code, 404, '... got the right status for creation');
+        like( $res->content, qr/404 Resource Not Found \: no resource for id \(1\)/, '... got the right value for the 404' );
+    }
 });
 
 
