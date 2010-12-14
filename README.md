@@ -20,15 +20,15 @@ YAML or a dialect of XML. The schema language is also self-describing, meaning t
 each core element of the language is described with the language itself. There is
 support for a set of core types which are shown below in the type heirarchy.
 
-  Any
-      Null
-      Boolean
-      Number
-          Integer
-      String
-      Array[ T ]
-      Object[ String, T ]
-        Schema
+    Any
+        Null
+        Boolean
+        Number
+            Integer
+        String
+        Array[ T ]
+        Object[ String, T ]
+          Schema
 
 Additionally the core schema language also supports references (using the JSPON
 $ref syntax) and through the use of references it is also possible to 'extend'
