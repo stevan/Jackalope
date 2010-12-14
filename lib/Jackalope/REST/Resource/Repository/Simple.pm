@@ -14,6 +14,8 @@ has 'db' => (
     default => sub { +{} }
 );
 
+sub get_next_id { ++$ID_COUNTERS{ $_[0] . "" } }
+
 sub list {
     my $self = shift;
     return [ map { [ $_, $self->db->{ $_ } ] } sort keys %{ $self->db } ]
@@ -21,7 +23,7 @@ sub list {
 
 sub create {
     my ($self, $data) = @_;
-    my $id = ++$ID_COUNTERS{ "$self" };
+    my $id = $self->get_next_id;
     $self->db->{ $id } = $data;
     return ( $id, $data );
 }

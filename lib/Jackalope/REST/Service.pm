@@ -4,6 +4,7 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use List::AllUtils 'first';
 use Try::Tiny;
 use Class::Load 'load_class';
 use Path::Router;
@@ -45,7 +46,8 @@ has 'router' => (
     is      => 'ro',
     isa     => 'Path::Router',
     lazy    => 1,
-    builder => 'build_router'
+    builder => 'build_router',
+    writer  => 'update_router',
 );
 
 my %REL_TO_TARGET_CLASS = (
@@ -74,13 +76,15 @@ sub get_target_class_for_link {
 sub build_router {
     my $self   = shift;
     my $router = Path::Router->new;
+    my $schema = $self->compiled_schema;
 
-    foreach my $link ( @{ $self->compiled_schema->{'links'} }) {
+    foreach my $link ( @{ $schema->{'links'} }) {
         $router->add_route(
             $link->{'href'},
             defaults => {
                 rel    => $link->{'rel'},
                 method => $link->{'method'},
+                schema => $schema->{'id'}
             },
             target  => $self->get_target_class_for_link( $link )->new(
                 service => $self,
@@ -90,6 +94,45 @@ sub build_router {
     }
 
     $router;
+}
+
+sub generate_read_link_for_resource {
+    my ($self, $resource) = @_;
+    my $schema = $self->compiled_schema;
+    my $link   = first { $_->{'rel'} eq 'read' } @{ $schema->{'links'} };
+    # FIXME
+    # This should just return undef or something
+    # throwing an exception is kinda extreme
+    # - SL
+    (defined $link)
+        || confess("Could not generate read link for id (" . $resource->id . ")");
+    $self->router->uri_for(
+        rel    => $link->{'rel'},
+        method => $link->{'method'},
+        schema => $schema->{'id'},
+        id     => $resource->id
+    )
+}
+
+sub generate_links_for_resource {
+    my ($self, $resource) = @_;
+    my $schema = $self->compiled_schema;
+    $resource->add_links(
+        map {
+            +{
+                rel    => $_->{'rel'},
+                method => $_->{'method'},
+                href   => $self->router->uri_for(
+                    rel    => $_->{'rel'},
+                    method => $_->{'method'},
+                    schema => $schema->{'id'},
+                    (exists $_->{'uri_schema'}
+                        ? ( id => $resource->id )
+                        : ())
+                )
+            }
+        } @{ $schema->{'links'} }
+    );
 }
 
 __PACKAGE__->meta->make_immutable;

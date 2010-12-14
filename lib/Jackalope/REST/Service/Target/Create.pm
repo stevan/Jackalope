@@ -12,7 +12,7 @@ sub execute {
     return $error if $error;
     return $self->process_psgi_output([
         201,
-        [ 'Location' => $self->generate_read_link_for_resource( $resource ) ],
+        [ 'Location' => $self->service->generate_read_link_for_resource( $resource ) ],
         [ $resource ]
     ]);
 }

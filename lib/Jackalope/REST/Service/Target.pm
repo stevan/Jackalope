@@ -4,7 +4,6 @@ use Moose::Role;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use List::AllUtils 'first';
 use Try::Tiny;
 use Data::Dump;
 use Jackalope::REST::Error::InternalServerError;
@@ -67,12 +66,12 @@ sub verify_and_prepare_output {
 
     if (ref $result eq 'ARRAY') {
         foreach my $resource ( @$result) {
-            $self->generate_links_for_resource( $resource );
+            $self->service->generate_links_for_resource( $resource );
         }
         $self->check_target_schema( [ map { $_->pack } @$result ] );
     }
     elsif (blessed $result) {
-        $self->generate_links_for_resource( $result );
+        $self->service->generate_links_for_resource( $result );
         $self->check_target_schema( $result->pack );
     }
 
@@ -181,37 +180,6 @@ sub check_target_schema {
             $self->throw_server_error("Output failed to validate against target_schema because : " . (Data::Dump::dump $result));
         }
     }
-}
-
-sub generate_read_link_for_resource {
-    my ($self, $resource) = @_;
-    my $link = first { $_->{'rel'} eq 'read' } @{ $self->service->compiled_schema->{'links'} };
-    # FIXME
-    # This should just return undef or something
-    # throwing an exception is kinda extreme
-    # - SL
-    (defined $link)
-        || $self->throw_server_error("Could not generate read link for id (" . $resource->id . ")");
-    $self->router->uri_for( rel => $link->{'rel'}, method => $link->{'method'}, id => $resource->id )
-}
-
-sub generate_links_for_resource {
-    my ($self, $resource) = @_;
-    $resource->add_links(
-        map {
-            +{
-                rel    => $_->{'rel'},
-                method => $_->{'method'},
-                href   => $self->router->uri_for(
-                    rel    => $_->{'rel'},
-                    method => $_->{'method'},
-                    (exists $_->{'uri_schema'}
-                        ? ( id => $resource->id )
-                        : ())
-                )
-            }
-        } @{ $self->service->compiled_schema->{'links'} }
-    );
 }
 
 requires 'execute';
