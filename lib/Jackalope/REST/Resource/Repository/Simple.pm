@@ -6,7 +6,7 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 with 'Jackalope::REST::Resource::Repository';
 
-my $ID_COUNTER = 0;
+my %ID_COUNTERS;
 
 has 'db' => (
     is      => 'ro',
@@ -21,7 +21,7 @@ sub list {
 
 sub create {
     my ($self, $data) = @_;
-    my $id = ++$ID_COUNTER;
+    my $id = ++$ID_COUNTERS{ "$self" };
     $self->db->{ $id } = $data;
     return ( $id, $data );
 }

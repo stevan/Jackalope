@@ -96,6 +96,27 @@
     - jackalope/web/rest/resource
     - jackalope/web/rest/service
 
+== KNOWN ISSUES ==
+
+- Jackalope::Schema::Respository
+    - extending a self referencing schema in a properties is not allowed
+      but you can do it in links, so something like this ...
+          {
+            id => "foo/schema",
+            properties => {
+                bar => { extends => { $ref => "#" } }
+            }
+          }
+      will not work correctly because it would lead to a circular loop.
+      However, this does work:
+          {
+            id => "foo/schema",
+            properties => {
+                bar => { $ref => "#" }
+            }
+          }
+      the solution is to make another schema for 'bar' excplictly, however
+      we do not properly throw an error now, which is bad.
 
 == LOW PRIORITY ==
 

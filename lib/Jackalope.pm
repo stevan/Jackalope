@@ -47,7 +47,7 @@ sub BUILD {
         # schema repository, this infers
         # all the other stuff as well, like
         # the spec and the validators
-        typemap 'Jackalope::Schema::Repository' => infer;
+        typemap 'Jackalope::Schema::Repository' => infer( lifecycle => 'Singleton' );
     };
 }
 

@@ -203,7 +203,7 @@ sub _prepare_schema_for_compiling {
     # NOTE:
     # this might not be good idea
     # - SL
-    $schema->{'compiled'}->{'id'} ||= Data::UUID->new->create_str;
+    delete $schema->{'compiled'}->{'id'} unless $schema->{'compiled'}->{'id'};
 
     return $schema;
 }

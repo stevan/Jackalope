@@ -62,7 +62,10 @@ is($employee->{'type'}, 'object', '... it is the right employee type');
 ok(exists $employee->{'links'}, '... employee has the links key');
 isnt($employee->{'links'}, $person->{'links'}, '... employee has a different links list then person');
 
+is($employee->{'properties'}->{'manager'}, $employee, '... manager schema is inflated correctly');
+
 is($employee->{'links'}->[0]->{'target_schema'}, $employee, '... employee link goes to itself in the target_schema');
 is($person->{'links'}->[0]->{'target_schema'}, $person, '... person link goes to itself in the target_schema');
+
 
 done_testing;
