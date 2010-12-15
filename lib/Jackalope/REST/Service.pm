@@ -61,14 +61,18 @@ my %REL_TO_TARGET_CLASS = (
 
 sub get_target_class_for_link {
     my ($self, $link) = @_;
-    # TODO:
-    # add support for putting the target_class
-    # in the metadata as well
-    # - SL
-    (exists $REL_TO_TARGET_CLASS{ lc $link->{'rel'} })
+
+    my $target_class;
+    if (exists $REL_TO_TARGET_CLASS{ lc $link->{'rel'} }) {
+        $target_class = $REL_TO_TARGET_CLASS{ lc $link->{'rel'} };
+    }
+    else {
+        $target_class = join '::' => map { ucfirst $_ } split '/' => $link->{'rel'};
+    }
+
+    (defined $target_class)
         || confess "No target class found for rel (" . $link->{'rel'} . ")";
 
-    my $target_class = $REL_TO_TARGET_CLASS{ lc $link->{'rel'} };
     load_class( $target_class );
     return $target_class;
 }

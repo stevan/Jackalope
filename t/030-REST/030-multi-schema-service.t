@@ -52,6 +52,18 @@ use Plack::App::Path::Router;
         return $self->inflate_user_and_items( clone( $self->db->{ $id } ) );
     }
 
+    sub add_item {
+        my ($self, $id, $data) = @_;
+
+        my $cart = $self->db->{ $id };
+        push @{ $cart->{'items'} } => $data;
+
+        return $self->wrap_data(
+            $id,
+            $self->inflate_user_and_items( clone( $cart ) )
+        );
+    }
+
     sub inflate_user_and_items {
         my ($self, $cart) = @_;
 
@@ -68,6 +80,23 @@ use Plack::App::Path::Router;
         ];
 
         $cart;
+    }
+}
+
+{
+    package My::ShoppingCart::Target::AddItem;
+    use Moose;
+
+    our $VERSION   = '0.01';
+    our $AUTHORITY = 'cpan:STEVAN';
+
+    with 'Jackalope::REST::Service::Target';
+
+    sub execute {
+        my ($self, $r, @args) = @_;
+        my ($resource, $error) = $self->process_operation( 'add_item' => ( $r, @args ) );
+        return $error if $error;
+        return $self->process_psgi_output([ 202, [], [ $resource ] ]);
     }
 }
 
@@ -167,6 +196,22 @@ my $c = container $j => as {
                 rel           => 'read',
                 href          => '/:id',
                 method        => 'GET',
+                target_schema => {
+                    type       => 'object',
+                    extends    => { '$ref' => 'schema/web/resource' },
+                    properties => {
+                        body => { '$ref' => '#' },
+                    }
+                },
+                uri_schema    => {
+                    id => { type => 'string' }
+                }
+            },
+            {
+                rel           => 'my/shoppingCart/target/addItem',
+                href          => '/:id/add_item',
+                method        => 'PUT',
+                data_schema   => { '$ref' => 'schema/core/ref' },
                 target_schema => {
                     type       => 'object',
                     extends    => { '$ref' => 'schema/web/resource' },
@@ -352,6 +397,36 @@ test_psgi( app => $app, client => sub {
         );
     }
 
+    diag("POST-ing product");
+    {
+        my $req = POST("http://localhost/product/create" => (
+            Content => '{"sku":"3838372","desc":"polyester-suit"}'
+        ));
+        my $res = $cb->($req);
+        is($res->code, 201, '... got the right status for creation');
+        is($res->header('Location'), 'product/3', '... got the right URL for the item');
+        is_deeply(
+            $serializer->deserialize( $res->content ),
+            {
+                id   => 3,
+                body => {
+                    sku  => "3838372",
+                    desc => "polyester-suit"
+                },
+                version => 'e13d199dae9e277e852c79b236106d4727ed52be9bee385c39fa66c9475aa4ff',
+                links => [
+                    { rel => "describedby", href => "product/schema",   method => "GET"    },
+                    { rel => "list",        href => "product",          method => "GET"    },
+                    { rel => "create",      href => "product/create",   method => "POST"   },
+                    { rel => "read",        href => "product/3",        method => "GET"    },
+                    { rel => "edit",        href => "product/3/edit",   method => "PUT"    },
+                    { rel => "delete",      href => "product/3/delete", method => "DELETE" },
+                ]
+            },
+            '... got the right value for creation'
+        );
+    }
+
     diag("POST-ing cart");
     {
         my $req = POST("http://localhost/cart/create" => (
@@ -423,9 +498,10 @@ test_psgi( app => $app, client => sub {
                 },
                 version => '6f2b0ecaeb1dfc8fc50c2bb0cae7c685969793ea2aee5016dd2075c76ae40a94',
                 links => [
-                    { rel => "create",      href => "cart/create",   method => "POST"   },
-                    { rel => "read",        href => "cart/1",        method => "GET"    },
-                    { rel => "delete",      href => "cart/1/delete", method => "DELETE" },
+                    { rel => "create",                         href => "cart/create",     method => "POST"   },
+                    { rel => "read",                           href => "cart/1",          method => "GET"    },
+                    { rel => "my/shoppingCart/target/addItem", href => "cart/1/add_item", method => "PUT"    },
+                    { rel => "delete",                         href => "cart/1/delete",   method => "DELETE" },
                 ]
             },
             '... got the right value for creation'
@@ -494,9 +570,100 @@ test_psgi( app => $app, client => sub {
                 },
                 version => '6f2b0ecaeb1dfc8fc50c2bb0cae7c685969793ea2aee5016dd2075c76ae40a94',
                 links => [
-                    { rel => "create",      href => "cart/create",   method => "POST"   },
-                    { rel => "read",        href => "cart/1",        method => "GET"    },
-                    { rel => "delete",      href => "cart/1/delete", method => "DELETE" },
+                    { rel => "create",                         href => "cart/create",     method => "POST"   },
+                    { rel => "read",                           href => "cart/1",          method => "GET"    },
+                    { rel => "my/shoppingCart/target/addItem", href => "cart/1/add_item", method => "PUT"    },
+                    { rel => "delete",                         href => "cart/1/delete",   method => "DELETE" },
+                ]
+            },
+            '... got the right value for creation'
+        );
+    }
+
+    diag("PUT-ing a new item");
+    {
+        my $req = PUT("http://localhost/cart/1/add_item" => (
+            Content => '{"$ref":"3"}'
+        ));
+        my $res = $cb->($req);
+        is($res->code, 202, '... got the right status for adding an item');
+        is_deeply(
+            $serializer->deserialize( $res->content ),
+            {
+                id   => 1,
+                body => {
+                    user => {
+                        id   => 1,
+                        body => {
+                            username => 'stevan'
+                        },
+                        version => '7f53a57fae8a7548af8677e60a46c2526d85569b1752ac679b376880bdd4f2a2',
+                        links => [
+                            { rel => "describedby", href => "user/schema",   method => "GET"    },
+                            { rel => "list",        href => "user",          method => "GET"    },
+                            { rel => "create",      href => "user/create",   method => "POST"   },
+                            { rel => "read",        href => "user/1",        method => "GET"    },
+                            { rel => "edit",        href => "user/1/edit",   method => "PUT"    },
+                            { rel => "delete",      href => "user/1/delete", method => "DELETE" },
+                        ]
+                    },
+                    items => [
+                        {
+                            id   => 1,
+                            body => {
+                                sku  => "123456",
+                                desc => "disco-ball"
+                            },
+                            version => '07c302816348f4e67f0a8f3701aca90330c65a5030f48a2dbb891bcc6c18520d',
+                            links => [
+                                { rel => "describedby", href => "product/schema",   method => "GET"    },
+                                { rel => "list",        href => "product",          method => "GET"    },
+                                { rel => "create",      href => "product/create",   method => "POST"   },
+                                { rel => "read",        href => "product/1",        method => "GET"    },
+                                { rel => "edit",        href => "product/1/edit",   method => "PUT"    },
+                                { rel => "delete",      href => "product/1/delete", method => "DELETE" },
+                            ]
+                        },
+                        {
+                            id   => 2,
+                            body => {
+                                sku  => "227272",
+                                desc => "dancin-shoes"
+                            },
+                            version => 'd2e63b1870594d57bc16999e7f61e1f84fe91ba1cd47388a85d52fda206cb1cc',
+                            links => [
+                                { rel => "describedby", href => "product/schema",   method => "GET"    },
+                                { rel => "list",        href => "product",          method => "GET"    },
+                                { rel => "create",      href => "product/create",   method => "POST"   },
+                                { rel => "read",        href => "product/2",        method => "GET"    },
+                                { rel => "edit",        href => "product/2/edit",   method => "PUT"    },
+                                { rel => "delete",      href => "product/2/delete", method => "DELETE" },
+                            ]
+                        },
+                        {
+                            id   => 3,
+                            body => {
+                                sku  => "3838372",
+                                desc => "polyester-suit"
+                            },
+                            version => 'e13d199dae9e277e852c79b236106d4727ed52be9bee385c39fa66c9475aa4ff',
+                            links => [
+                                { rel => "describedby", href => "product/schema",   method => "GET"    },
+                                { rel => "list",        href => "product",          method => "GET"    },
+                                { rel => "create",      href => "product/create",   method => "POST"   },
+                                { rel => "read",        href => "product/3",        method => "GET"    },
+                                { rel => "edit",        href => "product/3/edit",   method => "PUT"    },
+                                { rel => "delete",      href => "product/3/delete", method => "DELETE" },
+                            ]
+                        }
+                    ]
+                },
+                version => 'a59edbdb6b270e3cdb74e8e729f6a9ea2f82fc9b72db3813159f3516205fe29c',
+                links => [
+                    { rel => "create",                         href => "cart/create",     method => "POST"   },
+                    { rel => "read",                           href => "cart/1",          method => "GET"    },
+                    { rel => "my/shoppingCart/target/addItem", href => "cart/1/add_item", method => "PUT"    },
+                    { rel => "delete",                         href => "cart/1/delete",   method => "DELETE" },
                 ]
             },
             '... got the right value for creation'
@@ -506,7 +673,7 @@ test_psgi( app => $app, client => sub {
     diag("DELETE-ing cart (with conditional match)");
     {
         my $req = GET("http://localhost/cart/1/delete" => (
-            'If-Matches' => '6f2b0ecaeb1dfc8fc50c2bb0cae7c685969793ea2aee5016dd2075c76ae40a94'
+            'If-Matches' => 'a59edbdb6b270e3cdb74e8e729f6a9ea2f82fc9b72db3813159f3516205fe29c'
         ));
         my $res = $cb->($req);
         is($res->code, 204, '... got the right status for delete');
