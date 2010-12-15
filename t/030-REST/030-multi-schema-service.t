@@ -55,10 +55,10 @@ use Plack::App::Path::Router;
 
     sub add_item {
         my ($self, $id, $data) = @_;
-
         my $cart = $self->db->{ $id };
+        (defined $cart)
+            || Jackalope::REST::Error::ResourceNotFound->throw("no cart for id ($id)");
         push @{ $cart->{'items'} } => $data;
-
         return $self->wrap_data(
             $id,
             $self->inflate_user_and_items( clone( $cart ) )
