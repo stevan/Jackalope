@@ -27,6 +27,7 @@ use Plack::App::Path::Router;
     package My::ShoppingCart::Repo;
     use Moose;
     use Clone 'clone';
+    use Jackalope::REST::Error::NotImplemented;
 
     extends 'Jackalope::REST::Resource::Repository::Simple';
 
@@ -36,8 +37,8 @@ use Plack::App::Path::Router;
         required => 1,
     );
 
-    sub list   { die "Not supported" }
-    sub update { die "Not supported" }
+    sub list   { Jackalope::REST::Error::NotImplemented->throw("List is not supported") }
+    sub update { Jackalope::REST::Error::NotImplemented->throw("Update is not supported") }
 
     sub create {
         my ($self, $data) = @_;

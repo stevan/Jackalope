@@ -9,6 +9,8 @@ use Jackalope::REST::Resource;
 use Jackalope::REST::Error::ResourceNotFound;
 use Jackalope::REST::Error::BadRequest;
 use Jackalope::REST::Error::ConflictDetected;
+use Jackalope::REST::Error::MethodNotAllowed;
+use Jackalope::REST::Error::NotImplemented;
 
 has 'resource_class' => (
     is      => 'ro',

@@ -29,6 +29,11 @@
       the same resource if it hasn't been changed, which means checking
       the version to be sure before we do anything
     - read about 201 Created in http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+    - we should be checking methods too and returning 405 when we find something amis
+        - 405 -> The method specified in the Request-Line is not allowed for the resource
+                 identified by the Request-URI. The response MUST include an Allow header
+                 containing a list of valid methods for the requested resource.
+    - might want to return 412 Precondition Failed when delete If-Matches fails
 
 - spec for REST API
     - NOTE: This is heavily inspired by the ATOM publishing protocol
