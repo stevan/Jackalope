@@ -242,7 +242,9 @@ sub _flatten_extends {
 sub _merge_schema {
     my ($self, $schema, $super, $schema_map) = @_;
     foreach my $key ( keys %{ $super->{'raw'} } ) {
-        next if $key eq 'id'; # ID should never be copied
+        next if $key eq 'id'                     # ID should never be copied
+             || $key eq 'properties'             # properties will be copied later
+             || $key eq 'additional_properties'; # additional_properties will be copied later
         if ( not exists $schema->{'raw'}->{ $key } ) {
             $schema->{'compiled'}->{ $key } = ref $super->{'raw'}->{ $key }
                                             ? clone( $super->{'raw'}->{ $key } )

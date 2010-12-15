@@ -1,96 +1,48 @@
 
 = TODOS =
 
-- Jackalope::REST::Resource::Repository
-    - this should return perl data structures to the web-service
-      which should be the resource wrapper, minus the links, which
-      are to be filled in by the web-service
-    - &list should optionally take some parameters
-        - search term(s)
-        - start/end for paging of results
-        - add this to the corresponding schema/web/service as well
-    - Resource wrapper notes
-        - the elements of the link are also the elements
-          that the Router would use to construct the URLs
-          so that fits together nicely
-        - the version string is a SHA1 of the content, so that we can
-          take advantage of ETags
-            - read up on http://en.wikipedia.org/wiki/HTTP_ETag
-
-- Jackalope::REST::Service
-    - we need to write defaults into the route so that they
-      can be idenfified from the outside and URIs can be created
-        - the method and rel should do enough
-    - it can make some assumptions about the repository
-      knowing that it is going to use the Jackalope::REST::Resource::Repository
-      role, this should simplify the metadata even more
-      if not eliminate the metadata completely
-    - Remember, PUT actions are Idempotent, you should always return
-      the same resource if it hasn't been changed, which means checking
-      the version to be sure before we do anything
-    - read about 201 Created in http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
-    - we should be checking methods too and returning 405 when we find something amis
-        - 405 -> The method specified in the Request-Line is not allowed for the resource
-                 identified by the Request-URI. The response MUST include an Allow header
-                 containing a list of valid methods for the requested resource.
-    - might want to return 412 Precondition Failed when delete If-Matches fails
-
-- spec for REST API
-    - NOTE: This is heavily inspired by the ATOM publishing protocol
-    - CRUD actions
-        - describedby
-            - return the schema that it is created with
-        - listing
-            - listing is done by GETing to the URI of a collection
-            - the result is basically a list of resources, nothing more
-            - this should take search params and paging params as well
-            - returns 200 status
-        - creation
-            - creation is done by POSTing to the specified creation URI
-            - returns a 201 status
-            - the response Location header should provide the link to read the resource
-            - the newly created resource should be in the body of the response
-                - the resource should include links that
-                  provide hrefs for the various other actions
-        - read
-            - returns 200 status
-            - reading is done by GETing the specified reading URI
-                - the resource id should be embedded in the URI
-        - update
-            - returns 202 status
-            - updating is done by PUTing to the specified update URI
-                - the resource id should be embedded in the URI
-                - you need to PUT the full wrapped resource (minus the links metadata)
-                  so that we can also test the version string to make sure it is in sync
-            - the updated resource is sent back in the body of the request
-        - delete
-            - returns 204 status
-            - deletion is done by sending DELETE to the specified deletion URI
-                - the id should be embedded in the URI
-                - an optional If-Matches header is supported for version checking
-    - Caching options
-        - we should support eTags and conditional GETS, but this is more for the client end
-            - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#edit-no-lost-update
-            - this will allow us to do two things
-                1) cache more effectively
-                2) detect conflicts
-            - this should gel with the 'version' field in the resource spec
-    - Media (binary data)
-        - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#media-link-entries
-
 - Jackalope.Schema.Repository
     - refactor the compilation process
       to match the Perl version
         - the 003-web.t.js tests are broken because of this
     - ponder separating the web part of the schema afects the JS
 
+- Jackalope::REST::Schema::Spec
+    - perhaps support a simpler web/service, maybe a read-only one?
+    - perhaps a more complex ref type that can refer to other services or repos?
+
+- Jackalope::REST::Resource::Repository
+    - not sure I really like having to return NotImplmented in the
+      repo subclass in 030-multi-schema-service.t, it would be nice
+      if we could compose this more such that I don't have to have
+      it if I don't want it.
+    - &list should optionally take some parameters
+        - search term(s)
+        - start/end for paging of results
+        - add this to the corresponding schema/web/service as well
+    - Resource wrapper notes
+        - the version string is a SHA1 of the content, so that we can
+          take advantage of ETags
+            - read up on http://en.wikipedia.org/wiki/HTTP_ETag
+
+- Jackalope::REST::Service
+    - we should be checking methods too and returning 405 when we find something amis
+        - 405 -> The method specified in the Request-Line is not allowed for the resource
+                 identified by the Request-URI. The response MUST include an Allow header
+                 containing a list of valid methods for the requested resource.
+    - might want to return 412 Precondition Failed when delete If-Matches fails
+    - Caching options
+        - we should support eTags
+    - Media (binary data)
+        - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#media-link-entries
+
 - ponder spliting things up
     - Jackalope
     - Jackalope::Web::REST
     - Jackalope::JS
-    - the reasoning being that some parts are
-      more opinionated then others and it would
-      be nice to give people flexibility
+        - the reasoning being that some parts are
+          more opinionated then others and it would
+          be nice to give people flexibility
 
 - think about renaming the schema URIs
   to something more sensible, like ...

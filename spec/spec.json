@@ -40,6 +40,15 @@
          "type" : "object",
          "links" : [
             {
+               "rel" : "describedby",
+               "target_schema" : {
+                  "$ref" : "schema/types/schema"
+               },
+               "href" : "/schema",
+               "method" : "GET"
+            },
+            {
+               "rel" : "list",
                "target_schema" : {
                   "type" : "array",
                   "items" : {
@@ -55,10 +64,10 @@
                   }
                },
                "href" : "/",
-               "relation" : "list",
                "method" : "GET"
             },
             {
+               "rel" : "create",
                "data_schema" : {
                   "$ref" : "#"
                },
@@ -73,11 +82,11 @@
                      }
                   }
                },
-               "href" : "/",
-               "relation" : "create",
+               "href" : "/create",
                "method" : "POST"
             },
             {
+               "rel" : "read",
                "target_schema" : {
                   "type" : "object",
                   "extends" : {
@@ -95,12 +104,20 @@
                   }
                },
                "href" : "/:id",
-               "relation" : "read",
                "method" : "GET"
             },
             {
+               "rel" : "edit",
                "data_schema" : {
-                  "$ref" : "#"
+                  "type" : "object",
+                  "extends" : {
+                     "$ref" : "schema/web/resource"
+                  },
+                  "properties" : {
+                     "body" : {
+                        "$ref" : "#"
+                     }
+                  }
                },
                "target_schema" : {
                   "type" : "object",
@@ -118,18 +135,17 @@
                      "type" : "string"
                   }
                },
-               "href" : "/:id",
-               "relation" : "edit",
+               "href" : "/:id/edit",
                "method" : "PUT"
             },
             {
+               "rel" : "delete",
                "uri_schema" : {
                   "id" : {
                      "type" : "string"
                   }
                },
-               "href" : "/:id",
-               "relation" : "delete",
+               "href" : "/:id/delete",
                "method" : "DELETE"
             }
          ]
@@ -207,6 +223,15 @@
          }
       },
       "schema/web/resource" : {
+         "additional_properties" : {
+            "links" : {
+               "type" : "array",
+               "description" : "This is a list of links which represent the\ncapabilities of given resource, the consumer of\nthe resource can use these links to perform\ndifferent actions.\n",
+               "items" : {
+                  "$ref" : "schema/core/xlink"
+               }
+            }
+         },
          "id" : "schema/web/resource",
          "title" : "The 'Resource' schema",
          "type" : "object",
@@ -217,20 +242,13 @@
                "description" : "This is the body of the resource, it is of type\n'any' for now, but it as this schema is meant to\nbe extended and this property overridden, this is\nbasically whatever you need it to be.\n"
             },
             "version" : {
-               "format" : "uuid",
+               "format" : "digest",
                "type" : "string",
-               "description" : "This is a UUID string representing the current\nversion of the resource. When the resource is updated\nthe version should be compared first, to make sure\nthat it has not been updated by another.\n"
+               "description" : "This is a digest string (SHA1?) representing the current\nversion of the resource. When the resource is updated\nthe version should be compared first, to make sure\nthat it has not been updated by another.\n"
             },
             "id" : {
                "type" : "string",
                "description" : "This is the ID of the given resource, it is\nassumed to be some kind of string, which should\nstill just work fine even for numeric values.\nThis is expected to be the lookup key for\nresources in a resource repository.\n"
-            },
-            "links" : {
-               "type" : "array",
-               "description" : "This is a list of links which represent the\ncapabilities of given resource, the consumer of\nthe resource can use these links to perform\ndifferent actions.\n",
-               "items" : {
-                  "$ref" : "schema/core/xlink"
-               }
             }
          }
       },
@@ -246,7 +264,8 @@
                   "uri",
                   "uri_template",
                   "regex",
-                  "uuid"
+                  "uuid",
+                  "digest"
                ],
                "type" : "string",
                "description" : "This is one of a set of built-in formatters"
@@ -477,14 +496,14 @@
          "type" : "object",
          "description" : "This is the 'link' type for the hyper schema\nwhich represents links for resources.\n",
          "properties" : {
+            "rel" : {
+               "type" : "string",
+               "description" : "This string should in some way describe the relation\nof the link to the object instance. The validity of\nthe values is determined by the consumer of the\nlink data. By convention it should either be one\nof well-know link relations, which can be found here\nhttp://www.iana.org/assignments/link-relations/link-relations.xhtml,\nor a URI specific to the consumer of this link data.\n"
+            },
             "href" : {
                "format" : "uri_template",
                "type" : "string",
                "description" : "This is a URI for the resource, it may also\nbe a URI template containing variables (using the\nRoR style colon prefix). In the case of these\ntemplates the variables should be resolved in\nthe context of the object instance. This means\nthat a template like so:\n/product/:id/view\nshould be resolved to be this:\n/product/1234/view\ngiven an object with an 'id' property of 1234.\n"
-            },
-            "relation" : {
-               "type" : "string",
-               "description" : "This string should in some way describe the relation\nof the link to the object instance. The validity of\nthe values is determined by the consumer of the\nlink data. By convention it should either be one\nof well-know link relations, which can be found here\nhttp://www.iana.org/assignments/link-relations/link-relations.xhtml,\nor a URI specific to the consumer of this link data.\n"
             }
          }
       },
@@ -506,14 +525,14 @@
          "type" : "object",
          "description" : "This is the 'link' type for the hyper schema\nwhich represents the concrete links that are\ndescribed with the hyperlink schema.\n",
          "properties" : {
+            "rel" : {
+               "type" : "string",
+               "description" : "This string describes the relation of the link\nto the actual resource it points to. For more\ndetails see the docs for the 'rel' element\nin the schema/core/hyperlink schema.\n"
+            },
             "href" : {
                "format" : "uri",
                "type" : "string",
                "description" : "This is a URI of the resource the link is pointing to.\n"
-            },
-            "relation" : {
-               "type" : "string",
-               "description" : "This string describes the relation of the link\nto the actual resource it points to. For more\ndetails see the docs for the 'relation' element\nin the schema/core/hyperlink schema.\n"
             }
          }
       },
@@ -578,7 +597,8 @@
          "uri",
          "uri_template",
          "regex",
-         "uuid"
+         "uuid",
+         "digest"
       ]
    },
    "authority" : "cpan:STEVAN"

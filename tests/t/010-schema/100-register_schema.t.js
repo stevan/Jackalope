@@ -29,12 +29,12 @@ test(
                     },
                     "links" : [
                         {
-                            "rel"      : "self",
+                            "rel"           : "self",
                             "href"          : "product/{id}/view",
                             "target_schema" : { "$ref" : "#" }
                         },
                         {
-                            "rel"    : "edit",
+                            "rel"         : "edit",
                             "href"        : "product/{id}/update",
                             "method"      : "POST",
                             "data_schema" : { "$ref" : "#" }
@@ -58,12 +58,12 @@ test(
                     },
                     "links" : [
                         {
-                            "rel"      : "/my_schemas/link/product_listing",
+                            "rel"           : "/my_schemas/link/product_listing",
                             "href"          : "product/list",
                             "target_schema" : { "$ref" : "#" }
                         },
                         {
-                            "rel"    : "create",
+                            "rel"         : "create",
                             "href"        : "product/create",
                             "method"      : "POST",
                             "data_schema" : { "$ref" : "/my_schemas/product" }

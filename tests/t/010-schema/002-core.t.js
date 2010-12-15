@@ -17,9 +17,9 @@ test(
 
         for (var i = 0; i < types.length; i++) {
             tester.validation_pass(
-                fixtures.repo.validate(
+                repo.validate(
                     { "$ref" : "schema/types/object" },
-                    fixtures.repo.compiled_schemas["schema/core/" + types[i]]
+                    repo.get_compiled_schema_by_uri("schema/core/" + types[i])
                 ),
                 "... validate the " + types[i] + " schema with the object type"
             );

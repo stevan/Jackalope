@@ -23,7 +23,7 @@ test(
             tester.validation_pass(
                 repo.validate(
                     { "$ref" : "schema/types/schema" },
-                    repo.compiled_schemas["schema/types/" + types[i]]
+                    repo.get_compiled_schema_for_type( types[i] )
                 ),
                 "... validate the " + types[i] + " schema with the schema type"
             );
@@ -32,7 +32,7 @@ test(
         tester.validation_pass(
             repo.validate(
                 { "$ref" : "schema/types/schema" },
-                repo.compiled_schemas["schema/types/schema"]
+                repo.get_compiled_schema_for_type("schema")
             ),
             "... validate the schema schema with the schema type (bootstrap)"
         );
