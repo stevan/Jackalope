@@ -65,6 +65,17 @@ use Plack::App::Path::Router;
         );
     }
 
+    sub remove_item {
+        my ($self, $id, $data) = @_;
+
+        my $cart = $self->db->{ $id };
+        $cart->{'items'} = [ grep { $_->{'$ref'} != $data->{'$ref'} } @{ $cart->{'items'} } ];
+        return $self->wrap_data(
+            $id,
+            $self->inflate_user_and_items( clone( $cart ) )
+        );
+    }
+
     sub inflate_user_and_items {
         my ($self, $cart) = @_;
 
@@ -96,6 +107,23 @@ use Plack::App::Path::Router;
     sub execute {
         my ($self, $r, @args) = @_;
         my ($resource, $error) = $self->process_operation( 'add_item' => ( $r, @args ) );
+        return $error if $error;
+        return $self->process_psgi_output([ 202, [], [ $resource ] ]);
+    }
+}
+
+{
+    package My::ShoppingCart::Target::RemoveItem;
+    use Moose;
+
+    our $VERSION   = '0.01';
+    our $AUTHORITY = 'cpan:STEVAN';
+
+    with 'Jackalope::REST::Service::Target';
+
+    sub execute {
+        my ($self, $r, @args) = @_;
+        my ($resource, $error) = $self->process_operation( 'remove_item' => ( $r, @args ) );
         return $error if $error;
         return $self->process_psgi_output([ 202, [], [ $resource ] ]);
     }
@@ -211,6 +239,22 @@ my $c = container $j => as {
             {
                 rel           => 'my/shoppingCart/target/addItem',
                 href          => '/:id/add_item',
+                method        => 'PUT',
+                data_schema   => { '$ref' => 'schema/core/ref' },
+                target_schema => {
+                    type       => 'object',
+                    extends    => { '$ref' => 'schema/web/resource' },
+                    properties => {
+                        body => { '$ref' => '#' },
+                    }
+                },
+                uri_schema    => {
+                    id => { type => 'string' }
+                }
+            },
+            {
+                rel           => 'my/shoppingCart/target/removeItem',
+                href          => '/:id/remove_item',
                 method        => 'PUT',
                 data_schema   => { '$ref' => 'schema/core/ref' },
                 target_schema => {
@@ -502,6 +546,7 @@ test_psgi( app => $app, client => sub {
                     { rel => "create",                         href => "cart/create",     method => "POST"   },
                     { rel => "read",                           href => "cart/1",          method => "GET"    },
                     { rel => "my/shoppingCart/target/addItem", href => "cart/1/add_item", method => "PUT"    },
+                    { rel => "my/shoppingCart/target/removeItem", href => "cart/1/remove_item", method => "PUT"    },
                     { rel => "delete",                         href => "cart/1/delete",   method => "DELETE" },
                 ]
             },
@@ -574,6 +619,7 @@ test_psgi( app => $app, client => sub {
                     { rel => "create",                         href => "cart/create",     method => "POST"   },
                     { rel => "read",                           href => "cart/1",          method => "GET"    },
                     { rel => "my/shoppingCart/target/addItem", href => "cart/1/add_item", method => "PUT"    },
+                    { rel => "my/shoppingCart/target/removeItem", href => "cart/1/remove_item", method => "PUT"    },
                     { rel => "delete",                         href => "cart/1/delete",   method => "DELETE" },
                 ]
             },
@@ -664,6 +710,7 @@ test_psgi( app => $app, client => sub {
                     { rel => "create",                         href => "cart/create",     method => "POST"   },
                     { rel => "read",                           href => "cart/1",          method => "GET"    },
                     { rel => "my/shoppingCart/target/addItem", href => "cart/1/add_item", method => "PUT"    },
+                    { rel => "my/shoppingCart/target/removeItem", href => "cart/1/remove_item", method => "PUT"    },
                     { rel => "delete",                         href => "cart/1/delete",   method => "DELETE" },
                 ]
             },
@@ -671,10 +718,88 @@ test_psgi( app => $app, client => sub {
         );
     }
 
+    diag("DELETE-ing a new item from cart");
+    {
+        # XX What is the right method here? DELETE to cart would make sense?
+        my $req = PUT("http://localhost/cart/1/remove_item" => (
+            Content => '{"$ref":"3"}'
+        ));
+        my $res = $cb->($req);
+        is($res->code, 202, '... got the right status for removing an item');
+#use Data::Dumper;diag(Dumper($serializer->deserialize($res->content)));
+        is_deeply(
+            $serializer->deserialize( $res->content ),
+            {
+                id   => 1,
+                body => {
+                    user => {
+                        id   => 1,
+                        body => {
+                            username => 'stevan'
+                        },
+                        version => '7f53a57fae8a7548af8677e60a46c2526d85569b1752ac679b376880bdd4f2a2',
+                        links => [
+                            { rel => "describedby", href => "user/schema",   method => "GET"    },
+                            { rel => "list",        href => "user",          method => "GET"    },
+                            { rel => "create",      href => "user/create",   method => "POST"   },
+                            { rel => "read",        href => "user/1",        method => "GET"    },
+                            { rel => "edit",        href => "user/1/edit",   method => "PUT"    },
+                            { rel => "delete",      href => "user/1/delete", method => "DELETE" },
+                        ]
+                    },
+                    items => [
+                        {
+                            id   => 1,
+                            body => {
+                                sku  => "123456",
+                                desc => "disco-ball"
+                            },
+                            version => '07c302816348f4e67f0a8f3701aca90330c65a5030f48a2dbb891bcc6c18520d',
+                            links => [
+                                { rel => "describedby", href => "product/schema",   method => "GET"    },
+                                { rel => "list",        href => "product",          method => "GET"    },
+                                { rel => "create",      href => "product/create",   method => "POST"   },
+                                { rel => "read",        href => "product/1",        method => "GET"    },
+                                { rel => "edit",        href => "product/1/edit",   method => "PUT"    },
+                                { rel => "delete",      href => "product/1/delete", method => "DELETE" },
+                            ]
+                        },
+                        {
+                            id   => 2,
+                            body => {
+                                sku  => "227272",
+                                desc => "dancin-shoes"
+                            },
+                            version => 'd2e63b1870594d57bc16999e7f61e1f84fe91ba1cd47388a85d52fda206cb1cc',
+                            links => [
+                                { rel => "describedby", href => "product/schema",   method => "GET"    },
+                                { rel => "list",        href => "product",          method => "GET"    },
+                                { rel => "create",      href => "product/create",   method => "POST"   },
+                                { rel => "read",        href => "product/2",        method => "GET"    },
+                                { rel => "edit",        href => "product/2/edit",   method => "PUT"    },
+                                { rel => "delete",      href => "product/2/delete", method => "DELETE" },
+                            ]
+                        },
+                    ]
+                },
+                version => '6f2b0ecaeb1dfc8fc50c2bb0cae7c685969793ea2aee5016dd2075c76ae40a94',
+                links => [
+                    { rel => "create",                         href => "cart/create",     method => "POST"   },
+                    { rel => "read",                           href => "cart/1",          method => "GET"    },
+                    { rel => "my/shoppingCart/target/addItem", href => "cart/1/add_item", method => "PUT"    },
+                    { rel => "my/shoppingCart/target/removeItem", href => "cart/1/remove_item", method => "PUT"    },
+                    { rel => "delete",                         href => "cart/1/delete",   method => "DELETE" },
+                ]
+            },
+            '... got the right value for creation'
+        );
+    }
+
+
     diag("DELETE-ing cart (with conditional match)");
     {
         my $req = GET("http://localhost/cart/1/delete" => (
-            'If-Matches' => 'a59edbdb6b270e3cdb74e8e729f6a9ea2f82fc9b72db3813159f3516205fe29c'
+            'If-Matches' => '6f2b0ecaeb1dfc8fc50c2bb0cae7c685969793ea2aee5016dd2075c76ae40a94'
         ));
         my $res = $cb->($req);
         is($res->code, 204, '... got the right status for delete');
