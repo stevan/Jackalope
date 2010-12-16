@@ -8,7 +8,7 @@ extends 'Jackalope::Schema::Spec';
 
 override '_all_spec_builder_methods' => sub {
     my $self = shift;
-    super(), qw[ resource service ]
+    super(), qw[ resource resource_ref service ]
 };
 
 ## ------------------------------------------------------------------
@@ -56,7 +56,7 @@ sub resource {
                 type        => "string",
                 'format'    => "digest",
                 description => q[
-                    This is a digest string (SHA1?) representing the current
+                    This is a digest string (SHA-256) representing the current
                     version of the resource. When the resource is updated
                     the version should be compared first, to make sure
                     that it has not been updated by another.
@@ -72,6 +72,58 @@ sub resource {
                     capabilities of given resource, the consumer of
                     the resource can use these links to perform
                     different actions.
+                ]
+            }
+        }
+    }
+}
+
+## ------------------------------------------------------------------
+## Resource Ref Schema
+## ------------------------------------------------------------------
+## The Resource Ref schema is meant to be a way to represent
+## references to resources, it can be a convient way to refer
+## to a resource only by it's ID and therefore save bandwidth.
+## ------------------------------------------------------------------
+
+sub resource_ref {
+    my $self = shift;
+    return +{
+        id          => "schema/web/resource/ref",
+        title       => "The 'Resource Ref' schema",
+        description => q[
+            This is meant to be a way to represent
+            references to resources, it can be a convient
+            way to refer to a resource only by it's ID
+            and therefore save bandwidth.
+        ],
+        type        => "object",
+        properties  => {
+            '$id' => {
+                type        => "string",
+                description => q[
+                    This is the lookup ID which can be
+                    used to locate the resource.
+                ]
+            },
+            type_of => {
+                type        => "string",
+                "format"    => "uri",
+                description => q[
+                    This is the schema URI for the type of
+                    resource that this refers too.
+                ]
+            }
+        },
+        additional_properties => {
+            version => {
+                type        => "string",
+                'format'    => "digest",
+                description => q[
+                    This is a digest string (SHA-256) representing the current
+                    version of the resource being pointed to. This can be used
+                    to check to make sure that the resource has not changed
+                    since it was last referred too.
                 ]
             }
         }

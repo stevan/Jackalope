@@ -1,0 +1,48 @@
+[
+    {
+        "schema" : { "$ref" : "schema/web/resource/ref" },
+        "pass" : [
+            { "$id" : "1", "type_of" : "some/simple/schema" },
+            { "$id" : "1", "type_of" : "some/simple/schema", "version" : "2i29219jkjklewioewjklewk" }
+        ],
+        "fail" : [
+            { "$id" : "1" },
+            { "type_of" : "some/simple/schema" },
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            "Hello",
+            [],
+            [ 1, 5, 6 ],
+            { "foo" : "bar" }
+        ]
+    },
+    {
+        "schema" : {
+            "extends" : { "$ref" : "schema/web/resource/ref" },
+            "properties" : {
+                "type_of" : { "type" : "string", "literal" : "some/simple/schema" }
+            }
+        },
+        "pass" : [
+            { "$id" : "1", "type_of" : "some/simple/schema" },
+            { "$id" : "1", "type_of" : "some/simple/schema", "version" : "2i29219jkjklewioewjklewk" }
+        ],
+        "fail" : [
+            { "$id" : "1", "type_of" : "some/other/simple/schema" },
+            { "$id" : "1" },
+            { "type_of" : "some/simple/schema" },
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            "Hello",
+            [],
+            [ 1, 5, 6 ],
+            { "foo" : "bar" }
+        ]
+    }
+]

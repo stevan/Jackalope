@@ -25,6 +25,8 @@ has 'repo' => (
 sub run_fixtures_for_type {
     my ($self, $type) = @_;
 
+    $type =~ s/\//_/g if $type =~ /\//;
+
     my $repo     = $self->repo;
     my $fixtures = decode_json( scalar $self->fixture_dir->file( $type . '.json' )->slurp );
 
