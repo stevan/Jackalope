@@ -5,6 +5,7 @@ our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use Try::Tiny;
+use Plack::Request;
 use Data::Dump;
 use Jackalope::REST::Error::InternalServerError;
 
@@ -188,6 +189,17 @@ sub check_target_schema {
 }
 
 requires 'execute';
+
+sub to_app {
+    my $self = shift;
+    return sub {
+        my $env = shift;
+        $self->execute(
+            Plack::Request->new( $env ),
+            @{ $env->{'plack.router.match.args'} }
+        );
+    }
+}
 
 no Moose::Role; 1;
 
