@@ -1,6 +1,15 @@
 
 = TODOS =
 
+- Jackalope::REST::Client
+    - write it
+
+- t/
+    - do more error checking in ...
+        - 020-basic-service.t
+        - 021-basic-service-w-middleware.t
+        - 030-multi-schema-service.t
+
 - Jackalope.Schema.Repository
     - port the remainder of the tests
         - t/010-schema/111-extends-in-properties.t
@@ -8,7 +17,6 @@
 
 - Jackalope::REST::Schema::Spec
     - perhaps support a simpler web/service, maybe a read-only one?
-    - perhaps a more complex ref type that can refer to other services or repos?
 
 - Jackalope::REST::Resource::Repository
     - not sure I really like having to return NotImplmented in the
@@ -25,10 +33,6 @@
             - read up on http://en.wikipedia.org/wiki/HTTP_ETag
 
 - Jackalope::REST::Service
-    - we should be checking methods too and returning 405 when we find something amis
-        - 405 -> The method specified in the Request-Line is not allowed for the resource
-                 identified by the Request-URI. The response MUST include an Allow header
-                 containing a list of valid methods for the requested resource.
     - might want to return 412 Precondition Failed when delete If-Matches fails
     - Caching options
         - we should support eTags

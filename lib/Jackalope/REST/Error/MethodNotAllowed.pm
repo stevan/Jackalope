@@ -9,6 +9,21 @@ extends 'Jackalope::REST::Error';
 has '+code' => (default => 405);
 has '+desc' => (default => 'Method Not Allowed');
 
+has 'allowed_methods' => ( is => 'ro', isa => 'ArrayRef' );
+
+# The method specified in the Request-Line is not allowed for the resource
+# identified by the Request-URI. The response MUST include an Allow header
+# containing a list of valid methods for the requested resource.
+
+sub to_psgi {
+    my $self = shift;
+    [
+        $self->code,
+        [ 'Allow' => join "," => @{ $self->allowed_methods } ],
+        [ $self->as_string ]
+    ];
+}
+
 __PACKAGE__->meta->make_immutable( inline_constructor => 0 );
 
 no Moose; 1;

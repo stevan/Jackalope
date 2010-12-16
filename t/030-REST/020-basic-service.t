@@ -283,6 +283,14 @@ test_psgi( app => $app, client => sub {
             '... got the right value for list'
         );
     }
+
+    diag("Errors");
+    {
+        my $req = GET("http://localhost/1/delete");
+        my $res = $cb->($req);
+        is($res->code, 405, '... got the right status for bad method');
+        is($res->header('Allow'), 'DELETE', '... got the right Allow header');
+    }
 });
 
 
