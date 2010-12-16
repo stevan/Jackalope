@@ -3,6 +3,8 @@
 
 - Jackalope.Schema.Repository
     - port the remainder of the tests
+        - t/010-schema/111-extends-in-properties.t
+        - t/030-REST/011-schema-web-service-extension.t
 
 - Jackalope::REST::Schema::Spec
     - perhaps support a simpler web/service, maybe a read-only one?
@@ -73,6 +75,11 @@
       we do not properly throw an error now, which is bad.
 
 == LOW PRIORITY ==
+
+- Jackalope::Schema::Repository
+    - we should be able to serialize the compiled_schemas to disk
+      and then be able to load them instead of compiling them all
+      might save on some of the startup overhead
 
 - Jackalope.js
     - add some kind of basic Bread-Board type thing
