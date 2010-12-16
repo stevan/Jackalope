@@ -3,7 +3,8 @@
 use strict;
 use warnings;
 
-use lib '/Users/stevan/Projects/CPAN/current/Bread-Board/lib';
+use lib '/Users/stevan/Projects/CPAN/current/Bread-Board/lib',
+        '/Users/stevan/Projects/CPAN/current/Plack-App-Path-Router/lib';
 
 use Test::More;
 use Test::Fatal;
@@ -20,7 +21,7 @@ use Jackalope::REST::Resource::Repository::Simple;
 
 use Plack;
 use Plack::Builder;
-use Plack::App::Path::Router;
+use Plack::App::Path::Router::PSGI;
 
 my $j = Jackalope::REST->new;
 my $c = container $j => as {
@@ -71,7 +72,7 @@ is_deeply($service->schema, {
 }, '... got the schema we expected');
 isa_ok($service->router, 'Path::Router');
 
-my $app = Plack::App::Path::Router->new( router => $service->router );
+my $app = Plack::App::Path::Router::PSGI->new( router => $service->router );
 
 my $serializer = $c->resolve(
     service    => 'Jackalope::Serializer',

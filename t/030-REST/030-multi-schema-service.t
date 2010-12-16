@@ -3,7 +3,8 @@
 use strict;
 use warnings;
 
-use lib '/Users/stevan/Projects/CPAN/current/Bread-Board/lib';
+use lib '/Users/stevan/Projects/CPAN/current/Bread-Board/lib',
+        '/Users/stevan/Projects/CPAN/current/Plack-App-Path-Router/lib';
 
 use Test::More;
 use Test::Fatal;
@@ -21,7 +22,7 @@ use Path::Router;
 
 use Plack;
 use Plack::Builder;
-use Plack::App::Path::Router;
+use Plack::App::Path::Router::PSGI;
 
 {
     package My::ShoppingCart::Repo;
@@ -329,7 +330,7 @@ foreach my $service ( $product_service, $user_service, $cart_service ) {
     $service->update_router( $router );
 }
 
-my $app = Plack::App::Path::Router->new( router => $router );
+my $app = Plack::App::Path::Router::PSGI->new( router => $router );
 
 my $serializer = $c->resolve(
     service    => 'Jackalope::Serializer',
