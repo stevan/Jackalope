@@ -7,7 +7,7 @@ test(
         var tester = new Test.Jackalope ();
 
         var repo = new Jackalope.Schema.Repository ({
-            spec      : new Jackalope.Schema.Spec({ spec_url : "../spec/spec.json" }),
+            spec      : new Jackalope.Schema.Spec({ spec_url : "spec/spec.json" }),
             validator : new Jackalope.Schema.Validator ()
         });
         ok(repo instanceof Jackalope.Schema.Repository, "... we are an instance of Jackalope.Schema.Repository");

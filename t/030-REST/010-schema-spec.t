@@ -19,7 +19,7 @@ my $repo = Jackalope::REST->new->resolve(
 isa_ok($repo, 'Jackalope::Schema::Repository');
 
 my $fixtures = Test::Jackalope::Fixtures->new(
-    fixture_dir => [ $FindBin::Bin, '..', '..', 'fixtures' ],
+    fixture_dir => [ $FindBin::Bin, '..', '..', 'tests', 'fixtures' ],
     repo        => $repo
 );
 

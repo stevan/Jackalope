@@ -6,11 +6,11 @@ test(
 
         var tester   = new Test.Jackalope ();
         var repo     = new Jackalope.Schema.Repository ({
-            spec      : new Jackalope.Schema.Spec({ spec_url : "../spec/spec.json" }),
+            spec      : new Jackalope.Schema.Spec({ spec_url : "spec/spec.json" }),
             validator : new Jackalope.Schema.Validator ()
         });
         var fixtures = new Test.Jackalope.Fixtures ({
-            "fixture_dir" : "../fixtures/",
+            "fixture_dir" : "fixtures/",
             "repo"        : repo
         });
 

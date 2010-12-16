@@ -5,9 +5,9 @@ test(
         expect(9);
 
         var fixtures = new Test.Jackalope.Fixtures ({
-            "fixture_dir" : "../fixtures/",
+            "fixture_dir" : "fixtures/",
             "repo"        : new Jackalope.Schema.Repository ({
-                spec      : new Jackalope.Schema.Spec({ spec_url : "../spec/spec.json" }),
+                spec      : new Jackalope.Schema.Spec({ spec_url : "spec/spec.json" }),
                 validator : new Jackalope.Schema.Validator ()
             })
         });

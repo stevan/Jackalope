@@ -16,7 +16,7 @@ my $repo = Jackalope->new->resolve( type => 'Jackalope::Schema::Repository' );
 isa_ok($repo, 'Jackalope::Schema::Repository');
 
 Test::Jackalope::Fixtures->new(
-    fixture_dir => [ $FindBin::Bin, '..', '..', 'fixtures' ],
+    fixture_dir => [ $FindBin::Bin, '..', '..', 'tests', 'fixtures' ],
     repo        => $repo
 )->run_fixtures_for_type( 'boolean' );
 
