@@ -59,7 +59,7 @@ my %REL_TO_TARGET_CLASS = (
     describedby => 'Jackalope::REST::Service::Target::DescribedBy',
 );
 
-sub get_target_class_for_link {
+sub get_target_for_link {
     my ($self, $link) = @_;
 
     my $target_class;
@@ -74,7 +74,11 @@ sub get_target_class_for_link {
         || confess "No target class found for rel (" . $link->{'rel'} . ")";
 
     load_class( $target_class );
-    return $target_class;
+
+    return $target_class->new(
+        service => $self,
+        link    => $link
+    );
 }
 
 sub build_router {
@@ -90,10 +94,7 @@ sub build_router {
                 method => $link->{'method'},
                 schema => $schema->{'id'}
             },
-            target  => $self->get_target_class_for_link( $link )->new(
-                service => $self,
-                link    => $link
-            )
+            target  => $self->get_target_for_link( $link )->to_app
         );
     }
 
