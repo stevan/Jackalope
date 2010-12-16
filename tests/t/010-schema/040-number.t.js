@@ -2,6 +2,7 @@
 test(
     "Fixture tests for number",
     function () {
+        expect(81);
 
         var fixtures = new Test.Jackalope.Fixtures ({
             "fixture_dir" : "../fixtures/",

@@ -29,7 +29,7 @@ is(exception{
             },
             links => [
                 {
-                    rel    => 'create',
+                    rel         => 'create',
                     href        => '/create',
                     method      => 'PUT',
                     data_schema => {
@@ -54,26 +54,17 @@ my $person = $repo->get_compiled_schema_by_uri('simple/person');
 is_deeply(
     $person->{'links'}->[0]->{'data_schema'}->{'properties'},
     {
+        'id' => { 'type' => 'null' },
+        'first_name' => { 'type' => 'string' },
+        'last_name' => { 'type' => 'string' },
         'age' => {
-                   'greater_than' => 0,
-                   'type' => 'integer'
-                 },
-        'first_name' => {
-                          'type' => 'string'
-                        },
-        'id' => {
-                  'type' => 'null'
-                },
-        'last_name' => {
-                         'type' => 'string'
-                       },
+            'type' => 'integer',
+            'greater_than' => 0
+        },
         'sex' => {
-                   'enum' => [
-                               'male',
-                               'female'
-                             ],
-                   'type' => 'string'
-                 }
+            'type' => 'string',
+            'enum' => [ 'male', 'female' ]
+        }
     },
     '... the extended schema embedded in the link is resolved correctly'
 );

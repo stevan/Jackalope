@@ -2,6 +2,7 @@
 test(
     "Fixture tests for object",
     function () {
+        expect(49);
 
         var fixtures = new Test.Jackalope.Fixtures ({
             "fixture_dir" : "../fixtures/",

@@ -2,11 +2,6 @@
 test(
     "Bootstrap test",
     function() {
-        // verify that all the tests run
-        // because if the schema doesn't
-        // load right they won't run, but
-        // errors will not occur.
-        // - SL
         expect(11);
 
         var tester = new Test.Jackalope ();

@@ -2,6 +2,7 @@
 test(
     "Register Schema test",
     function() {
+        expect(5);
 
         var tester = new Test.Jackalope ();
 

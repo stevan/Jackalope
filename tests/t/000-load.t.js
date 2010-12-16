@@ -2,6 +2,8 @@
 test(
     "Basic test",
     function() {
+        expect(2);
+
         var jackalope = new Jackalope ();
         ok(jackalope instanceof Jackalope, '... we are an instance of Jackalope');
 

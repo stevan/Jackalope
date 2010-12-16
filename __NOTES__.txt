@@ -2,10 +2,7 @@
 = TODOS =
 
 - Jackalope.Schema.Repository
-    - refactor the compilation process
-      to match the Perl version
-        - the 003-web.t.js tests are broken because of this
-    - ponder separating the web part of the schema afects the JS
+    - port the remainder of the tests
 
 - Jackalope::REST::Schema::Spec
     - perhaps support a simpler web/service, maybe a read-only one?
