@@ -11,7 +11,7 @@ use Test::Fatal;
 use Test::Moose;
 use Bread::Board;
 use Plack::Test;
-use HTTP::Request::Common;
+use HTTP::Request::Common qw[ GET PUT POST DELETE ];
 
 BEGIN {
     use_ok('Jackalope::REST');
@@ -185,7 +185,7 @@ test_psgi( app => $app, client => sub {
 
     diag("PUTing updates to the resource we just posted");
     {
-        my $req = POST("http://localhost/1/edit" => (
+        my $req = PUT("http://localhost/1/edit" => (
             Content => '{"id":"1","version":"fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2","body":{"first_name":"Stevan","last_name":"Little","age":38}}'
         ));
         my $res = $cb->($req);
@@ -243,7 +243,7 @@ test_psgi( app => $app, client => sub {
 
     diag("DELETEing resource we just updated (with conditional match)");
     {
-        my $req = GET("http://localhost/1/delete" => (
+        my $req = DELETE("http://localhost/1/delete" => (
             'If-Matches' => '9d4a75302bb634edf050d6b838b050b978bea1460d5879618e8e3ae8c291247f'
         ));
         my $res = $cb->($req);
