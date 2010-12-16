@@ -354,7 +354,7 @@ sub any {
         ],
         type        => "schema",
         properties  => {
-            type => { type => "string", enum => [ "any" ] }
+            type => { type => "string", literal =>"any" }
         },
         additional_properties => {
             id          => { type => "string", 'format' => "uri", description => "This should be a URI" },
@@ -396,7 +396,7 @@ sub null {
         type        => "schema",
         extends     => { '$ref' => "schema/types/any" },
         properties  => {
-            type => { type => "string", enum => [ "null" ] }
+            type => { type => "string", literal => "null" }
         }
     };
 }
@@ -419,7 +419,7 @@ sub boolean {
         type        => "schema",
         extends     => { '$ref' => "schema/types/any" },
         properties  => {
-            type => { type => "string", enum => [ "boolean" ] }
+            type => { type => "string", literal => "boolean" }
         }
     };
 }
@@ -441,7 +441,7 @@ sub number {
         type        => "schema",
         extends     => { '$ref' => "schema/types/any" },
         properties  => {
-            type => { type => "string", enum => [ "number" ] },
+            type => { type => "string", literal => "number" },
         },
         additional_properties => {
             less_than                => { type => "number", description => "A number must be less than this value" },
@@ -473,7 +473,7 @@ sub integer {
         type        => "schema",
         extends     => { '$ref' => "schema/types/number" },
         properties  => {
-            type => { type => "string", enum => [ "integer" ] },
+            type => { type => "string", literal => "integer" },
         },
         additional_properties => {
             less_than                => { type => "integer", description => "A integer must be less than this value" },
@@ -509,9 +509,10 @@ sub string {
         type        => "schema",
         extends     => { '$ref' => "schema/types/any" },
         properties  => {
-            type => { type => "string", enum => [ "string" ] },
+            type => { type => "string", literal => "string" },
         },
         additional_properties => {
+            literal    => { type => "string", description => "A literal value that must match exactly" },
             min_length => { type => "number", description => "The minimum length of the string given" },
             max_length => { type => "number", description => "The maximum length of the string given" },
             pattern    => { type => "string", 'format' => "regex", description => "A regular expression that can be checked against the string" },
@@ -544,7 +545,7 @@ sub array {
         type        => "schema",
         extends     => { '$ref' => "schema/types/any" },
         properties  => {
-            type => { type => "string", enum => [ "array" ] },
+            type => { type => "string", literal => "array" },
         },
         additional_properties => {
             min_items => { type => "integer", description => "The minimum number of items in the array" },
@@ -577,7 +578,7 @@ sub object {
         type        => "schema",
         extends     => { '$ref' => "schema/types/any" },
         properties  => {
-            type => { type => "string", enum => [ "object" ] },
+            type => { type => "string", literal => "object" },
         },
         additional_properties => {
             items      => {
@@ -631,7 +632,7 @@ sub schema {
         type        => "schema",
         extends     => { '$ref' => "schema/types/object" },
         properties  => {
-            type => { type => "string", enum => [ "schema" ] },
+            type => { type => "string", literal => "schema" },
         },
     };
 }

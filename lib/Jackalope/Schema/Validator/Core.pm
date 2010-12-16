@@ -106,6 +106,11 @@ sub string {
         error => 'string look more like a number'
     } unless defined $is_string;
 
+    if (exists $schema->{literal}) {
+        return {
+            error => $data . ' must exactly match ' . $schema->{literal}
+        } if $data ne $schema->{literal};
+    }
     if (exists $schema->{min_length}) {
         return {
             error => $data . ' is not the minimum length of ' . $schema->{min_length}

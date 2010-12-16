@@ -2,7 +2,7 @@
 test(
     "Fixture tests for string",
     function () {
-        expect(68);
+        expect(80);
 
         var fixtures = new Test.Jackalope.Fixtures ({
             "fixture_dir" : "fixtures/",

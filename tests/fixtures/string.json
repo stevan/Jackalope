@@ -108,5 +108,24 @@
             [ 1, 5, 6 ],
             { "foo" : "bar" }
         ]
+    },
+    {
+        "schema" : { "type" : "string", "literal" : "foo" },
+        "pass" : [
+            "foo"
+        ],
+        "fail" : [
+            "two",
+            "three",
+            "four",
+            null,
+            true,
+            false,
+            1,
+            1.5,
+            [],
+            [ 1, 5, 6 ],
+            { "foo" : "bar" }
+        ]
     }
 ]

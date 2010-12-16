@@ -254,6 +254,10 @@
       },
       "schema/types/string" : {
          "additional_properties" : {
+            "literal" : {
+               "type" : "string",
+               "description" : "A literal value that must match exactly"
+            },
             "pattern" : {
                "format" : "regex",
                "type" : "string",
