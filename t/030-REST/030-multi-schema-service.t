@@ -69,7 +69,7 @@ use Plack::App::Path::Router;
         my ($self, $id, $data) = @_;
 
         my $cart = $self->db->{ $id };
-        $cart->{'items'} = [ grep { $_->{'$ref'} != $data->{'$ref'} } @{ $cart->{'items'} } ];
+        $cart->{'items'} = [ grep { $_->{'$id'} != $data->{'$id'} } @{ $cart->{'items'} } ];
         return $self->wrap_data(
             $id,
             $self->inflate_user_and_items( clone( $cart ) )
@@ -79,13 +79,13 @@ use Plack::App::Path::Router;
     sub inflate_user_and_items {
         my ($self, $cart) = @_;
 
-        my $user = $self->user_service->resource_repository->get_resource( $cart->{'user'}->{'$ref'} );
+        my $user = $self->user_service->resource_repository->get_resource( $cart->{'user'}->{'$id'} );
         $self->user_service->generate_links_for_resource( $user );
         $cart->{'user'} = $user->pack;
 
         $cart->{'items'} = [
             map {
-                my $product = $self->product_service->resource_repository->get_resource( $_->{'$ref'} );
+                my $product = $self->product_service->resource_repository->get_resource( $_->{'$id'} );
                 $self->product_service->generate_links_for_resource( $product );
                 $product->pack;
             } @{ $cart->{'items'} }
@@ -206,10 +206,16 @@ my $c = container $j => as {
                 data_schema   => {
                     type       => 'object',
                     properties => {
-                        user  => { '$ref' => 'schema/core/ref' },
+                        user  => {
+                            extends    => { '$ref' => 'schema/web/resource/ref' },
+                            properties => { type_of => { type => "string", literal => "test/user" } }
+                        },
                         items => {
                             type  => 'array',
-                            items => { '$ref' => 'schema/core/ref' }
+                            items => {
+                                extends    => { '$ref' => 'schema/web/resource/ref' },
+                                properties => { type_of => { type => "string", literal => "test/product" } }
+                            }
                         },
                     }
                 },
@@ -240,7 +246,10 @@ my $c = container $j => as {
                 rel           => 'my/shoppingCart/target/addItem',
                 href          => '/:id/add_item',
                 method        => 'PUT',
-                data_schema   => { '$ref' => 'schema/core/ref' },
+                data_schema   => {
+                    extends    => { '$ref' => 'schema/web/resource/ref' },
+                    properties => { type_of => { type => "string", literal => "test/product" } }
+                },
                 target_schema => {
                     type       => 'object',
                     extends    => { '$ref' => 'schema/web/resource' },
@@ -256,7 +265,10 @@ my $c = container $j => as {
                 rel           => 'my/shoppingCart/target/removeItem',
                 href          => '/:id/remove_item',
                 method        => 'PUT',
-                data_schema   => { '$ref' => 'schema/core/ref' },
+                data_schema   => {
+                    extends    => { '$ref' => 'schema/web/resource/ref' },
+                    properties => { type_of => { type => "string", literal => "test/product" } }
+                },
                 target_schema => {
                     type       => 'object',
                     extends    => { '$ref' => 'schema/web/resource' },
@@ -476,10 +488,10 @@ test_psgi( app => $app, client => sub {
     {
         my $req = POST("http://localhost/cart/create" => (
             Content => $serializer->serialize({
-                user  => { '$ref' => '1' },
+                user  => { '$id' => '1', type_of => 'test/user' },
                 items => [
-                    { '$ref' => '1' },
-                    { '$ref' => '2' }
+                    { '$id' => '1', type_of => 'test/product' },
+                    { '$id' => '2', type_of => 'test/product' }
                 ]
             })
         ));
@@ -630,7 +642,7 @@ test_psgi( app => $app, client => sub {
     diag("PUT-ing a new item");
     {
         my $req = PUT("http://localhost/cart/1/add_item" => (
-            Content => '{"$ref":"3"}'
+            Content => '{"$id":"3","type_of":"test/product"}'
         ));
         my $res = $cb->($req);
         is($res->code, 202, '... got the right status for adding an item');
@@ -722,7 +734,7 @@ test_psgi( app => $app, client => sub {
     {
         # XX What is the right method here? DELETE to cart would make sense?
         my $req = PUT("http://localhost/cart/1/remove_item" => (
-            Content => '{"$ref":"3"}'
+            Content => '{"$id":"3","type_of":"test/product"}'
         ));
         my $res = $cb->($req);
         is($res->code, 202, '... got the right status for removing an item');
