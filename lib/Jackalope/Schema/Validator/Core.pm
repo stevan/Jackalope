@@ -248,6 +248,10 @@ sub _check_properties {
         return { error => "property '$k' didn't exist" } if not exists $data->{ $k };
 
         my $validator = $self->can( $schema->{type} );
+        return {
+            error => "could not find validator for '" . $schema->{type} . "' for property '$k'"
+        } if not defined $validator;
+
         my $result    = $self->$validator( $schema, $data->{ $k } );
         return {
             error      => "property '$k' didn't pass the schema for '" . $schema->{type} . "'",
@@ -272,9 +276,13 @@ sub _check_additional_properties {
         }
 
         my $validator = $self->can( $schema->{type} );
+        return {
+            error => "could not find validator for '" . $schema->{type} . "' for additional-property '$k'"
+        } if not defined $validator;
+
         my $result    = $self->$validator( $schema, $data->{ $k } );
         return {
-            error      => "property '$k' didn't pass the schema for '" . $schema->{type} . "'",
+            error      => "additional-property '$k' didn't pass the schema for '" . $schema->{type} . "'",
             sub_errors => $result
         } if exists $result->{error};
 
