@@ -15,6 +15,14 @@
         - t/010-schema/111-extends-in-properties.t
         - t/030-REST/011-schema-web-service-extension.t
 
+- Jackalope::REST::Service::Directory
+    - write this
+    - this should collect services and key them by schema->id
+      and then the services should have access to them, this
+      should simplify some of the 030-multi-schema-service.t stuff
+      by allowing the resource/ref stuff to find the correct
+      resource-repository for us
+
 - Jackalope::REST::Schema::Spec
     - perhaps support a simpler web/service, maybe a read-only one?
 
@@ -33,6 +41,7 @@
             - read up on http://en.wikipedia.org/wiki/HTTP_ETag
 
 - Jackalope::REST::Service
+    - look into Plack::Middleware::MethodOverride
     - might want to return 412 Precondition Failed when delete If-Matches fails
     - Caching options
         - we should support eTags

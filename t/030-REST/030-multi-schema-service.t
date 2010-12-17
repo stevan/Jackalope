@@ -556,11 +556,11 @@ test_psgi( app => $app, client => sub {
                 },
                 version => '6f2b0ecaeb1dfc8fc50c2bb0cae7c685969793ea2aee5016dd2075c76ae40a94',
                 links => [
-                    { rel => "create",                         href => "cart/create",     method => "POST"   },
-                    { rel => "read",                           href => "cart/1",          method => "GET"    },
-                    { rel => "my/shoppingCart/target/addItem", href => "cart/1/add_item", method => "PUT"    },
+                    { rel => "create",                            href => "cart/create",        method => "POST"   },
+                    { rel => "read",                              href => "cart/1",             method => "GET"    },
+                    { rel => "my/shoppingCart/target/addItem",    href => "cart/1/add_item",    method => "PUT"    },
                     { rel => "my/shoppingCart/target/removeItem", href => "cart/1/remove_item", method => "PUT"    },
-                    { rel => "delete",                         href => "cart/1/delete",   method => "DELETE" },
+                    { rel => "delete",                            href => "cart/1/delete",      method => "DELETE" },
                 ]
             },
             '... got the right value for creation'
@@ -629,11 +629,11 @@ test_psgi( app => $app, client => sub {
                 },
                 version => '6f2b0ecaeb1dfc8fc50c2bb0cae7c685969793ea2aee5016dd2075c76ae40a94',
                 links => [
-                    { rel => "create",                         href => "cart/create",     method => "POST"   },
-                    { rel => "read",                           href => "cart/1",          method => "GET"    },
-                    { rel => "my/shoppingCart/target/addItem", href => "cart/1/add_item", method => "PUT"    },
+                    { rel => "create",                            href => "cart/create",        method => "POST"   },
+                    { rel => "read",                              href => "cart/1",             method => "GET"    },
+                    { rel => "my/shoppingCart/target/addItem",    href => "cart/1/add_item",    method => "PUT"    },
                     { rel => "my/shoppingCart/target/removeItem", href => "cart/1/remove_item", method => "PUT"    },
-                    { rel => "delete",                         href => "cart/1/delete",   method => "DELETE" },
+                    { rel => "delete",                            href => "cart/1/delete",      method => "DELETE" },
                 ]
             },
             '... got the right value for creation'
@@ -720,11 +720,11 @@ test_psgi( app => $app, client => sub {
                 },
                 version => 'a59edbdb6b270e3cdb74e8e729f6a9ea2f82fc9b72db3813159f3516205fe29c',
                 links => [
-                    { rel => "create",                         href => "cart/create",     method => "POST"   },
-                    { rel => "read",                           href => "cart/1",          method => "GET"    },
-                    { rel => "my/shoppingCart/target/addItem", href => "cart/1/add_item", method => "PUT"    },
+                    { rel => "create",                            href => "cart/create",        method => "POST"   },
+                    { rel => "read",                              href => "cart/1",             method => "GET"    },
+                    { rel => "my/shoppingCart/target/addItem",    href => "cart/1/add_item",    method => "PUT"    },
                     { rel => "my/shoppingCart/target/removeItem", href => "cart/1/remove_item", method => "PUT"    },
-                    { rel => "delete",                         href => "cart/1/delete",   method => "DELETE" },
+                    { rel => "delete",                            href => "cart/1/delete",      method => "DELETE" },
                 ]
             },
             '... got the right value for creation'
@@ -796,11 +796,11 @@ test_psgi( app => $app, client => sub {
                 },
                 version => '6f2b0ecaeb1dfc8fc50c2bb0cae7c685969793ea2aee5016dd2075c76ae40a94',
                 links => [
-                    { rel => "create",                         href => "cart/create",     method => "POST"   },
-                    { rel => "read",                           href => "cart/1",          method => "GET"    },
-                    { rel => "my/shoppingCart/target/addItem", href => "cart/1/add_item", method => "PUT"    },
+                    { rel => "create",                            href => "cart/create",        method => "POST"   },
+                    { rel => "read",                              href => "cart/1",             method => "GET"    },
+                    { rel => "my/shoppingCart/target/addItem",    href => "cart/1/add_item",    method => "PUT"    },
                     { rel => "my/shoppingCart/target/removeItem", href => "cart/1/remove_item", method => "PUT"    },
-                    { rel => "delete",                         href => "cart/1/delete",   method => "DELETE" },
+                    { rel => "delete",                            href => "cart/1/delete",      method => "DELETE" },
                 ]
             },
             '... got the right value for creation'
