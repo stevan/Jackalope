@@ -113,9 +113,19 @@ sub resource_ref {
                     This is the schema URI for the type of
                     resource that this refers too.
                 ]
-            }
+            },
         },
         additional_properties => {
+            link    => {
+                extends               => { '$ref' => 'schema/core/xlink' },
+                properties            => { rel    => { type => 'string', literal => 'read' } },
+                additional_properties => { method => { type => 'string', literal => 'GET'  } },
+                description           => q[
+                    This is an optional xlink to read the resource
+                    described, it should only ever be GET since it
+                    is only for reading.
+                ]
+            },
             version => {
                 type        => "string",
                 'format'    => "digest",
@@ -125,7 +135,7 @@ sub resource_ref {
                     to check to make sure that the resource has not changed
                     since it was last referred too.
                 ]
-            }
+            },
         }
     }
 }

@@ -3,11 +3,32 @@
         "schema" : { "$ref" : "schema/web/resource/ref" },
         "pass" : [
             { "$id" : "1", "type_of" : "some/simple/schema" },
-            { "$id" : "1", "type_of" : "some/simple/schema", "version" : "2i29219jkjklewioewjklewk" }
+            { "$id" : "1", "type_of" : "some/simple/schema", "version" : "2i29219jkjklewioewjklewk" },
+            {
+                "$id" : "1",
+                "type_of" : "some/simple/schema",
+                "version" : "2i29219jkjklewioewjklewk",
+                "link" : { "rel" : "read", "method" : "GET", "href" : "some/simple/1" }
+            },
+            {
+                "$id" : "1",
+                "type_of" : "some/simple/schema",
+                "link" : { "rel" : "read", "method" : "GET", "href" : "some/simple/1" }
+            }
         ],
         "fail" : [
             { "$id" : "1" },
             { "type_of" : "some/simple/schema" },
+            {
+                "$id" : "1",
+                "type_of" : "some/simple/schema",
+                "link" : { "rel" : "read", "method" : "POST", "href" : "some/simple/1" }
+            },
+            {
+                "$id" : "1",
+                "type_of" : "some/simple/schema",
+                "link" : { "rel" : "create", "method" : "GET", "href" : "some/simple/1" }
+            },
             null,
             true,
             false,
