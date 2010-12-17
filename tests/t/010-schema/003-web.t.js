@@ -2,7 +2,7 @@
 test(
     "Web test",
     function() {
-        expect(22);
+        expect(54);
 
         var tester   = new Test.Jackalope ();
         var fixtures = new Test.Jackalope.Fixtures ({
@@ -13,7 +13,7 @@ test(
             })
         });
 
-        var types = [ 'resource', 'service' ];
+        var types = [ 'resource', 'resource/ref', 'service' ];
 
         for (var i = 0; i < types.length; i++) {
             tester.validation_pass(

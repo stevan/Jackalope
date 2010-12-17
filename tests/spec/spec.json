@@ -1,5 +1,47 @@
 {
    "schema_map" : {
+      "schema/web/resource/ref" : {
+         "additional_properties" : {
+            "link" : {
+               "additional_properties" : {
+                  "method" : {
+                     "literal" : "GET",
+                     "type" : "string"
+                  }
+               },
+               "extends" : {
+                  "$ref" : "schema/core/xlink"
+               },
+               "description" : "This is an optional xlink to read the resource\ndescribed, it should only ever be GET since it\nis only for reading.\n",
+               "properties" : {
+                  "rel" : {
+                     "literal" : "read",
+                     "type" : "string"
+                  }
+               }
+            },
+            "version" : {
+               "format" : "digest",
+               "type" : "string",
+               "description" : "This is a digest string (SHA-256) representing the current\nversion of the resource being pointed to. This can be used\nto check to make sure that the resource has not changed\nsince it was last referred too.\n"
+            }
+         },
+         "id" : "schema/web/resource/ref",
+         "title" : "The 'Resource Ref' schema",
+         "type" : "object",
+         "description" : "This is meant to be a way to represent\nreferences to resources, it can be a convient\nway to refer to a resource only by it's ID\nand therefore save bandwidth.\n",
+         "properties" : {
+            "type_of" : {
+               "format" : "uri",
+               "type" : "string",
+               "description" : "This is the schema URI for the type of\nresource that this refers too.\n"
+            },
+            "$id" : {
+               "type" : "string",
+               "description" : "This is the lookup ID which can be\nused to locate the resource.\n"
+            }
+         }
+      },
       "schema/types/boolean" : {
          "id" : "schema/types/boolean",
          "title" : "The 'Boolean' type schema",
@@ -10,9 +52,7 @@
          },
          "properties" : {
             "type" : {
-               "enum" : [
-                  "boolean"
-               ],
+               "literal" : "boolean",
                "type" : "string"
             }
          }
@@ -27,9 +67,7 @@
          },
          "properties" : {
             "type" : {
-               "enum" : [
-                  "null"
-               ],
+               "literal" : "null",
                "type" : "string"
             }
          }
@@ -160,9 +198,7 @@
          },
          "properties" : {
             "type" : {
-               "enum" : [
-                  "schema"
-               ],
+               "literal" : "schema",
                "type" : "string"
             }
          }
@@ -203,9 +239,7 @@
          },
          "properties" : {
             "type" : {
-               "enum" : [
-                  "number"
-               ],
+               "literal" : "number",
                "type" : "string"
             }
          }
@@ -244,7 +278,7 @@
             "version" : {
                "format" : "digest",
                "type" : "string",
-               "description" : "This is a digest string (SHA1?) representing the current\nversion of the resource. When the resource is updated\nthe version should be compared first, to make sure\nthat it has not been updated by another.\n"
+               "description" : "This is a digest string (SHA-256) representing the current\nversion of the resource. When the resource is updated\nthe version should be compared first, to make sure\nthat it has not been updated by another.\n"
             },
             "id" : {
                "type" : "string",
@@ -300,44 +334,7 @@
          },
          "properties" : {
             "type" : {
-               "enum" : [
-                  "string"
-               ],
-               "type" : "string"
-            }
-         }
-      },
-      "schema/types/array" : {
-         "additional_properties" : {
-            "max_items" : {
-               "type" : "integer",
-               "description" : "The maximum number of items in the array"
-            },
-            "is_unique" : {
-               "type" : "boolean",
-               "description" : "A boolean to indicate of the list should contain no duplicates"
-            },
-            "min_items" : {
-               "type" : "integer",
-               "description" : "The minimum number of items in the array"
-            },
-            "items" : {
-               "type" : "schema",
-               "description" : "This is a schema (or a reference to a schema)\nrepresented as an 'object' instance, which will\nbe used to validate all the elements in a list.\n"
-            }
-         },
-         "id" : "schema/types/array",
-         "title" : "The 'Array' type schema",
-         "type" : "schema",
-         "description" : "This is a schema for the 'array' type, which is\nbasically just a list of other values. The list\nby default are heterogenous, but using the\noptional 'items' property it is possible to\nconstrain the list to be more homogenous.\n",
-         "extends" : {
-            "$ref" : "schema/types/any"
-         },
-         "properties" : {
-            "type" : {
-               "enum" : [
-                  "array"
-               ],
+               "literal" : "string",
                "type" : "string"
             }
          }
@@ -372,9 +369,40 @@
          },
          "properties" : {
             "type" : {
-               "enum" : [
-                  "object"
-               ],
+               "literal" : "object",
+               "type" : "string"
+            }
+         }
+      },
+      "schema/types/array" : {
+         "additional_properties" : {
+            "max_items" : {
+               "type" : "integer",
+               "description" : "The maximum number of items in the array"
+            },
+            "is_unique" : {
+               "type" : "boolean",
+               "description" : "A boolean to indicate of the list should contain no duplicates"
+            },
+            "min_items" : {
+               "type" : "integer",
+               "description" : "The minimum number of items in the array"
+            },
+            "items" : {
+               "type" : "schema",
+               "description" : "This is a schema (or a reference to a schema)\nrepresented as an 'object' instance, which will\nbe used to validate all the elements in a list.\n"
+            }
+         },
+         "id" : "schema/types/array",
+         "title" : "The 'Array' type schema",
+         "type" : "schema",
+         "description" : "This is a schema for the 'array' type, which is\nbasically just a list of other values. The list\nby default are heterogenous, but using the\noptional 'items' property it is possible to\nconstrain the list to be more homogenous.\n",
+         "extends" : {
+            "$ref" : "schema/types/any"
+         },
+         "properties" : {
+            "type" : {
+               "literal" : "array",
                "type" : "string"
             }
          }
@@ -413,9 +441,7 @@
          "description" : "This is a schema for the 'any' type, it is the\nbase schema type, all other schema types extend\nthis one. Therefore this schema defines the\nbase elements that are in all schemas, both\nrequired and optional.\n",
          "properties" : {
             "type" : {
-               "enum" : [
-                  "any"
-               ],
+               "literal" : "any",
                "type" : "string"
             }
          }
@@ -576,9 +602,7 @@
          },
          "properties" : {
             "type" : {
-               "enum" : [
-                  "integer"
-               ],
+               "literal" : "integer",
                "type" : "string"
             }
          }
