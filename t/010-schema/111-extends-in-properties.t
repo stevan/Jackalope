@@ -25,7 +25,8 @@ is(exception{
                 first_name => { type => 'string' },
                 last_name  => { type => 'string' },
                 age        => { type => 'integer', greater_than => 0 },
-                sex        => { type => 'string', enum => [qw[ male female ]] }
+                sex        => { type => 'string', enum => [qw[ male female ]] },
+                pay_scale  => { type => 'string', enum => [qw[ low medium high ]] },
             }
         }
     )
@@ -39,8 +40,12 @@ is(exception{
             extends    => { '$ref' => 'simple/employee' },
             properties => {
                 title     => { type => 'string' },
+                pay_scale => { type => 'string', literal => 'high' },
                 assistant => {
-                    extends => { '$ref' => 'simple/employee' }
+                    extends    => { '$ref' => 'simple/employee' },
+                    properties => {
+                        pay_scale => { type => 'string', literal => 'medium' },
+                    }
                 }
             }
         }
@@ -67,7 +72,8 @@ is_deeply(
                     'age' => { 'greater_than' => 0, 'type' => 'integer' },
                     'sex' => { 'enum' => [ 'male', 'female' ], 'type' => 'string' },
                     'first_name' => {'type' => 'string' },
-                    'last_name' => { 'type' => 'string' }
+                    'last_name' => { 'type' => 'string' },
+                    pay_scale => { type => 'string', literal => 'medium' }
                 }
             },
             'title' => { 'type' => 'string' },
@@ -75,7 +81,8 @@ is_deeply(
             'age' => { 'greater_than' => 0, 'type' => 'integer' },
             'sex' => { 'enum' => [ 'male', 'female' ], 'type' => 'string' },
             'first_name' => {'type' => 'string' },
-            'last_name' => { 'type' => 'string' }
+            'last_name' => { 'type' => 'string' },
+            pay_scale => { type => 'string', literal => 'high' }
         }
     },
     '... manager schema is inflated correctly'
