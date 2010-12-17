@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<style type="text/css">
+
+.label {
+    float : left;
+    width : 100px;
+}
+
+</style>
+<script type="text/javascript" src="/static/js/jquery.js"></script>
+<script type="text/javascript" src="/static/js/json2.js"></script>
+<script type="text/javascript">
+
+function form_submit () {
+    var url     = $('#url').val();
+    var method  = $('#method').val();
+    var headers = $('#headers').val();
+    var content = $('#content').val();
+
+    if (headers) {
+        headers = JSON.parse( headers );
+    }
+
+    $.ajax({
+        // data
+        "url"  : '/' + url,
+        "type" : method,
+        "data" : content,
+        // special callbacks
+        "beforeSend" : function (xhr) {
+            if (headers) {
+                for (var header in headers) {
+                    console.log( header, headers[header] );
+                    xhr.setRequestHeader( header, headers[header] );
+                }
+            }
+        },
+        // normal callbacks
+        "error"   : function (xhr, status, error) {
+            $('#output').html(
+                xhr.status + ' ' + xhr.statusText + '<br/>' +
+                '<pre>' + xhr.getAllResponseHeaders() + '</pre>' +
+                '<pre>' + xhr.responseText + '</pre>'
+            );
+        },
+        "success" : function (data, status, xhr) {
+            $('#output').html(
+                xhr.status + ' ' + xhr.statusText + '<br/>' +
+                '<pre>' + xhr.getAllResponseHeaders() + '</pre>' +
+                '<pre>' + JSON.stringify( data, null, '  ') + '</pre>'
+            );
+        }
+    });
+}
+
+</script>
+</head>
+<body>
+<h1>Jackalope REST Tester</h1>
+<hr/>
+<form id="rest_form">
+    <div>
+        <div class="label">URL</div>
+        <div><input type="text" id="url" size="100" /></div>
+    </div>
+    <div>
+        <div class="label">Method</div>
+        <div>
+            <select id="method">
+                <option value="GET">GET</option>
+                <option value="PUT">PUT</option>
+                <option value="POST">POST</option>
+                <option value="DELETE">DELETE</option>
+            </select>
+        </div>
+    </div>
+    <div>
+        <div class="label">Headers</div>
+        <div><textarea id="headers" rows="2" cols="80"></textarea></div>
+    </div>
+    <div>
+        <div class="label">Content</div>
+        <div><textarea id="content" rows="4" cols="80"></textarea></div>
+    </div>
+    <div>
+        <input type="button" value="Submit" onclick="form_submit()">
+    </div>
+</form>
+<hr/>
+<div id="output"></div>
+</body>
+</html>
