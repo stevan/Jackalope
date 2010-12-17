@@ -120,6 +120,25 @@ test_psgi( app => $app, client => sub {
         );
     }
 
+    diag("Error check");
+    {
+        my $req = POST("http://localhost/create" => (
+            Content => '{"first_name":"Stevan","last_name":"Little"}',
+        ));
+        my $res = $cb->($req);
+        is($res->code, 401, '... got the right status for this exception');
+        like($res->content, qr/Authorization required/, '... got the error we expected');
+    }
+    {
+        my $req = POST("http://localhost/create" => (
+            Content => '{"first_name":"Stevan","last_name":"Little"}',
+            Authorization => "Basic fake"
+        ));
+        my $res = $cb->($req);
+        is($res->code, 401, '... got the right status for this exception');
+        like($res->content, qr/Authorization required/, '... got the error we expected');
+    }
+
     diag("POSTing resource");
     {
         my $req = POST("http://localhost/create" => (
@@ -150,6 +169,17 @@ test_psgi( app => $app, client => sub {
             },
             '... got the right value for creation'
         );
+    }
+
+    diag("Error check");
+    {
+        my $req = POST("http://localhost/create" => (
+            Content => '{"first_name":"Stevan","last_name":"Little"}',
+            Authorization => "Basic YWRtaW46czNjcjN0"
+        ));
+        my $res = $cb->($req);
+        is($res->code, 500, '... got the right status for this exception');
+        like($res->content, qr/Params failed to validate against data_schema/, '... got the error we expected');
     }
 
     diag("Listing resources (expecting one in set)");
@@ -210,6 +240,13 @@ test_psgi( app => $app, client => sub {
         );
     }
 
+    diag("Error check");
+    {
+        my $req = GET("http://localhost/2");
+        my $res = $cb->($req);
+        is($res->code, 404, '... got the right status for not found');
+    }
+
     diag("PUTing updates to the resource we just posted");
     {
         my $req = PUT("http://localhost/1/edit" => (
@@ -241,6 +278,61 @@ test_psgi( app => $app, client => sub {
         );
     }
 
+    diag("Error check");
+    {
+        my $req = PUT("http://localhost/1/edit" => (
+            Content => '{"id":"1","versi":"fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2","body":{"first_name":"Stevan","last_name":"Little","age":38}}',
+            Authorization => "Basic YWRtaW46czNjcjN0"
+        ));
+        my $res = $cb->($req);
+        is($res->code, 500, '... got the right status for this exception');
+        like($res->content, qr/Params failed to validate against data_schema/, '... got the error we expected');
+    }
+    {
+        my $req = PUT("http://localhost/2/edit" => (
+            Content => '{"id":"1","version":"fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2","body":{"first_name":"Stevan","last_name":"Little","age":38}}',
+            Authorization => "Basic YWRtaW46czNjcjN0"
+        ));
+        my $res = $cb->($req);
+        is($res->code, 400, '... got the right status for this exception');
+        like($res->content, qr/the id does not match the id of the updated resource/, '... got the error we expected');
+    }
+    {
+        my $req = PUT("http://localhost/2/edit" => (
+            Content => '{"id":"2","version":"fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2","body":{"first_name":"Stevan","last_name":"Little","age":38}}',
+            Authorization => "Basic YWRtaW46czNjcjN0"
+        ));
+        my $res = $cb->($req);
+        is($res->code, 404, '... got the right status for not found');
+    }
+    {
+        my $req = PUT("http://localhost/1/edit" => (
+            Content => '{"id":"1","version":"fe982ce14ce2b2a1c09762decdeb1522a1e0a2ca390673446c930ca5fd11d2","body":{"first_name":"Stevan","last_name":"Little","age":38}}',
+            Authorization => "Basic YWRtaW46czNjcjN0"
+        ));
+        my $res = $cb->($req);
+        is($res->code, 409, '... got the right status for this exception');
+        like($res->content, qr/resource submitted has out of date version/, '... got the error we expected');
+    }
+    {
+        my $req = PUT("http://localhost/1/edit" => (
+            Content => '{"id":"1","version":"fe982ce14ce2b2a1c09762decdeb1522a1e0a2ca390673446c930ca5fd11d2","body":{"first_name":"Stevan","last_name":"Little","age":38}}'
+        ));
+        my $res = $cb->($req);
+        is($res->code, 401, '... got the right status for this exception');
+        like($res->content, qr/Authorization required/, '... got the error we expected');
+    }
+    {
+        my $req = PUT("http://localhost/1/edit" => (
+            Content => '{"id":"1","version":"fe982ce14ce2b2a1c09762decdeb1522a1e0a2ca390673446c930ca5fd11d2","body":{"first_name":"Stevan","last_name":"Little","age":38}}',
+            Authorization => "Basic bogus"
+        ));
+        my $res = $cb->($req);
+        is($res->code, 401, '... got the right status for this exception');
+        like($res->content, qr/Authorization required/, '... got the error we expected');
+    }
+
+
     diag("GETing resource we just updated");
     {
         my $req = GET("http://localhost/1" );
@@ -269,6 +361,48 @@ test_psgi( app => $app, client => sub {
         );
     }
 
+    diag("Errors");
+    {
+        my $req = GET("http://localhost/1/delete" => (
+            Authorization => "Basic YWRtaW46czNjcjN0"
+        ));
+        my $res = $cb->($req);
+        is($res->code, 405, '... got the right status for bad method');
+        is($res->header('Allow'), 'DELETE', '... got the right Allow header');
+    }
+    {
+        my $req = GET("http://localhost/1/delete");
+        my $res = $cb->($req);
+        is($res->code, 401, '... got the right status for bad method');
+        like($res->content, qr/Authorization required/, '... got the error we expected');
+    }
+    {
+        my $req = DELETE("http://localhost/1/delete" => (
+            'If-Matches' => '9d4a75302bb63df050d6b838b050b978bea1460d5879618e8e3ae8c291247f',
+            Authorization => "Basic YWRtaW46czNjcjN0"
+        ));
+        my $res = $cb->($req);
+        is($res->code, 409, '... got the right status for this exception');
+        like($res->content, qr/resource submitted has out of date version/, '... got the error we expected');
+    }
+    {
+        my $req = DELETE("http://localhost/1/delete" => (
+            'If-Matches' => '9d4a75302bb63df050d6b838b050b978bea1460d5879618e8e3ae8c291247f'
+        ));
+        my $res = $cb->($req);
+        is($res->code, 401, '... got the right status for this exception');
+        like($res->content, qr/Authorization required/, '... got the error we expected');
+    }
+    {
+        my $req = DELETE("http://localhost/1/delete" => (
+            'If-Matches' => '9d4a75302bb63df050d6b838b050b978bea1460d5879618e8e3ae8c291247f',
+            Authorization => "Basic bogus"
+        ));
+        my $res = $cb->($req);
+        is($res->code, 401, '... got the right status for this exception');
+        like($res->content, qr/Authorization required/, '... got the error we expected');
+    }
+
     diag("DELETEing resource we just updated (with conditional match)");
     {
         my $req = DELETE("http://localhost/1/delete" => (
@@ -292,9 +426,81 @@ test_psgi( app => $app, client => sub {
         );
     }
 
+    diag("POSTing resource");
+    {
+        my $req = POST("http://localhost/create" => (
+            Content => '{"first_name":"Stevan","last_name":"Little","age":37}',
+            Authorization => "Basic YWRtaW46czNjcjN0"
+        ));
+        my $res = $cb->($req);
+        is($res->code, 201, '... got the right status for creation');
+        is($res->header('Location'), '2', '... got the right URL for the item');
+        is_deeply(
+            $serializer->deserialize( $res->content ),
+            {
+                id   => 2,
+                body => {
+                    first_name => "Stevan",
+                    last_name  => "Little",
+                    age        => 37,
+                },
+                version => 'fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2',
+                links => [
+                    { rel => "describedby", href => "schema",   method => "GET"    },
+                    { rel => "list",        href => "",         method => "GET"    },
+                    { rel => "create",      href => "create",   method => "POST"   },
+                    { rel => "read",        href => "2",        method => "GET"    },
+                    { rel => "edit",        href => "2/edit",   method => "PUT"    },
+                    { rel => "delete",      href => "2/delete", method => "DELETE" },
+                ]
+            },
+            '... got the right value for creation'
+        );
+    }
+
+    diag("Errors");
+    {
+        my $req = DELETE("http://localhost/1/delete");
+        my $res = $cb->($req);
+        is($res->code, 401, '... got the right status for this exception');
+        like($res->content, qr/Authorization required/, '... got the error we expected');
+    }
+    {
+        my $req = DELETE("http://localhost/1/delete" => (
+            Authorization => "Basic bogus"
+        ));
+        my $res = $cb->($req);
+        is($res->code, 401, '... got the right status for this exception');
+        like($res->content, qr/Authorization required/, '... got the error we expected');
+    }
+
+    diag("DELETEing resource we just updated (without conditional match)");
+    {
+        my $req = DELETE("http://localhost/2/delete" => (
+            Authorization => "Basic YWRtaW46czNjcjN0"
+        ));
+        my $res = $cb->($req);
+        is($res->code, 204, '... got the right status for delete');
+        is_deeply( $res->content, '', '... got the right value for delete' );
+    }
+
+    diag("Listing resources (expecting empty set)");
+    {
+        my $req = GET( "http://localhost/");
+        my $res = $cb->($req);
+        is($res->code, 200, '... got the right status for list ');
+        is_deeply(
+           $serializer->deserialize( $res->content ),
+           [],
+            '... got the right value for list'
+        );
+    }
+
     diag("Calling the DescribedBy");
     {
-        my $req = GET( "http://localhost/schema", Authorization => "Basic YWRtaW46czNjcjN0");
+        my $req = GET( "http://localhost/schema" => (
+            Authorization => "Basic YWRtaW46czNjcjN0"
+        ));
         my $res = $cb->($req);
         is($res->code, 200, '... got the right status for list ');
         is_deeply(
@@ -313,27 +519,6 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("Calling method that should fail because of no auth");
-    {
-        my $req = GET("http://localhost/schema");
-        my $res = $cb->($req);
-        is($res->code, 401, '... got the right status for no auth');
-    }
-    {
-        my $req = DELETE("http://localhost/1/delete");
-        my $res = $cb->($req);
-        is($res->code, 401, '... got the right status for no auth');
-    }
-    {
-        my $req = PUT("http://localhost/1/edit");
-        my $res = $cb->($req);
-        is($res->code, 401, '... got the right status for no auth');
-    }
-    {
-        my $req = POST("http://localhost/create");
-        my $res = $cb->($req);
-        is($res->code, 401, '... got the right status for no auth');
-    }
 
 });
 

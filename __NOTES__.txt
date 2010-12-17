@@ -4,12 +4,6 @@
 - Jackalope::REST::Client
     - write it
 
-- t/
-    - do more error checking in ...
-        - 020-basic-service.t
-        - 021-basic-service-w-middleware.t
-        - 030-multi-schema-service.t
-
 - Jackalope.Schema.Repository
     - port the remainder of the tests
         - t/010-schema/111-extends-in-properties.t
@@ -47,6 +41,9 @@
         - we should support eTags
     - Media (binary data)
         - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#media-link-entries
+    - the described-by relation should probably return a more
+      complete (compiled) schema, and any referenced schemas
+      should have their complete URIs, not just the reference
 
 - ponder spliting things up
     - Jackalope
