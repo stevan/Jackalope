@@ -175,10 +175,9 @@ sub _compile_core_schemas {
         $self->_flatten_extends( $schema, $schema_map );
     }
 
-    # NOTE:
-    # Dont think I need to do _resolve_embedded_extends
-    # in here, because there shoudn't be any.
-    # - SL
+    foreach my $schema ( @schemas ) {
+        $self->_resolve_embedded_extends( $schema, $schema_map );
+    }
 
     foreach my $schema ( @schemas ) {
         $self->_resolve_refs( $schema, $schema_map );
