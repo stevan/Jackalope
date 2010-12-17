@@ -4,11 +4,6 @@
 - Jackalope::REST::Client
     - write it
 
-- Jackalope.Schema.Repository
-    - port the remainder of the tests
-        - t/010-schema/111-extends-in-properties.t
-        - t/030-REST/011-schema-web-service-extension.t
-
 - Jackalope::REST::Service::Directory
     - write this
     - this should collect services and key them by schema->id
