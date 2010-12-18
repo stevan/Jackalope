@@ -21,7 +21,7 @@ has 'desc' => (
 around 'as_string' => sub {
     my $next = shift;
     my $self = shift;
-    $self->code . " " . $self->desc . " : " . $self->$next;
+    $self->code . " " . $self->desc . " : " . $self->message;
 };
 
 sub to_psgi {
