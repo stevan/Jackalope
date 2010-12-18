@@ -7,6 +7,7 @@ use lib '/Users/stevan/Projects/CPAN/current/Bread-Board/lib',
         '/Users/stevan/Projects/CPAN/current/Plack-App-Path-Router/lib';
 
 use Bread::Board;
+use Path::Router;
 use Jackalope::REST;
 use Jackalope::REST::Resource::Repository::Simple;
 
@@ -45,7 +46,17 @@ my $c = container $j => as {
     );
 };
 
-my $app = Plack::App::Path::Router::PSGI->new( router => $c->resolve( service => 'MyService' )->router );
+my $service = $c->resolve( service => 'MyService' );
+my $router  = Path::Router->new;
+$router->add_route( '/' => (
+    target => sub {
+        [ 302, [ 'Location' => 'static/index.html' ], []]
+    }
+));
+$router->include_router( 'people/' => $service->router );
+$service->update_router( $router );
+
+my $app = Plack::App::Path::Router::PSGI->new( router => $router );
 
 builder {
     enable "Plack::Middleware::Static" => (
