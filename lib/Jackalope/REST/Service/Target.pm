@@ -58,16 +58,7 @@ sub process_operation {
 
 sub sanitize_and_prepare_input {
     my ($self, $r ) = @_;
-
-    if (exists $self->link->{'method'}) {
-        if ($self->link->{'method'} ne $r->method) {
-            Jackalope::REST::Error::MethodNotAllowed->new(
-                allowed_methods => [ $self->link->{'method'} ],
-                message         => ($r->method . ' method is not allowed, expecting ' . $self->link->{'method'})
-            )->throw;
-        }
-    }
-
+    $self->check_http_method( $r );
     $self->check_uri_schema( $r );
     $self->check_data_schema( $r );
 }
@@ -114,6 +105,18 @@ sub process_psgi_output {
 }
 
 # ...
+
+sub check_http_method {
+    my ($self, $r) = @_;
+    if (exists $self->link->{'method'}) {
+        if ($self->link->{'method'} ne $r->method) {
+            Jackalope::REST::Error::MethodNotAllowed->new(
+                allowed_methods => [ $self->link->{'method'} ],
+                message         => ($r->method . ' method is not allowed, expecting ' . $self->link->{'method'})
+            )->throw;
+        }
+    }
+}
 
 sub check_uri_schema {
     my ($self, $r) = @_;

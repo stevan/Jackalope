@@ -402,6 +402,14 @@ test_psgi( app => $app, client => sub {
         );
     }
 
+    diag("Errors");
+    {
+        my $req = POST("http://localhost/schema");
+        my $res = $cb->($req);
+        is($res->code, 405, '... got the right status for bad method');
+        is($res->header('Allow'), 'GET', '... got the right Allow header');
+    }
+
 });
 
 
