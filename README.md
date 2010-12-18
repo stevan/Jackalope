@@ -3,7 +3,7 @@
 Jackalope is a framework for building REST style web services with embedded
 hypermedia controls. It was heavily inspired by the description of "Level 3"
 web services as described in [this article](http://martinfowler.com/articles/richardsonMaturityModel.html#level3)
-by Martin Fowler.
+by Martin Fowler and the book [REST in Practice](http://restinpractice.com/default.aspx).
 
 ## Core Concepts
 
@@ -64,13 +64,19 @@ the schema.
 
 This part of Jackalope starts to get more opinionated. Currently it provides a
 basic set of tools for exposing discoverable services to manage a collection a
-resources. It borrows some of the basic HTTP interactions from the ATOM publishing
-protocol and Microsoft's Cannonical REST Entity model, them mixed up with some of
-my personal opinions.
+resources in a CRUD like manner. It borrows some of the basic HTTP interactions
+from the ATOM publishing protocol and Microsoft's Cannonical REST Entity model,
+then mixed up with some of my personal opinions.
 
-We extend the base Jackalope spec for this part, adding to it a 'web/resource'
-schema and an 'web/service' schema, those can seen in Jackalope::REST::Schema::Spec.
-These are the two core components of the REST component.
+It should be noted that there is more to REST then simple CRUD actions on
+resource collections, but currently this is what is available "out of the box"
+with plans for more later on. At this point if you wanted a more complex flow
+it would be possible to do it manually with the tools in Jackalope.
+
+We extend the base Jackalope spec for this part, adding to it a 'web/resource' and
+'web/resource/ref schemas and an 'web/service' schema, those can seen in
+Jackalope::REST::Schema::Spec. These are the two core components of the REST part
+of Jackalope.
 
 #### Resources
 
@@ -87,8 +93,24 @@ A resource is the transport format, it looks something like this:
 The 'id' field is the lookup key for this given resource in the repository and the
 'body' is what you have stored in the resource repository. The 'version' is a digest
 of the body constructed by creating an SHA-256 hash of the cannonical JSON of the body.
-And then finally the 'links' is an array of 'xlink' items which represent the other
-available services for this resource (ex: read, update, delete, etc.)
+And then finally the optional 'links' is an array of 'xlink' items which represent
+the other available services for this resource (ex: read, update, delete, etc.)
+
+We also have a concept of resource references, which is a representation of a
+reference to a resource. It looks something like this:
+
+     {
+        $id     : <string id>,
+        type_of : <schema uri of resource this refers to>,
+        version : <digest of the body of the resource this refers to>,
+        link    : <xlink to read this resource>
+     }
+
+The '$id' field is the same as the 'id' field in a resource, the 'type_of' field
+is the schema this '$id' refers too. Then optionally we have a 'version', which is
+as described above and could be used in your code to check that the resource being
+referred to has not changed. We also optionally have a 'link', which is an 'xlink'
+of the 'read' service for this resource (basically a link to the resource itself).
 
 The next concept is the resource repository. Currently we supply a role that will
 wrap around your data repository, you only need worry about the 'body' of the resource
@@ -107,6 +129,7 @@ schema from Jackalope::REST::Schema::Spec, and a resource repository and creates
 a web service with the following features.
 
 - describedby
+    - This is done by doing a GET to the describedby URI (/schema)
     - This returns the schema that the service was created with.
 - listing
     - This is done by doing a GET to the URI of a collection (/)
@@ -142,9 +165,14 @@ a web service with the following features.
             - it should contain the version string of the resource you want to delete and we will check it against the current one before deletion
             - if it does not match it returns a 409 (Conflict) status with no content
 
+We also check to make sure that the proper HTTP method is used for the proper
+URI and throw a 405 (Method Not Allowed) error with an 'Allow' header properly
+populated.
+
 ## References
 
 * [Richardson Maturity Model](http://martinfowler.com/articles/richardsonMaturityModel.html)
+* [REST in Practice](http://restinpractice.com/default.aspx)
 * [REST on Wikipedia](http://en.wikipedia.org/wiki/Representational_State_Transfer)
 * [ATOM publishing protocol](http://www.atomenabled.org/)
 * [HTTP Status Codes](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html)
