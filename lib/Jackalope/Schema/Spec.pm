@@ -87,7 +87,7 @@ sub _build_spec {
 
 sub _all_spec_builder_methods {
     my $self = shift;
-    keys %{ $self->typemap }, qw[ ref spec hyperlink xlink ]
+    keys %{ $self->typemap }, qw[ ref spec linkrel xlink ]
 }
 
 ## ------------------------------------------------------------------
@@ -172,10 +172,10 @@ sub ref {
 ## to talk about and describe links for resources.
 ## ------------------------------------------------------------------
 
-sub hyperlink {
+sub linkrel {
     my $self = shift;
     return +{
-        id          => "schema/core/hyperlink",
+        id          => "schema/core/linkrel",
         title       => "The 'HyperLink' schema",
         description => q[
             This is the 'link' type for the hyper schema
@@ -277,7 +277,7 @@ sub hyperlink {
 ## Xlink Schema
 ## ------------------------------------------------------------------
 ## The Xlink schema is an additional schema which provides a way
-## to represent concrete links that are described with the hyperlink
+## to represent concrete links that are described with the linkrel
 ## schema above.
 ## ------------------------------------------------------------------
 
@@ -289,7 +289,7 @@ sub xlink {
         description => q[
             This is the 'link' type for the hyper schema
             which represents the concrete links that are
-            described with the hyperlink schema.
+            described with the linkrel schema.
         ],
         type        => "object",
         properties  => {
@@ -299,7 +299,7 @@ sub xlink {
                     This string describes the relation of the link
                     to the actual resource it points to. For more
                     details see the docs for the 'rel' element
-                    in the schema/core/hyperlink schema.
+                    in the schema/core/linkrel schema.
                 ]
             },
             href => {
@@ -370,7 +370,7 @@ sub any {
             },
             links => {
                 type        => "array",
-                items       => { '$ref' => "schema/core/hyperlink" },
+                items       => { '$ref' => "schema/core/linkrel" },
                 is_unique   => true,
                 description => q[
                     This is an array of 'link' objects, the purpose

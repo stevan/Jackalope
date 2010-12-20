@@ -21,7 +21,7 @@ my $fixtures = Test::Jackalope::Fixtures->new(
     repo        => $repo
 );
 
-foreach my $type ( qw[ ref hyperlink xlink ] ) {
+foreach my $type ( qw[ ref linkrel xlink ] ) {
     my $schema = $repo->get_compiled_schema_by_uri('schema/core/' . $type);
     validation_pass(
         $repo->validate(

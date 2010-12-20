@@ -431,7 +431,7 @@
                "type" : "array",
                "description" : "This is an array of 'link' objects, the purpose\nof which is to provide a way to map services\nto the objects described in a schema. In OOP terms,\nyou can think of them as methods, while the schema\ndescribes the instance structure.\n",
                "items" : {
-                  "$ref" : "schema/core/hyperlink"
+                  "$ref" : "schema/core/linkrel"
                }
             }
          },
@@ -481,7 +481,7 @@
             }
          }
       },
-      "schema/core/hyperlink" : {
+      "schema/core/linkrel" : {
          "additional_properties" : {
             "target_schema" : {
                "type" : "schema",
@@ -521,7 +521,7 @@
                "description" : "A short human readable description of the link"
             }
          },
-         "id" : "schema/core/hyperlink",
+         "id" : "schema/core/linkrel",
          "title" : "The 'HyperLink' schema",
          "type" : "object",
          "description" : "This is the 'link' type for the hyper schema\nwhich represents links for resources.\n",
@@ -553,11 +553,11 @@
          "id" : "schema/core/xlink",
          "title" : "The 'XLink' schema",
          "type" : "object",
-         "description" : "This is the 'link' type for the hyper schema\nwhich represents the concrete links that are\ndescribed with the hyperlink schema.\n",
+         "description" : "This is the 'link' type for the hyper schema\nwhich represents the concrete links that are\ndescribed with the linkrel schema.\n",
          "properties" : {
             "rel" : {
                "type" : "string",
-               "description" : "This string describes the relation of the link\nto the actual resource it points to. For more\ndetails see the docs for the 'rel' element\nin the schema/core/hyperlink schema.\n"
+               "description" : "This string describes the relation of the link\nto the actual resource it points to. For more\ndetails see the docs for the 'rel' element\nin the schema/core/linkrel schema.\n"
             },
             "href" : {
                "format" : "uri",

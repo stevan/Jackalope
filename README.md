@@ -46,15 +46,15 @@ so I recommend re-reading it then. Hopefully at that point, it will all make sen
 
 ### Hypermedia controls
 
-In the core set of schemas we also provide a basic 'hyperlink' schema and an 'xlink'
-schema. The 'hyperlink' schema is for describing the concept of a link enough so that
+In the core set of schemas we also provide a basic 'linkrel' schema and an 'xlink'
+schema. The 'linkrel' schema is for describing the concept of a link enough so that
 a link could easily be created from the available metadata. The 'xlink' schema is
-for describing the concrete implementation of a 'hyperlink'. It is perhaps useful to
-think of a 'hyperlink' like a class and 'xlink' like an object instance, they have
+for describing the concrete implementation of a 'linkrel'. It is perhaps useful to
+think of a 'linkrel' like a class and 'xlink' like an object instance, they have
 a similar relationship to one another.
 
 The base 'any' schema type provides an optional 'links' property, which is an array
-of 'hyperlinks'. These are meant to describe the possible actions that can be taken
+of 'linkrels'. These are meant to describe the possible actions that can be taken
 against a given schema. Think of them as methods, where the schema is the class. These
 are also used by the REST style web services to generate the routes that can be called
 on the service, and used to generate a set of hypermedia controls for an instance of

@@ -1,6 +1,6 @@
 [
     {
-        "schema" : { "$ref" : "schema/core/hyperlink" },
+        "schema" : { "$ref" : "schema/core/linkrel" },
         "pass" : [
             {
                 "rel" : "self",
