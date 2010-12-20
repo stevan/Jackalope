@@ -215,6 +215,14 @@ sub linkrel {
                     given an object with an 'id' property of 1234.
                 ]
             },
+            method       => {
+                type        => "string",
+                enum        => [ "GET", "POST", "PUT", "DELETE" ],
+                description => q[
+                    The HTTP method expected by this link, if
+                    this isn't included then GET is assumed.
+                ],
+            }
         },
         additional_properties => {
             target_schema => {
@@ -250,14 +258,6 @@ sub linkrel {
                     and on the client side it can be used to check
                     to assure the URL being called is valid.
                 ]
-            },
-            method       => {
-                type        => "string",
-                enum        => [ "GET", "POST", "PUT", "DELETE" ],
-                description => q[
-                    The HTTP method expected by this link, if
-                    this isn't included then GET is assumed.
-                ],
             },
             title        => { type => "string", description => "The human readable title of a given link" },
             description  => { type => "string", description => "A short human readable description of the link" },
