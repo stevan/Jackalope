@@ -8,7 +8,14 @@ extends 'Jackalope::Schema::Spec';
 
 override '_all_spec_builder_methods' => sub {
     my $self = shift;
-    super(), qw[ resource resource_ref service ]
+    super(), qw[
+        resource
+        resource_ref
+
+        service_readonly
+        service_non_editable
+        service
+    ]
 };
 
 ## ------------------------------------------------------------------
@@ -141,18 +148,18 @@ sub resource_ref {
 }
 
 ## ------------------------------------------------------------------
-## Service Schema
+## Service Schemas
 ## ------------------------------------------------------------------
 ## The Service schema is a simple template for REST based web
 ## service that follows a convention for the standard operations
 ## that would be performed on a REST resource collection.
 ## ------------------------------------------------------------------
 
-sub service {
+sub service_readonly {
     my $self = shift;
     return +{
-        id    => 'schema/web/service',
-        title => 'This is a simple REST enabled schema',
+        id    => 'schema/web/service/read-only',
+        title => 'This is a simple read-only REST enabled schema',
         type  => 'object',
         links => {
             describedby => {
@@ -176,19 +183,6 @@ sub service {
                     }
                 },
             },
-            create => {
-                rel           => 'create',
-                href          => '/create',
-                method        => 'POST',
-                data_schema   => { '$ref' => '#' },
-                target_schema => {
-                    type       => 'object',
-                    extends    => { '$ref' => 'schema/web/resource' },
-                    properties => {
-                        body => { '$ref' => '#' },
-                    }
-                },
-            },
             read => {
                 rel           => 'read',
                 href          => '/:id',
@@ -203,7 +197,50 @@ sub service {
                 uri_schema    => {
                     id => { type => 'string' }
                 }
+            }
+        }
+    };
+}
+
+sub service_non_editable {
+    my $self = shift;
+    return +{
+        id      => 'schema/web/service/non-editable',
+        title   => 'This is a simple REST enabled schema',
+        extends => { '$ref' => 'schema/web/service/read-only' },
+        links   => {
+            create => {
+                rel           => 'create',
+                href          => '/create',
+                method        => 'POST',
+                data_schema   => { '$ref' => '#' },
+                target_schema => {
+                    type       => 'object',
+                    extends    => { '$ref' => 'schema/web/resource' },
+                    properties => {
+                        body => { '$ref' => '#' },
+                    }
+                },
             },
+            delete => {
+                rel           => 'delete',
+                href          => '/:id/delete',
+                method        => 'DELETE',
+                uri_schema    => {
+                    id => { type => 'string' }
+                }
+            }
+        }
+    };
+}
+
+sub service {
+    my $self = shift;
+    return +{
+        id      => 'schema/web/service/crud',
+        title   => 'This is a simple REST enabled schema',
+        extends => { '$ref' => 'schema/web/service/non-editable' },
+        links   => {
             edit => {
                 rel           => 'edit',
                 href          => '/:id/edit',
@@ -222,14 +259,6 @@ sub service {
                         body => { '$ref' => '#' },
                     }
                 },
-                uri_schema    => {
-                    id => { type => 'string' }
-                }
-            },
-            delete => {
-                rel           => 'delete',
-                href          => '/:id/delete',
-                method        => 'DELETE',
                 uri_schema    => {
                     id => { type => 'string' }
                 }

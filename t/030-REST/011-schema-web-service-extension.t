@@ -21,7 +21,7 @@ is(exception{
         {
             id         => 'simple/person',
             title      => 'This is a simple person schema',
-            extends    => { '$ref' => 'schema/web/service' },
+            extends    => { '$ref' => 'schema/web/service/crud' },
             properties => {
                 first_name => { type => 'string' },
                 last_name  => { type => 'string' },

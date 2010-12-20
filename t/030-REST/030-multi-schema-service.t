@@ -137,7 +137,7 @@ my $c = container $j => as {
 
     service 'ProductSchema' => {
         id         => "test/product",
-        extends    => { '$ref' => 'schema/web/service' },
+        extends    => { '$ref' => 'schema/web/service/crud' },
         properties => {
             sku  => { type => "string" },
             desc => { type => "string" }
@@ -161,7 +161,7 @@ my $c = container $j => as {
 
     service 'UserSchema' => {
         id         => "test/user",
-        extends    => { '$ref' => 'schema/web/service' },
+        extends    => { '$ref' => 'schema/web/service/crud' },
         properties => {
             username => { type => "string" }
         }

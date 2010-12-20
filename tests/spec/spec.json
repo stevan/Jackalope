@@ -72,8 +72,8 @@
             }
          }
       },
-      "schema/web/service" : {
-         "id" : "schema/web/service",
+      "schema/web/service/crud" : {
+         "id" : "schema/web/service/crud",
          "title" : "This is a simple REST enabled schema",
          "type" : "object",
          "links" : [

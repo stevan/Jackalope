@@ -54,7 +54,7 @@ my $c = container $j => as {
     service 'MySchema' => {
         id         => 'simple/person',
         title      => 'This is a simple person schema',
-        extends    => { '$ref' => 'schema/web/service' },
+        extends    => { '$ref' => 'schema/web/service/crud' },
         properties => {
             first_name => { type => 'string' },
             last_name  => { type => 'string' },
@@ -90,7 +90,7 @@ does_ok($service->resource_repository, 'Jackalope::REST::Resource::Repository');
 is_deeply($service->schema, {
     id         => 'simple/person',
     title      => 'This is a simple person schema',
-    extends    => { '$ref' => 'schema/web/service' },
+    extends    => { '$ref' => 'schema/web/service/crud' },
     properties => {
         first_name => { type => 'string' },
         last_name  => { type => 'string' },
@@ -509,7 +509,7 @@ test_psgi( app => $app, client => sub {
            {
                id         => 'simple/person',
                title      => 'This is a simple person schema',
-               extends    => { '$ref' => 'schema/web/service' },
+               extends    => { '$ref' => 'schema/web/service/crud' },
                properties => {
                    first_name => { type => 'string' },
                    last_name  => { type => 'string' },
