@@ -481,75 +481,7 @@
             }
          }
       },
-      "schema/core/linkrel" : {
-         "additional_properties" : {
-            "target_schema" : {
-               "type" : "schema",
-               "description" : "This is a schema (or a reference to a schema),\nof the resource being linked to. Typically this\nwill be just { '$ref' => '#' } to indicate that\nit refers to the schema it is contained within.\n"
-            },
-            "data_schema" : {
-               "type" : "schema",
-               "description" : "This is a schema (or a reference to a schema)\nof the submission data that will be accepted\nby this link. In the case of a POST or PUT\nmethod, the data is expected in the given\ntransport format. In the case of GET, this\nshould be an 'object' type schema and the\nquery string parameters should be checked\nagainst it.\n"
-            },
-            "uri_schema" : {
-               "type" : "object",
-               "description" : "This is a schema (or a reference to a schema)\nof the results of the mapping of the URI-template\nin the 'href' property. On the server side it\ncan be used to validate the value that we get,\nand on the client side it can be used to check\nto assure the URL being called is valid.\n",
-               "items" : {
-                  "type" : "schema"
-               }
-            },
-            "method" : {
-               "enum" : [
-                  "GET",
-                  "POST",
-                  "PUT",
-                  "DELETE"
-               ],
-               "type" : "string",
-               "description" : "The HTTP method expected by this link, if\nthis isn't included then GET is assumed.\n"
-            },
-            "title" : {
-               "type" : "string",
-               "description" : "The human readable title of a given link"
-            },
-            "metadata" : {
-               "type" : "object",
-               "description" : "This is just a place for random additional metadata\nthat might be useful for your given implementation.\nThis is totally free form and can be anything you want.\n"
-            },
-            "description" : {
-               "type" : "string",
-               "description" : "A short human readable description of the link"
-            }
-         },
-         "id" : "schema/core/linkrel",
-         "title" : "The 'HyperLink' schema",
-         "type" : "object",
-         "description" : "This is the 'link' type for the hyper schema\nwhich represents links for resources.\n",
-         "properties" : {
-            "rel" : {
-               "type" : "string",
-               "description" : "This string should in some way describe the relation\nof the link to the object instance. The validity of\nthe values is determined by the consumer of the\nlink data. By convention it should either be one\nof well-know link relations, which can be found here\nhttp://www.iana.org/assignments/link-relations/link-relations.xhtml,\nor a URI specific to the consumer of this link data.\n"
-            },
-            "href" : {
-               "format" : "uri_template",
-               "type" : "string",
-               "description" : "This is a URI for the resource, it may also\nbe a URI template containing variables (using the\nRoR style colon prefix). In the case of these\ntemplates the variables should be resolved in\nthe context of the object instance. This means\nthat a template like so:\n/product/:id/view\nshould be resolved to be this:\n/product/1234/view\ngiven an object with an 'id' property of 1234.\n"
-            }
-         }
-      },
       "schema/core/hyperlink" : {
-         "additional_properties" : {
-            "method" : {
-               "enum" : [
-                  "GET",
-                  "POST",
-                  "PUT",
-                  "DELETE"
-               ],
-               "type" : "string",
-               "description" : "The HTTP method expected by this link, if\nthis isn't included then GET is assumed.\n"
-            }
-         },
          "id" : "schema/core/hyperlink",
          "title" : "The 'XLink' schema",
          "type" : "object",
@@ -563,6 +495,18 @@
                "format" : "uri",
                "type" : "string",
                "description" : "This is a URI of the resource the link is pointing to.\n"
+            },
+            "method" : {
+               "enum" : [
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "DELETE",
+                  "HEAD",
+                  "OPTIONS"
+               ],
+               "type" : "string",
+               "description" : "The HTTP method expected by this link, if\nthis isn't included then GET is assumed.\n"
             }
          }
       },
@@ -604,6 +548,64 @@
             "type" : {
                "literal" : "integer",
                "type" : "string"
+            }
+         }
+      },
+      "schema/core/linkrel" : {
+         "additional_properties" : {
+            "target_schema" : {
+               "type" : "schema",
+               "description" : "This is a schema (or a reference to a schema),\nof the resource being linked to. Typically this\nwill be just { '$ref' => '#' } to indicate that\nit refers to the schema it is contained within.\n"
+            },
+            "data_schema" : {
+               "type" : "schema",
+               "description" : "This is a schema (or a reference to a schema)\nof the submission data that will be accepted\nby this link. In the case of a POST or PUT\nmethod, the data is expected in the given\ntransport format. In the case of GET, this\nshould be an 'object' type schema and the\nquery string parameters should be checked\nagainst it.\n"
+            },
+            "uri_schema" : {
+               "type" : "object",
+               "description" : "This is a schema (or a reference to a schema)\nof the results of the mapping of the URI-template\nin the 'href' property. On the server side it\ncan be used to validate the value that we get,\nand on the client side it can be used to check\nto assure the URL being called is valid.\n",
+               "items" : {
+                  "type" : "schema"
+               }
+            },
+            "title" : {
+               "type" : "string",
+               "description" : "The human readable title of a given link"
+            },
+            "metadata" : {
+               "type" : "object",
+               "description" : "This is just a place for random additional metadata\nthat might be useful for your given implementation.\nThis is totally free form and can be anything you want.\n"
+            },
+            "description" : {
+               "type" : "string",
+               "description" : "A short human readable description of the link"
+            }
+         },
+         "id" : "schema/core/linkrel",
+         "title" : "The 'HyperLink' schema",
+         "type" : "object",
+         "description" : "This is the 'link' type for the hyper schema\nwhich represents links for resources.\n",
+         "properties" : {
+            "rel" : {
+               "type" : "string",
+               "description" : "This string should in some way describe the relation\nof the link to the object instance. The validity of\nthe values is determined by the consumer of the\nlink data. By convention it should either be one\nof well-know link relations, which can be found here\nhttp://www.iana.org/assignments/link-relations/link-relations.xhtml,\nor a URI specific to the consumer of this link data.\n"
+            },
+            "href" : {
+               "format" : "uri_template",
+               "type" : "string",
+               "description" : "This is a URI for the resource, it may also\nbe a URI template containing variables (using the\nRoR style colon prefix). In the case of these\ntemplates the variables should be resolved in\nthe context of the object instance. This means\nthat a template like so:\n/product/:id/view\nshould be resolved to be this:\n/product/1234/view\ngiven an object with an 'id' property of 1234.\n"
+            },
+            "method" : {
+               "enum" : [
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "DELETE",
+                  "HEAD",
+                  "OPTIONS"
+               ],
+               "type" : "string",
+               "description" : "The HTTP method expected by this link, if\nthis isn't included then GET is assumed.\n"
             }
          }
       }

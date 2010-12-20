@@ -2,7 +2,7 @@
 test(
     "Core test",
     function() {
-        expect(25);
+        expect(32);
 
         var tester   = new Test.Jackalope ();
         var repo     = new Jackalope.Schema.Repository ({

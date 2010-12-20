@@ -31,6 +31,7 @@ test(
                     "links" : [
                         {
                             "rel"           : "self",
+                            "method"        : "GET",
                             "href"          : "product/{id}/view",
                             "target_schema" : { "$ref" : "#" }
                         },
@@ -60,6 +61,7 @@ test(
                     "links" : [
                         {
                             "rel"           : "/my_schemas/link/product_listing",
+                            "method"        : "GET",
                             "href"          : "product/list",
                             "target_schema" : { "$ref" : "#" }
                         },
