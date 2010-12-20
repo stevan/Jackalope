@@ -40,7 +40,7 @@ my $c = container $j => as {
     typemap 'Jackalope::REST::Resource::Repository::Simple' => infer;
 
     service 'MyService' => (
-        class        => 'Jackalope::REST::Service',
+        class        => 'Jackalope::REST::CRUD::Service',
         dependencies => {
             schema_repository   => 'type:Jackalope::Schema::Repository',
             resource_repository => 'type:Jackalope::REST::Resource::Repository::Simple',
@@ -55,7 +55,8 @@ my $c = container $j => as {
 };
 
 my $service = $c->resolve( service => 'MyService' );
-isa_ok($service, 'Jackalope::REST::Service');
+isa_ok($service, 'Jackalope::REST::CRUD::Service');
+does_ok($service, 'Jackalope::REST::Service');
 
 isa_ok($service->schema_repository, 'Jackalope::Schema::Repository');
 isa_ok($service->resource_repository, 'Jackalope::REST::Resource::Repository::Simple');

@@ -34,7 +34,7 @@ use Plack::App::Path::Router::PSGI;
 
     has [ 'product_service', 'user_service' ] => (
         is       => 'ro',
-        isa      => 'Jackalope::REST::Service',
+        isa      => 'Jackalope::REST::CRUD::Service',
         required => 1,
     );
 
@@ -146,7 +146,7 @@ my $c = container $j => as {
 
     service 'ProductService' => (
         lifecycle    => 'Singleton',
-        class        => 'Jackalope::REST::Service',
+        class        => 'Jackalope::REST::CRUD::Service',
         dependencies => {
             schema_repository   => 'type:Jackalope::Schema::Repository',
             resource_repository => 'type:Jackalope::REST::Resource::Repository::Simple',
@@ -169,7 +169,7 @@ my $c = container $j => as {
 
     service 'UserService' => (
         lifecycle    => 'Singleton',
-        class        => 'Jackalope::REST::Service',
+        class        => 'Jackalope::REST::CRUD::Service',
         dependencies => {
             schema_repository   => 'type:Jackalope::Schema::Repository',
             resource_repository => 'type:Jackalope::REST::Resource::Repository::Simple',
@@ -302,7 +302,7 @@ my $c = container $j => as {
 
     service 'ShoppingCartService' => (
         lifecycle    => 'Singleton',
-        class        => 'Jackalope::REST::Service',
+        class        => 'Jackalope::REST::CRUD::Service',
         dependencies => {
             schema_repository   => 'type:Jackalope::Schema::Repository',
             resource_repository => 'MyShoppingCartRepo',

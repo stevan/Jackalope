@@ -11,7 +11,7 @@ use Jackalope::REST::Error::InternalServerError;
 
 has 'service' => (
     is       => 'ro',
-    isa      => 'Jackalope::REST::Service',
+    isa      => 'Jackalope::REST::CRUD::Service',
     required => 1,
     handles  => [qw[
         resource_repository

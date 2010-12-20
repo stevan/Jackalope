@@ -26,7 +26,7 @@ use Plack::App::Path::Router::PSGI;
 {
     package My::Service;
     use Moose;
-    extends 'Jackalope::REST::Service';
+    extends 'Jackalope::REST::CRUD::Service';
 
     use Plack::Middleware::Auth::Basic;
 
@@ -81,7 +81,8 @@ my $c = container $j => as {
 
 my $service = $c->resolve( service => 'MyService' );
 isa_ok($service, 'My::Service');
-isa_ok($service, 'Jackalope::REST::Service');
+isa_ok($service, 'Jackalope::REST::CRUD::Service');
+does_ok($service, 'Jackalope::REST::Service');
 
 isa_ok($service->schema_repository, 'Jackalope::Schema::Repository');
 isa_ok($service->resource_repository, 'Jackalope::REST::Resource::Repository::Simple');

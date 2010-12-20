@@ -32,7 +32,7 @@ my $c = container $j => as {
     typemap 'Jackalope::REST::Resource::Repository::Simple' => infer;
 
     service 'MyService' => (
-        class        => 'Jackalope::REST::Service',
+        class        => 'Jackalope::REST::CRUD::Service',
         dependencies => {
             schema_repository   => 'type:Jackalope::Schema::Repository',
             resource_repository => 'type:Jackalope::REST::Resource::Repository::Simple',
