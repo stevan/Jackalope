@@ -2,7 +2,7 @@
 test(
     "Schema Extension test",
     function() {
-        expect(10);
+        expect(12);
 
         var tester = new Test.Jackalope ();
 
@@ -25,14 +25,20 @@ test(
                         "age"        : { "type" : "integer", "greater_than" : 0 },
                         "sex"        : { "type" : "string", "enum" : [ "male", "female" ] }
                     },
-                    "links" : [
-                        {
-                            "rel"           : "self",
-                            "href"          : "/:id/read",
-                            "method"        : "GET",
-                            "target_schema" : { "$ref" : "#" }
+                    "links" : {
+                        "self" : {
+                            "rel"           : 'self',
+                            "href"          : '/:id/read',
+                            "method"        : 'GET',
+                            "target_schema" : { '$ref' : '#' }
+                        },
+                        "edit" : {
+                            "rel"           : 'edit',
+                            "href"          : '/:id/update',
+                            "method"        : 'GET',
+                            "target_schema" : { '$ref' : '#' }
                         }
-                    ]
+                    }
                 }
             );
             ok(true, "... successfully registered the schema");
@@ -49,6 +55,14 @@ test(
                     "properties" : {
                         "title"   : { type : "string" },
                         "manager" : { "$ref" : "#" }
+                    },
+                    "links" : {
+                        "self" : {
+                            "rel"           : 'self',
+                            "href"          : '/:id',
+                            "method"        : 'GET',
+                            "target_schema" : { '$ref' : '#' }
+                        }
                     }
                 }
             );
@@ -68,8 +82,11 @@ test(
 
         ok(employee.properties.manager === employee, "... embedded manager schema is the same as employee");
 
-        ok(employee.links[0].target_schema === employee, "... employee links target_schema is the same object as employee");
-        ok(person.links[0].target_schema === person, "... person links target_schema is the same object as person");
+        ok(employee.links.self.target_schema === employee, "... employee links target_schema is the same object as employee");
+        ok(person.links.self.target_schema === person, "... person links target_schema is the same object as person");
+
+        ok(employee.links.edit.target_schema === employee, "... employee links target_schema is the same object as employee");
+        ok(person.links.edit.target_schema === person, "... person links target_schema is the same object as person");
 
     }
 

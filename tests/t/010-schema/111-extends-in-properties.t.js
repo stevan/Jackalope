@@ -109,11 +109,13 @@ test(
                             },
                             "pay_scale" : { "type" : "string", "literal" : "medium" }
                         },
-                        "additional_properties": {}
+                        "additional_properties": {},
+                        "links": {}
                     }
                 },
                 "type": "object",
-                "additional_properties": {}
+                "additional_properties": {},
+                "links": {}
             },
             '... manager schema is inflated correctly'
         );

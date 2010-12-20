@@ -25,8 +25,8 @@ test(
                         "age"        : { "type" : "integer", "greater_than" : 0 },
                         "sex"        : { "type" : "string", "enum" : [ "male", "female" ] }
                     },
-                    "links" : [
-                        {
+                    "links" : {
+                        "create" : {
                             "rel"         : "create",
                             "href"        : "/create",
                             "method"      : "PUT",
@@ -38,7 +38,7 @@ test(
                                 "links" : []
                             }
                         }
-                    ]
+                    }
                 }
             );
             ok(true, "... successfully registered the schema");
@@ -49,7 +49,7 @@ test(
         var person = repo.get_compiled_schema_by_uri("simple/person");
 
         deepEqual(
-            person.links[0].data_schema.properties,
+            person.links.create.data_schema.properties,
             {
                 "id"         : { "type" : "null" },
                 "first_name" : { "type" : "string" },

@@ -13,7 +13,7 @@ test(
             })
         });
 
-        var types = [ 'resource', 'resource/ref', 'service' ];
+        var types = [ 'resource', 'resource/ref', 'service/crud' ];
 
         for (var i = 0; i < types.length; i++) {
             tester.validation_pass(

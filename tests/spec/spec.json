@@ -1,44 +1,57 @@
 {
    "schema_map" : {
-      "schema/web/resource/ref" : {
-         "additional_properties" : {
-            "link" : {
-               "additional_properties" : {
-                  "method" : {
-                     "literal" : "GET",
-                     "type" : "string"
-                  }
-               },
-               "extends" : {
-                  "$ref" : "schema/core/hyperlink"
-               },
-               "description" : "This is an optional hyperlink to read the resource\ndescribed, it should only ever be GET since it\nis only for reading.\n",
-               "properties" : {
-                  "rel" : {
-                     "literal" : "read",
-                     "type" : "string"
-                  }
-               }
-            },
-            "version" : {
-               "format" : "digest",
-               "type" : "string",
-               "description" : "This is a digest string (SHA-256) representing the current\nversion of the resource being pointed to. This can be used\nto check to make sure that the resource has not changed\nsince it was last referred too.\n"
-            }
-         },
-         "id" : "schema/web/resource/ref",
-         "title" : "The 'Resource Ref' schema",
+      "schema/web/service/read-only" : {
+         "id" : "schema/web/service/read-only",
+         "title" : "This is a simple read-only REST enabled schema",
          "type" : "object",
-         "description" : "This is meant to be a way to represent\nreferences to resources, it can be a convient\nway to refer to a resource only by it's ID\nand therefore save bandwidth.\n",
-         "properties" : {
-            "type_of" : {
-               "format" : "uri",
-               "type" : "string",
-               "description" : "This is the schema URI for the type of\nresource that this refers too.\n"
+         "links" : {
+            "describedby" : {
+               "rel" : "describedby",
+               "target_schema" : {
+                  "$ref" : "schema/types/schema"
+               },
+               "href" : "/schema",
+               "method" : "GET"
             },
-            "$id" : {
-               "type" : "string",
-               "description" : "This is the lookup ID which can be\nused to locate the resource.\n"
+            "read" : {
+               "rel" : "read",
+               "target_schema" : {
+                  "type" : "object",
+                  "extends" : {
+                     "$ref" : "schema/web/resource"
+                  },
+                  "properties" : {
+                     "body" : {
+                        "$ref" : "#"
+                     }
+                  }
+               },
+               "uri_schema" : {
+                  "id" : {
+                     "type" : "string"
+                  }
+               },
+               "href" : "/:id",
+               "method" : "GET"
+            },
+            "list" : {
+               "rel" : "list",
+               "target_schema" : {
+                  "type" : "array",
+                  "items" : {
+                     "type" : "object",
+                     "extends" : {
+                        "$ref" : "schema/web/resource"
+                     },
+                     "properties" : {
+                        "body" : {
+                           "$ref" : "#"
+                        }
+                     }
+                  }
+               },
+               "href" : "/",
+               "method" : "GET"
             }
          }
       },
@@ -72,122 +85,6 @@
             }
          }
       },
-      "schema/web/service/crud" : {
-         "id" : "schema/web/service/crud",
-         "title" : "This is a simple REST enabled schema",
-         "type" : "object",
-         "links" : [
-            {
-               "rel" : "describedby",
-               "target_schema" : {
-                  "$ref" : "schema/types/schema"
-               },
-               "href" : "/schema",
-               "method" : "GET"
-            },
-            {
-               "rel" : "list",
-               "target_schema" : {
-                  "type" : "array",
-                  "items" : {
-                     "type" : "object",
-                     "extends" : {
-                        "$ref" : "schema/web/resource"
-                     },
-                     "properties" : {
-                        "body" : {
-                           "$ref" : "#"
-                        }
-                     }
-                  }
-               },
-               "href" : "/",
-               "method" : "GET"
-            },
-            {
-               "rel" : "create",
-               "data_schema" : {
-                  "$ref" : "#"
-               },
-               "target_schema" : {
-                  "type" : "object",
-                  "extends" : {
-                     "$ref" : "schema/web/resource"
-                  },
-                  "properties" : {
-                     "body" : {
-                        "$ref" : "#"
-                     }
-                  }
-               },
-               "href" : "/create",
-               "method" : "POST"
-            },
-            {
-               "rel" : "read",
-               "target_schema" : {
-                  "type" : "object",
-                  "extends" : {
-                     "$ref" : "schema/web/resource"
-                  },
-                  "properties" : {
-                     "body" : {
-                        "$ref" : "#"
-                     }
-                  }
-               },
-               "uri_schema" : {
-                  "id" : {
-                     "type" : "string"
-                  }
-               },
-               "href" : "/:id",
-               "method" : "GET"
-            },
-            {
-               "rel" : "edit",
-               "data_schema" : {
-                  "type" : "object",
-                  "extends" : {
-                     "$ref" : "schema/web/resource"
-                  },
-                  "properties" : {
-                     "body" : {
-                        "$ref" : "#"
-                     }
-                  }
-               },
-               "target_schema" : {
-                  "type" : "object",
-                  "extends" : {
-                     "$ref" : "schema/web/resource"
-                  },
-                  "properties" : {
-                     "body" : {
-                        "$ref" : "#"
-                     }
-                  }
-               },
-               "uri_schema" : {
-                  "id" : {
-                     "type" : "string"
-                  }
-               },
-               "href" : "/:id/edit",
-               "method" : "PUT"
-            },
-            {
-               "rel" : "delete",
-               "uri_schema" : {
-                  "id" : {
-                     "type" : "string"
-                  }
-               },
-               "href" : "/:id/delete",
-               "method" : "DELETE"
-            }
-         ]
-      },
       "schema/types/schema" : {
          "id" : "schema/types/schema",
          "title" : "The 'Schema' type schema",
@@ -203,47 +100,6 @@
             }
          }
       },
-      "schema/types/number" : {
-         "additional_properties" : {
-            "greater_than" : {
-               "type" : "number",
-               "description" : "A number must be greater than this value"
-            },
-            "less_than_or_equal_to" : {
-               "type" : "number",
-               "description" : "A number must be less than or equal to this value"
-            },
-            "greater_than_or_equal_to" : {
-               "type" : "number",
-               "description" : "A number must be greater than or equal to this value"
-            },
-            "enum" : {
-               "is_unique" : true,
-               "type" : "array",
-               "description" : "This is an array of possible acceptable values, it should contain no duplicates",
-               "items" : {
-                  "type" : "number"
-               }
-            },
-            "less_than" : {
-               "type" : "number",
-               "description" : "A number must be less than this value"
-            }
-         },
-         "id" : "schema/types/number",
-         "title" : "The 'Number' type schema",
-         "type" : "schema",
-         "description" : "This is a schema for the 'number' type, which is\na numeric value that includes floating point\nnumbers as well as whole numbers. The level of\nfloating point precision and the possible size\nof a number are platform and implementation\nspecific. However the spec reserves the right\nto possibly put a cap on this at a later date\nto help improve interoperability.\n",
-         "extends" : {
-            "$ref" : "schema/types/any"
-         },
-         "properties" : {
-            "type" : {
-               "literal" : "number",
-               "type" : "string"
-            }
-         }
-      },
       "schema/core/ref" : {
          "id" : "schema/core/ref",
          "title" : "The reference schema",
@@ -253,36 +109,6 @@
             "$ref" : {
                "format" : "uri",
                "type" : "string"
-            }
-         }
-      },
-      "schema/web/resource" : {
-         "additional_properties" : {
-            "links" : {
-               "type" : "array",
-               "description" : "This is a list of links which represent the\ncapabilities of given resource, the consumer of\nthe resource can use these links to perform\ndifferent actions.\n",
-               "items" : {
-                  "$ref" : "schema/core/hyperlink"
-               }
-            }
-         },
-         "id" : "schema/web/resource",
-         "title" : "The 'Resource' schema",
-         "type" : "object",
-         "description" : "The is a 'wrapper' of sorts for resources\nas viewed from the concept of the web and\nREST. It is mostly intended to be extended\nwhere the 'body' property is overriden with\nthe schema of our choice.\n",
-         "properties" : {
-            "body" : {
-               "type" : "any",
-               "description" : "This is the body of the resource, it is of type\n'any' for now, but it as this schema is meant to\nbe extended and this property overridden, this is\nbasically whatever you need it to be.\n"
-            },
-            "version" : {
-               "format" : "digest",
-               "type" : "string",
-               "description" : "This is a digest string (SHA-256) representing the current\nversion of the resource. When the resource is updated\nthe version should be compared first, to make sure\nthat it has not been updated by another.\n"
-            },
-            "id" : {
-               "type" : "string",
-               "description" : "This is the ID of the given resource, it is\nassumed to be some kind of string, which should\nstill just work fine even for numeric values.\nThis is expected to be the lookup key for\nresources in a resource repository.\n"
             }
          }
       },
@@ -339,74 +165,6 @@
             }
          }
       },
-      "schema/types/object" : {
-         "additional_properties" : {
-            "additional_properties" : {
-               "type" : "object",
-               "description" : "This is a set of key/value pairs where the\nkey is a property name and the value is\na schema (or a reference to a schema)\nrepresented as an 'object' instance. These\nproperties however are optional and do not\nneed to exist in order to pass validation.\n",
-               "items" : {
-                  "type" : "schema"
-               }
-            },
-            "items" : {
-               "type" : "schema",
-               "description" : "This is a schema (or a reference to a schema)\nrepresented as an 'object' instance, which will\nbe used to validate all the values in the object.\n"
-            },
-            "properties" : {
-               "type" : "object",
-               "description" : "This is a set of key/value pairs where the\nkey is a property name and the value is\na schema (or a reference to a schema)\nrepresented as an 'object' instance. All\nthese properties are required and must be\npresent in order to pass validation.\n",
-               "items" : {
-                  "type" : "schema"
-               }
-            }
-         },
-         "id" : "schema/types/object",
-         "title" : "The 'Object' type schema",
-         "type" : "schema",
-         "description" : "This is a schema for the 'object' type, which is\na set of key/value pairs. The term 'object' is\nderived from Javascript, but this is the same as\na hash in Perl, a dictionary in Python, an\nassociative array in PHP, a Hashtable, a Map,\nall of which are essentially the same thing.\n",
-         "extends" : {
-            "$ref" : "schema/types/any"
-         },
-         "properties" : {
-            "type" : {
-               "literal" : "object",
-               "type" : "string"
-            }
-         }
-      },
-      "schema/types/array" : {
-         "additional_properties" : {
-            "max_items" : {
-               "type" : "integer",
-               "description" : "The maximum number of items in the array"
-            },
-            "is_unique" : {
-               "type" : "boolean",
-               "description" : "A boolean to indicate of the list should contain no duplicates"
-            },
-            "min_items" : {
-               "type" : "integer",
-               "description" : "The minimum number of items in the array"
-            },
-            "items" : {
-               "type" : "schema",
-               "description" : "This is a schema (or a reference to a schema)\nrepresented as an 'object' instance, which will\nbe used to validate all the elements in a list.\n"
-            }
-         },
-         "id" : "schema/types/array",
-         "title" : "The 'Array' type schema",
-         "type" : "schema",
-         "description" : "This is a schema for the 'array' type, which is\nbasically just a list of other values. The list\nby default are heterogenous, but using the\noptional 'items' property it is possible to\nconstrain the list to be more homogenous.\n",
-         "extends" : {
-            "$ref" : "schema/types/any"
-         },
-         "properties" : {
-            "type" : {
-               "literal" : "array",
-               "type" : "string"
-            }
-         }
-      },
       "schema/types/any" : {
          "additional_properties" : {
             "id" : {
@@ -427,9 +185,8 @@
                "description" : "This is a schema (or a reference to a schema)\nrepresented as an 'object' instance. The exact\ndetails of extension are described elsewhere.\n"
             },
             "links" : {
-               "is_unique" : true,
-               "type" : "array",
-               "description" : "This is an array of 'link' objects, the purpose\nof which is to provide a way to map services\nto the objects described in a schema. In OOP terms,\nyou can think of them as methods, while the schema\ndescribes the instance structure.\n",
+               "type" : "object",
+               "description" : "This is an object of 'linkrel' objects, the purpose\nof which is to provide a way to map services\nto the objects described in a schema. In OOP terms,\nyou can think of them as methods, while the schema\ndescribes the instance structure.\n",
                "items" : {
                   "$ref" : "schema/core/linkrel"
                }
@@ -478,35 +235,6 @@
             },
             "authority" : {
                "type" : "string"
-            }
-         }
-      },
-      "schema/core/hyperlink" : {
-         "id" : "schema/core/hyperlink",
-         "title" : "The 'XLink' schema",
-         "type" : "object",
-         "description" : "This is the 'link' type for the hyper schema\nwhich represents the concrete links that are\ndescribed with the linkrel schema.\n",
-         "properties" : {
-            "rel" : {
-               "type" : "string",
-               "description" : "This string describes the relation of the link\nto the actual resource it points to. For more\ndetails see the docs for the 'rel' element\nin the schema/core/linkrel schema.\n"
-            },
-            "href" : {
-               "format" : "uri",
-               "type" : "string",
-               "description" : "This is a URI of the resource the link is pointing to.\n"
-            },
-            "method" : {
-               "enum" : [
-                  "GET",
-                  "POST",
-                  "PUT",
-                  "DELETE",
-                  "HEAD",
-                  "OPTIONS"
-               ],
-               "type" : "string",
-               "description" : "The HTTP method expected by this link, if\nthis isn't included then GET is assumed.\n"
             }
          }
       },
@@ -594,6 +322,295 @@
                "format" : "uri_template",
                "type" : "string",
                "description" : "This is a URI for the resource, it may also\nbe a URI template containing variables (using the\nRoR style colon prefix). In the case of these\ntemplates the variables should be resolved in\nthe context of the object instance. This means\nthat a template like so:\n/product/:id/view\nshould be resolved to be this:\n/product/1234/view\ngiven an object with an 'id' property of 1234.\n"
+            },
+            "method" : {
+               "enum" : [
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "DELETE",
+                  "HEAD",
+                  "OPTIONS"
+               ],
+               "type" : "string",
+               "description" : "The HTTP method expected by this link, if\nthis isn't included then GET is assumed.\n"
+            }
+         }
+      },
+      "schema/web/service/non-editable" : {
+         "id" : "schema/web/service/non-editable",
+         "title" : "This is a simple REST enabled schema",
+         "extends" : {
+            "$ref" : "schema/web/service/read-only"
+         },
+         "links" : {
+            "create" : {
+               "rel" : "create",
+               "data_schema" : {
+                  "$ref" : "#"
+               },
+               "target_schema" : {
+                  "type" : "object",
+                  "extends" : {
+                     "$ref" : "schema/web/resource"
+                  },
+                  "properties" : {
+                     "body" : {
+                        "$ref" : "#"
+                     }
+                  }
+               },
+               "href" : "/create",
+               "method" : "POST"
+            },
+            "delete" : {
+               "rel" : "delete",
+               "uri_schema" : {
+                  "id" : {
+                     "type" : "string"
+                  }
+               },
+               "href" : "/:id/delete",
+               "method" : "DELETE"
+            }
+         }
+      },
+      "schema/web/resource/ref" : {
+         "additional_properties" : {
+            "link" : {
+               "additional_properties" : {
+                  "method" : {
+                     "literal" : "GET",
+                     "type" : "string"
+                  }
+               },
+               "extends" : {
+                  "$ref" : "schema/core/hyperlink"
+               },
+               "description" : "This is an optional hyperlink to read the resource\ndescribed, it should only ever be GET since it\nis only for reading.\n",
+               "properties" : {
+                  "rel" : {
+                     "literal" : "read",
+                     "type" : "string"
+                  }
+               }
+            },
+            "version" : {
+               "format" : "digest",
+               "type" : "string",
+               "description" : "This is a digest string (SHA-256) representing the current\nversion of the resource being pointed to. This can be used\nto check to make sure that the resource has not changed\nsince it was last referred too.\n"
+            }
+         },
+         "id" : "schema/web/resource/ref",
+         "title" : "The 'Resource Ref' schema",
+         "type" : "object",
+         "description" : "This is meant to be a way to represent\nreferences to resources, it can be a convient\nway to refer to a resource only by it's ID\nand therefore save bandwidth.\n",
+         "properties" : {
+            "type_of" : {
+               "format" : "uri",
+               "type" : "string",
+               "description" : "This is the schema URI for the type of\nresource that this refers too.\n"
+            },
+            "$id" : {
+               "type" : "string",
+               "description" : "This is the lookup ID which can be\nused to locate the resource.\n"
+            }
+         }
+      },
+      "schema/types/number" : {
+         "additional_properties" : {
+            "greater_than" : {
+               "type" : "number",
+               "description" : "A number must be greater than this value"
+            },
+            "less_than_or_equal_to" : {
+               "type" : "number",
+               "description" : "A number must be less than or equal to this value"
+            },
+            "greater_than_or_equal_to" : {
+               "type" : "number",
+               "description" : "A number must be greater than or equal to this value"
+            },
+            "enum" : {
+               "is_unique" : true,
+               "type" : "array",
+               "description" : "This is an array of possible acceptable values, it should contain no duplicates",
+               "items" : {
+                  "type" : "number"
+               }
+            },
+            "less_than" : {
+               "type" : "number",
+               "description" : "A number must be less than this value"
+            }
+         },
+         "id" : "schema/types/number",
+         "title" : "The 'Number' type schema",
+         "type" : "schema",
+         "description" : "This is a schema for the 'number' type, which is\na numeric value that includes floating point\nnumbers as well as whole numbers. The level of\nfloating point precision and the possible size\nof a number are platform and implementation\nspecific. However the spec reserves the right\nto possibly put a cap on this at a later date\nto help improve interoperability.\n",
+         "extends" : {
+            "$ref" : "schema/types/any"
+         },
+         "properties" : {
+            "type" : {
+               "literal" : "number",
+               "type" : "string"
+            }
+         }
+      },
+      "schema/web/resource" : {
+         "additional_properties" : {
+            "links" : {
+               "type" : "array",
+               "description" : "This is a list of links which represent the\ncapabilities of given resource, the consumer of\nthe resource can use these links to perform\ndifferent actions.\n",
+               "items" : {
+                  "$ref" : "schema/core/hyperlink"
+               }
+            }
+         },
+         "id" : "schema/web/resource",
+         "title" : "The 'Resource' schema",
+         "type" : "object",
+         "description" : "The is a 'wrapper' of sorts for resources\nas viewed from the concept of the web and\nREST. It is mostly intended to be extended\nwhere the 'body' property is overriden with\nthe schema of our choice.\n",
+         "properties" : {
+            "body" : {
+               "type" : "any",
+               "description" : "This is the body of the resource, it is of type\n'any' for now, but it as this schema is meant to\nbe extended and this property overridden, this is\nbasically whatever you need it to be.\n"
+            },
+            "version" : {
+               "format" : "digest",
+               "type" : "string",
+               "description" : "This is a digest string (SHA-256) representing the current\nversion of the resource. When the resource is updated\nthe version should be compared first, to make sure\nthat it has not been updated by another.\n"
+            },
+            "id" : {
+               "type" : "string",
+               "description" : "This is the ID of the given resource, it is\nassumed to be some kind of string, which should\nstill just work fine even for numeric values.\nThis is expected to be the lookup key for\nresources in a resource repository.\n"
+            }
+         }
+      },
+      "schema/types/array" : {
+         "additional_properties" : {
+            "max_items" : {
+               "type" : "integer",
+               "description" : "The maximum number of items in the array"
+            },
+            "is_unique" : {
+               "type" : "boolean",
+               "description" : "A boolean to indicate of the list should contain no duplicates"
+            },
+            "min_items" : {
+               "type" : "integer",
+               "description" : "The minimum number of items in the array"
+            },
+            "items" : {
+               "type" : "schema",
+               "description" : "This is a schema (or a reference to a schema)\nrepresented as an 'object' instance, which will\nbe used to validate all the elements in a list.\n"
+            }
+         },
+         "id" : "schema/types/array",
+         "title" : "The 'Array' type schema",
+         "type" : "schema",
+         "description" : "This is a schema for the 'array' type, which is\nbasically just a list of other values. The list\nby default are heterogenous, but using the\noptional 'items' property it is possible to\nconstrain the list to be more homogenous.\n",
+         "extends" : {
+            "$ref" : "schema/types/any"
+         },
+         "properties" : {
+            "type" : {
+               "literal" : "array",
+               "type" : "string"
+            }
+         }
+      },
+      "schema/web/service/crud" : {
+         "id" : "schema/web/service/crud",
+         "title" : "This is a simple REST enabled schema",
+         "extends" : {
+            "$ref" : "schema/web/service/non-editable"
+         },
+         "links" : {
+            "edit" : {
+               "rel" : "edit",
+               "data_schema" : {
+                  "type" : "object",
+                  "extends" : {
+                     "$ref" : "schema/web/resource"
+                  },
+                  "properties" : {
+                     "body" : {
+                        "$ref" : "#"
+                     }
+                  }
+               },
+               "target_schema" : {
+                  "type" : "object",
+                  "extends" : {
+                     "$ref" : "schema/web/resource"
+                  },
+                  "properties" : {
+                     "body" : {
+                        "$ref" : "#"
+                     }
+                  }
+               },
+               "uri_schema" : {
+                  "id" : {
+                     "type" : "string"
+                  }
+               },
+               "href" : "/:id/edit",
+               "method" : "PUT"
+            }
+         }
+      },
+      "schema/types/object" : {
+         "additional_properties" : {
+            "additional_properties" : {
+               "type" : "object",
+               "description" : "This is a set of key/value pairs where the\nkey is a property name and the value is\na schema (or a reference to a schema)\nrepresented as an 'object' instance. These\nproperties however are optional and do not\nneed to exist in order to pass validation.\n",
+               "items" : {
+                  "type" : "schema"
+               }
+            },
+            "items" : {
+               "type" : "schema",
+               "description" : "This is a schema (or a reference to a schema)\nrepresented as an 'object' instance, which will\nbe used to validate all the values in the object.\n"
+            },
+            "properties" : {
+               "type" : "object",
+               "description" : "This is a set of key/value pairs where the\nkey is a property name and the value is\na schema (or a reference to a schema)\nrepresented as an 'object' instance. All\nthese properties are required and must be\npresent in order to pass validation.\n",
+               "items" : {
+                  "type" : "schema"
+               }
+            }
+         },
+         "id" : "schema/types/object",
+         "title" : "The 'Object' type schema",
+         "type" : "schema",
+         "description" : "This is a schema for the 'object' type, which is\na set of key/value pairs. The term 'object' is\nderived from Javascript, but this is the same as\na hash in Perl, a dictionary in Python, an\nassociative array in PHP, a Hashtable, a Map,\nall of which are essentially the same thing.\n",
+         "extends" : {
+            "$ref" : "schema/types/any"
+         },
+         "properties" : {
+            "type" : {
+               "literal" : "object",
+               "type" : "string"
+            }
+         }
+      },
+      "schema/core/hyperlink" : {
+         "id" : "schema/core/hyperlink",
+         "title" : "The 'XLink' schema",
+         "type" : "object",
+         "description" : "This is the 'link' type for the hyper schema\nwhich represents the concrete links that are\ndescribed with the linkrel schema.\n",
+         "properties" : {
+            "rel" : {
+               "type" : "string",
+               "description" : "This string describes the relation of the link\nto the actual resource it points to. For more\ndetails see the docs for the 'rel' element\nin the schema/core/linkrel schema.\n"
+            },
+            "href" : {
+               "format" : "uri",
+               "type" : "string",
+               "description" : "This is a URI of the resource the link is pointing to.\n"
             },
             "method" : {
                "enum" : [

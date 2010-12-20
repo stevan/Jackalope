@@ -28,20 +28,20 @@ test(
                               "type"        : "string"
                         }
                     },
-                    "links" : [
-                        {
+                    "links" : {
+                        "self" : {
                             "rel"           : "self",
                             "method"        : "GET",
                             "href"          : "product/{id}/view",
                             "target_schema" : { "$ref" : "#" }
                         },
-                        {
+                        "edit" : {
                             "rel"         : "edit",
                             "href"        : "product/{id}/update",
                             "method"      : "POST",
                             "data_schema" : { "$ref" : "#" }
                         }
-                    ]
+                    }
                 }
             );
             ok(true, "... successfully registered the schema");
@@ -58,20 +58,20 @@ test(
                     "items"       : {
                         "$ref" : "/my_schemas/product"
                     },
-                    "links" : [
-                        {
+                    "links" : {
+                        "/my_schemas/link/product_listing" : {
                             "rel"           : "/my_schemas/link/product_listing",
                             "method"        : "GET",
                             "href"          : "product/list",
                             "target_schema" : { "$ref" : "#" }
                         },
-                        {
+                        "create" : {
                             "rel"         : "create",
                             "href"        : "product/create",
                             "method"      : "POST",
                             "data_schema" : { "$ref" : "/my_schemas/product" }
                         }
-                    ]
+                    }
                 }
             );
             ok(true, "... successfully registered the schema");
