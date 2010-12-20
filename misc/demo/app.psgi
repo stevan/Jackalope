@@ -12,6 +12,7 @@ use Jackalope::REST;
 use Jackalope::REST::Resource::Repository::Simple;
 
 use Plack;
+use Plack::Request;
 use Plack::Builder;
 use Plack::App::Path::Router::PSGI;
 
@@ -51,6 +52,29 @@ my $router  = Path::Router->new;
 $router->add_route( '/' => (
     target => sub {
         [ 302, [ 'Location' => 'static/index.html' ], []]
+    }
+));
+$router->add_route( 'schemas/core/' => (
+    target => sub {
+        my $r = Plack::Request->new( shift );
+
+        my $schema_name = $r->param('schema');
+        my $serializer  = $service->serializer;
+        my $schema      = Data::Visitor::Callback->new(
+            hash => sub {
+                my ($v, $data) = @_;
+                if (exists $data->{'description'} && not ref $data->{'description'}) {
+                    delete $data->{'description'};
+                }
+                return $data;
+            }
+        )->visit( $service->schema_repository->spec->$schema_name );
+
+        [
+            200,
+            [ 'Content-Type' => $serializer->content_type ],
+            [ $serializer->serialize( $schema, { pretty => 1, canonical => 1 } ) ]
+        ];
     }
 ));
 $router->include_router( 'people/' => $service->router );
