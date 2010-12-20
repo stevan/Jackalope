@@ -58,7 +58,6 @@ sub process_operation {
 
 sub sanitize_and_prepare_input {
     my ($self, $r ) = @_;
-    $self->check_http_method( $r );
     $self->check_uri_schema( $r );
     $self->check_data_schema( $r );
 }
@@ -106,23 +105,11 @@ sub process_psgi_output {
 
 # ...
 
-sub check_http_method {
-    my ($self, $r) = @_;
-    if (exists $self->link->{'method'}) {
-        if ($self->link->{'method'} ne $r->method) {
-            Jackalope::REST::Error::MethodNotAllowed->new(
-                allowed_methods => [ $self->link->{'method'} ],
-                message         => ($r->method . ' method is not allowed, expecting ' . $self->link->{'method'})
-            )->throw;
-        }
-    }
-}
-
 sub check_uri_schema {
     my ($self, $r) = @_;
     # look for a uri-schema ...
     if ( exists $self->link->{'uri_schema'} ) {
-        my $mapping = $r->env->{'plack.router.match'}->mapping;
+        my $mapping = +{ map { %{ $_ } } @{ $r->env->{'jackalope.router.match.mapping'} } };
         # since we have the 'uri_schema',
         # we can check the mappings against it
         foreach my $key ( keys %{ $self->link->{'uri_schema'} } ) {
@@ -209,7 +196,7 @@ sub to_app {
         my $env = shift;
         $self->execute(
             Plack::Request->new( $env ),
-            @{ $env->{'plack.router.match.args'} }
+            map { values %{ $_ } } @{ $env->{'jackalope.router.match.mapping'} }
         );
     }
 }

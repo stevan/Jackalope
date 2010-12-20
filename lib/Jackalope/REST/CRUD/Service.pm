@@ -6,10 +6,12 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 with 'Jackalope::REST::Service';
 
-use List::AllUtils 'first';
+use Jackalope::REST::Router;
+
+use Plack::Request;
 use Try::Tiny;
+use List::AllUtils 'first';
 use Class::Load 'load_class';
-use Path::Router;
 
 has 'resource_repository' => (
     is       => 'ro',
@@ -34,10 +36,12 @@ has 'compiled_schema' => (
 
 has 'router' => (
     is      => 'ro',
-    isa     => 'Path::Router',
+    isa     => 'Jackalope::REST::Router',
     lazy    => 1,
-    builder => 'build_router',
-    writer  => 'update_router',
+    default => sub {
+        my $self = shift;
+        Jackalope::REST::Router->new( schema => $self->compiled_schema )
+    }
 );
 
 my %REL_TO_TARGET_CLASS = (
@@ -71,42 +75,25 @@ sub get_target_for_link {
     );
 }
 
-sub build_router {
-    my $self   = shift;
-    my $router = Path::Router->new;
-    my $schema = $self->compiled_schema;
+sub to_app {
+    my $self = shift;
+    sub {
+        my $r     = Plack::Request->new( +shift );
+        my $match = $self->router->match( $r->path_info, $r->method );
 
-    foreach my $link ( values %{ $schema->{'links'} }) {
-        $router->add_route(
-            $link->{'href'},
-            defaults => {
-                rel    => $link->{'rel'},
-                method => $link->{'method'},
-                schema => $schema->{'id'}
-            },
-            target  => $self->get_target_for_link( $link )->to_app
-        );
+        return [ 404, [], [ 'Not Found' ] ] if not defined $match;
+
+        my $target = $self->get_target_for_link( $match->{'link'} );
+
+        $r->env->{'jackalope.router.match.mapping'} = $match->{'mapping'};
+
+        return $target->to_app->( $r->env );
     }
-
-    $router;
 }
 
 sub generate_read_link_for_resource {
     my ($self, $resource) = @_;
-    my $schema = $self->compiled_schema;
-    my $link   = first { $_->{'rel'} eq 'read' } values %{ $schema->{'links'} };
-    # FIXME
-    # This should just return undef or something
-    # throwing an exception is kinda extreme
-    # - SL
-    (defined $link)
-        || confess("Could not generate read link for id (" . $resource->id . ")");
-    $self->router->uri_for(
-        rel    => $link->{'rel'},
-        method => $link->{'method'},
-        schema => $schema->{'id'},
-        id     => $resource->id
-    )
+    $self->router->uri_for( 'read' => { id => $resource->id } )->{'href'};
 }
 
 sub generate_links_for_resource {
@@ -114,19 +101,11 @@ sub generate_links_for_resource {
     my $schema = $self->compiled_schema;
     $resource->add_links(
         map {
-            +{
-                rel    => $_->{'rel'},
-                method => $_->{'method'},
-                href   => $self->router->uri_for(
-                    rel    => $_->{'rel'},
-                    method => $_->{'method'},
-                    schema => $schema->{'id'},
-                    (exists $_->{'uri_schema'}
-                        ? ( id => $resource->id )
-                        : ())
-                )
-            }
-        } sort { $a->{rel} cmp $b->{rel} }values %{ $schema->{'links'} }
+            $self->router->uri_for(
+                $_->{'rel'},
+                (exists $_->{'uri_schema'} ? { id => $resource->id } : {} )
+            )
+        } sort { $a->{rel} cmp $b->{rel} } values %{ $schema->{'links'} }
     );
 }
 

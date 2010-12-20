@@ -211,7 +211,7 @@ sub service_non_editable {
         links   => {
             create => {
                 rel           => 'create',
-                href          => '/create',
+                href          => '/',
                 method        => 'POST',
                 data_schema   => { '$ref' => '#' },
                 target_schema => {
@@ -224,7 +224,7 @@ sub service_non_editable {
             },
             delete => {
                 rel           => 'delete',
-                href          => '/:id/delete',
+                href          => '/:id',
                 method        => 'DELETE',
                 uri_schema    => {
                     id => { type => 'string' }
@@ -243,7 +243,7 @@ sub service {
         links   => {
             edit => {
                 rel           => 'edit',
-                href          => '/:id/edit',
+                href          => '/:id',
                 method        => 'PUT',
                 data_schema   => {
                     type       => 'object',

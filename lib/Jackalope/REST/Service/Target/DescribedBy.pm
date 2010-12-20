@@ -11,19 +11,6 @@ with 'Jackalope::REST::Service::Target';
 sub execute {
     my ($self, $r, @args) = @_;
 
-    my $error;
-    try   { $self->check_http_method( $r ) }
-    catch { $error = $_ };
-
-    if ( $error ) {
-        if ( $error->isa('Jackalope::REST::Error') ) {
-            return $error->to_psgi;
-        }
-        else {
-            return [ 500, [], [ "Unknown Server Error : $error" ]]
-        }
-    }
-
     return $self->process_psgi_output([
         200,
         [],
