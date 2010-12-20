@@ -14,7 +14,7 @@ test(
             "repo"        : repo
         });
 
-        var types = ['ref', 'linkrel', 'xlink'];
+        var types = ['ref', 'linkrel', 'hyperlink'];
 
         for (var i = 0; i < types.length; i++) {
             tester.validation_pass(

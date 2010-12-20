@@ -46,11 +46,11 @@ so I recommend re-reading it then. Hopefully at that point, it will all make sen
 
 ### Hypermedia controls
 
-In the core set of schemas we also provide a basic 'linkrel' schema and an 'xlink'
+In the core set of schemas we also provide a basic 'linkrel' schema and an 'hyperlink'
 schema. The 'linkrel' schema is for describing the concept of a link enough so that
-a link could easily be created from the available metadata. The 'xlink' schema is
+a link could easily be created from the available metadata. The 'hyperlink' schema is
 for describing the concrete implementation of a 'linkrel'. It is perhaps useful to
-think of a 'linkrel' like a class and 'xlink' like an object instance, they have
+think of a 'linkrel' like a class and 'hyperlink' like an object instance, they have
 a similar relationship to one another.
 
 The base 'any' schema type provides an optional 'links' property, which is an array
@@ -87,13 +87,13 @@ A resource is the transport format, it looks something like this:
         id      : <string id>,
         body    : <data structure modeled by your schema>,
         version : <digest of the body>,
-        links   : [ <array of xlink items> ]
+        links   : [ <array of hyperlink items> ]
     }
 
 The 'id' field is the lookup key for this given resource in the repository and the
 'body' is what you have stored in the resource repository. The 'version' is a digest
 of the body constructed by creating an SHA-256 hash of the cannonical JSON of the body.
-And then finally the optional 'links' is an array of 'xlink' items which represent
+And then finally the optional 'links' is an array of 'hyperlink' items which represent
 the other available services for this resource (ex: read, update, delete, etc.)
 
 We also have a concept of resource references, which is a representation of a
@@ -103,13 +103,13 @@ reference to a resource. It looks something like this:
         $id     : <string id>,
         type_of : <schema uri of resource this refers to>,
         version : <digest of the body of the resource this refers to>,
-        link    : <xlink to read this resource>
+        link    : <hyperlink to read this resource>
      }
 
 The '$id' field is the same as the 'id' field in a resource, the 'type_of' field
 is the schema this '$id' refers too. Then optionally we have a 'version', which is
 as described above and could be used in your code to check that the resource being
-referred to has not changed. We also optionally have a 'link', which is an 'xlink'
+referred to has not changed. We also optionally have a 'link', which is an 'hyperlink'
 of the 'read' service for this resource (basically a link to the resource itself).
 
 The next concept is the resource repository. Currently we supply a role that will

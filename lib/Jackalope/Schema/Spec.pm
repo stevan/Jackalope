@@ -87,7 +87,7 @@ sub _build_spec {
 
 sub _all_spec_builder_methods {
     my $self = shift;
-    keys %{ $self->typemap }, qw[ ref spec linkrel xlink ]
+    keys %{ $self->typemap }, qw[ ref spec linkrel hyperlink ]
 }
 
 ## ------------------------------------------------------------------
@@ -217,7 +217,7 @@ sub linkrel {
             },
             method       => {
                 type        => "string",
-                enum        => [ "GET", "POST", "PUT", "DELETE" ],
+                enum        => [ "GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS" ],
                 description => q[
                     The HTTP method expected by this link, if
                     this isn't included then GET is assumed.
@@ -281,10 +281,10 @@ sub linkrel {
 ## schema above.
 ## ------------------------------------------------------------------
 
-sub xlink {
+sub hyperlink {
     my $self = shift;
     return +{
-        id          => "schema/core/xlink",
+        id          => "schema/core/hyperlink",
         title       => "The 'XLink' schema",
         description => q[
             This is the 'link' type for the hyper schema
@@ -309,11 +309,9 @@ sub xlink {
                     This is a URI of the resource the link is pointing to.
                 ]
             },
-        },
-        additional_properties => {
             method       => {
                 type        => "string",
-                enum        => [ "GET", "POST", "PUT", "DELETE" ],
+                enum        => [ "GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS" ],
                 description => q[
                     The HTTP method expected by this link, if
                     this isn't included then GET is assumed.

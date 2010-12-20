@@ -1,0 +1,24 @@
+[
+    {
+        "schema" : { "$ref" : "schema/core/hyperlink" },
+        "pass" : [
+            { "method" : "GET", "rel" : "list", "href" : "/" },
+            { "method" : "POST", "rel" : "create", "href" : "/" },
+            { "method" : "PUT", "rel" : "edit", "href" : "/10" },
+            { "method" : "DELETE", "rel" : "list", "href" : "/10" },
+            { "method" : "OPTIONS", "rel" : "list", "href" : "/" },
+            { "method" : "HEAD", "rel" : "list", "href" : "/" }
+        ],
+        "fail" : [
+            { "href" : "/" },
+            { "rel" : "edit" },
+            { "method" : "DELETE" },
+            { "method" : "FOO" },
+            { "rel" : "edit", "href" : "/" },
+            { "rel" : "edit", "method" : "GET" },
+            { "method" : "GET", "href" : "/" },
+            { "rel" : "edit", "method" : "FOO" },
+            { "method" : "BAR", "href" : "/" }
+        ]
+    }
+]

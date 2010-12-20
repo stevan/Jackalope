@@ -10,9 +10,9 @@
                   }
                },
                "extends" : {
-                  "$ref" : "schema/core/xlink"
+                  "$ref" : "schema/core/hyperlink"
                },
-               "description" : "This is an optional xlink to read the resource\ndescribed, it should only ever be GET since it\nis only for reading.\n",
+               "description" : "This is an optional hyperlink to read the resource\ndescribed, it should only ever be GET since it\nis only for reading.\n",
                "properties" : {
                   "rel" : {
                      "literal" : "read",
@@ -262,7 +262,7 @@
                "type" : "array",
                "description" : "This is a list of links which represent the\ncapabilities of given resource, the consumer of\nthe resource can use these links to perform\ndifferent actions.\n",
                "items" : {
-                  "$ref" : "schema/core/xlink"
+                  "$ref" : "schema/core/hyperlink"
                }
             }
          },
@@ -537,7 +537,7 @@
             }
          }
       },
-      "schema/core/xlink" : {
+      "schema/core/hyperlink" : {
          "additional_properties" : {
             "method" : {
                "enum" : [
@@ -550,7 +550,7 @@
                "description" : "The HTTP method expected by this link, if\nthis isn't included then GET is assumed.\n"
             }
          },
-         "id" : "schema/core/xlink",
+         "id" : "schema/core/hyperlink",
          "title" : "The 'XLink' schema",
          "type" : "object",
          "description" : "This is the 'link' type for the hyper schema\nwhich represents the concrete links that are\ndescribed with the linkrel schema.\n",
