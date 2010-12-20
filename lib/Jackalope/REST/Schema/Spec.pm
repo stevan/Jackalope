@@ -154,14 +154,14 @@ sub service {
         id    => 'schema/web/service',
         title => 'This is a simple REST enabled schema',
         type  => 'object',
-        links => [
-            {
+        links => {
+            describedby => {
                 rel           => 'describedby',
                 href          => '/schema',
                 method        => 'GET',
                 target_schema => { '$ref' => 'schema/types/schema' },
             },
-            {
+            list => {
                 rel           => 'list',
                 href          => '/',
                 method        => 'GET',
@@ -176,7 +176,7 @@ sub service {
                     }
                 },
             },
-            {
+            create => {
                 rel           => 'create',
                 href          => '/create',
                 method        => 'POST',
@@ -189,7 +189,7 @@ sub service {
                     }
                 },
             },
-            {
+            read => {
                 rel           => 'read',
                 href          => '/:id',
                 method        => 'GET',
@@ -204,7 +204,7 @@ sub service {
                     id => { type => 'string' }
                 }
             },
-            {
+            edit => {
                 rel           => 'edit',
                 href          => '/:id/edit',
                 method        => 'PUT',
@@ -226,7 +226,7 @@ sub service {
                     id => { type => 'string' }
                 }
             },
-            {
+            delete => {
                 rel           => 'delete',
                 href          => '/:id/delete',
                 method        => 'DELETE',
@@ -234,7 +234,7 @@ sub service {
                     id => { type => 'string' }
                 }
             }
-        ]
+        }
     };
 }
 

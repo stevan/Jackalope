@@ -198,9 +198,9 @@ my $c = container $j => as {
                 }
             }
         },
-        links => [
+        links => {
             # skipping the described-by, which you would do in real life ...
-            {
+            create => {
                 rel           => 'create',
                 href          => '/create',
                 method        => 'POST',
@@ -228,7 +228,7 @@ my $c = container $j => as {
                     }
                 },
             },
-            {
+            read => {
                 rel           => 'read',
                 href          => '/:id',
                 method        => 'GET',
@@ -243,7 +243,7 @@ my $c = container $j => as {
                     id => { type => 'string' }
                 }
             },
-            {
+            'my/shoppingCart/target/addItem' => {
                 rel           => 'my/shoppingCart/target/addItem',
                 href          => '/:id/add_item',
                 method        => 'PUT',
@@ -262,7 +262,7 @@ my $c = container $j => as {
                     id => { type => 'string' }
                 }
             },
-            {
+            'my/shoppingCart/target/removeItem' => {
                 rel           => 'my/shoppingCart/target/removeItem',
                 href          => '/:id/remove_item',
                 method        => 'PUT',
@@ -281,7 +281,7 @@ my $c = container $j => as {
                     id => { type => 'string' }
                 }
             },
-            {
+            delete => {
                 rel           => 'delete',
                 href          => '/:id/delete',
                 method        => 'DELETE',
@@ -289,7 +289,7 @@ my $c = container $j => as {
                     id => { type => 'string' }
                 }
             }
-        ]
+        }
     };
 
     service 'MyShoppingCartRepo' => (
@@ -357,12 +357,12 @@ test_psgi( app => $app, client => sub {
                 },
                 version => '7f53a57fae8a7548af8677e60a46c2526d85569b1752ac679b376880bdd4f2a2',
                 links => [
-                    { rel => "describedby", href => "user/schema",   method => "GET"    },
-                    { rel => "list",        href => "user",          method => "GET"    },
                     { rel => "create",      href => "user/create",   method => "POST"   },
-                    { rel => "read",        href => "user/1",        method => "GET"    },
-                    { rel => "edit",        href => "user/1/edit",   method => "PUT"    },
                     { rel => "delete",      href => "user/1/delete", method => "DELETE" },
+                    { rel => "describedby", href => "user/schema",   method => "GET"    },
+                    { rel => "edit",        href => "user/1/edit",   method => "PUT"    },
+                    { rel => "list",        href => "user",          method => "GET"    },
+                    { rel => "read",        href => "user/1",        method => "GET"    },
                 ]
             },
             '... got the right value for creation'
@@ -383,12 +383,12 @@ test_psgi( app => $app, client => sub {
                 },
                 version => '7f53a57fae8a7548af8677e60a46c2526d85569b1752ac679b376880bdd4f2a2',
                 links => [
-                    { rel => "describedby", href => "user/schema",   method => "GET"    },
-                    { rel => "list",        href => "user",          method => "GET"    },
                     { rel => "create",      href => "user/create",   method => "POST"   },
-                    { rel => "read",        href => "user/1",        method => "GET"    },
-                    { rel => "edit",        href => "user/1/edit",   method => "PUT"    },
                     { rel => "delete",      href => "user/1/delete", method => "DELETE" },
+                    { rel => "describedby", href => "user/schema",   method => "GET"    },
+                    { rel => "edit",        href => "user/1/edit",   method => "PUT"    },
+                    { rel => "list",        href => "user",          method => "GET"    },
+                    { rel => "read",        href => "user/1",        method => "GET"    },
                 ]
             },
             '... got the right value for read'
@@ -413,12 +413,12 @@ test_psgi( app => $app, client => sub {
                 },
                 version => '07c302816348f4e67f0a8f3701aca90330c65a5030f48a2dbb891bcc6c18520d',
                 links => [
-                    { rel => "describedby", href => "product/schema",   method => "GET"    },
-                    { rel => "list",        href => "product",          method => "GET"    },
                     { rel => "create",      href => "product/create",   method => "POST"   },
-                    { rel => "read",        href => "product/1",        method => "GET"    },
-                    { rel => "edit",        href => "product/1/edit",   method => "PUT"    },
                     { rel => "delete",      href => "product/1/delete", method => "DELETE" },
+                    { rel => "describedby", href => "product/schema",   method => "GET"    },
+                    { rel => "edit",        href => "product/1/edit",   method => "PUT"    },
+                    { rel => "list",        href => "product",          method => "GET"    },
+                    { rel => "read",        href => "product/1",        method => "GET"    },
                 ]
             },
             '... got the right value for creation'
@@ -443,12 +443,12 @@ test_psgi( app => $app, client => sub {
                 },
                 version => 'd2e63b1870594d57bc16999e7f61e1f84fe91ba1cd47388a85d52fda206cb1cc',
                 links => [
-                    { rel => "describedby", href => "product/schema",   method => "GET"    },
-                    { rel => "list",        href => "product",          method => "GET"    },
                     { rel => "create",      href => "product/create",   method => "POST"   },
-                    { rel => "read",        href => "product/2",        method => "GET"    },
-                    { rel => "edit",        href => "product/2/edit",   method => "PUT"    },
                     { rel => "delete",      href => "product/2/delete", method => "DELETE" },
+                    { rel => "describedby", href => "product/schema",   method => "GET"    },
+                    { rel => "edit",        href => "product/2/edit",   method => "PUT"    },
+                    { rel => "list",        href => "product",          method => "GET"    },
+                    { rel => "read",        href => "product/2",        method => "GET"    },
                 ]
             },
             '... got the right value for creation'
@@ -473,12 +473,12 @@ test_psgi( app => $app, client => sub {
                 },
                 version => 'e13d199dae9e277e852c79b236106d4727ed52be9bee385c39fa66c9475aa4ff',
                 links => [
-                    { rel => "describedby", href => "product/schema",   method => "GET"    },
-                    { rel => "list",        href => "product",          method => "GET"    },
                     { rel => "create",      href => "product/create",   method => "POST"   },
-                    { rel => "read",        href => "product/3",        method => "GET"    },
-                    { rel => "edit",        href => "product/3/edit",   method => "PUT"    },
                     { rel => "delete",      href => "product/3/delete", method => "DELETE" },
+                    { rel => "describedby", href => "product/schema",   method => "GET"    },
+                    { rel => "edit",        href => "product/3/edit",   method => "PUT"    },
+                    { rel => "list",        href => "product",          method => "GET"    },
+                    { rel => "read",        href => "product/3",        method => "GET"    },
                 ]
             },
             '... got the right value for creation'
@@ -511,12 +511,12 @@ test_psgi( app => $app, client => sub {
                         },
                         version => '7f53a57fae8a7548af8677e60a46c2526d85569b1752ac679b376880bdd4f2a2',
                         links => [
-                            { rel => "describedby", href => "user/schema",   method => "GET"    },
-                            { rel => "list",        href => "user",          method => "GET"    },
-                            { rel => "create",      href => "user/create",   method => "POST"   },
-                            { rel => "read",        href => "user/1",        method => "GET"    },
-                            { rel => "edit",        href => "user/1/edit",   method => "PUT"    },
-                            { rel => "delete",      href => "user/1/delete", method => "DELETE" },
+                        { rel => "create",      href => "user/create",   method => "POST"   },
+                        { rel => "delete",      href => "user/1/delete", method => "DELETE" },
+                        { rel => "describedby", href => "user/schema",   method => "GET"    },
+                        { rel => "edit",        href => "user/1/edit",   method => "PUT"    },
+                        { rel => "list",        href => "user",          method => "GET"    },
+                        { rel => "read",        href => "user/1",        method => "GET"    },
                         ]
                     },
                     items => [
@@ -528,12 +528,12 @@ test_psgi( app => $app, client => sub {
                             },
                             version => '07c302816348f4e67f0a8f3701aca90330c65a5030f48a2dbb891bcc6c18520d',
                             links => [
-                                { rel => "describedby", href => "product/schema",   method => "GET"    },
-                                { rel => "list",        href => "product",          method => "GET"    },
-                                { rel => "create",      href => "product/create",   method => "POST"   },
-                                { rel => "read",        href => "product/1",        method => "GET"    },
-                                { rel => "edit",        href => "product/1/edit",   method => "PUT"    },
-                                { rel => "delete",      href => "product/1/delete", method => "DELETE" },
+                            { rel => "create",      href => "product/create",   method => "POST"   },
+                            { rel => "delete",      href => "product/1/delete", method => "DELETE" },
+                            { rel => "describedby", href => "product/schema",   method => "GET"    },
+                            { rel => "edit",        href => "product/1/edit",   method => "PUT"    },
+                            { rel => "list",        href => "product",          method => "GET"    },
+                            { rel => "read",        href => "product/1",        method => "GET"    },
                             ]
                         },
                         {
@@ -544,23 +544,23 @@ test_psgi( app => $app, client => sub {
                             },
                             version => 'd2e63b1870594d57bc16999e7f61e1f84fe91ba1cd47388a85d52fda206cb1cc',
                             links => [
-                                { rel => "describedby", href => "product/schema",   method => "GET"    },
-                                { rel => "list",        href => "product",          method => "GET"    },
-                                { rel => "create",      href => "product/create",   method => "POST"   },
-                                { rel => "read",        href => "product/2",        method => "GET"    },
-                                { rel => "edit",        href => "product/2/edit",   method => "PUT"    },
-                                { rel => "delete",      href => "product/2/delete", method => "DELETE" },
+                            { rel => "create",      href => "product/create",   method => "POST"   },
+                            { rel => "delete",      href => "product/2/delete", method => "DELETE" },
+                            { rel => "describedby", href => "product/schema",   method => "GET"    },
+                            { rel => "edit",        href => "product/2/edit",   method => "PUT"    },
+                            { rel => "list",        href => "product",          method => "GET"    },
+                            { rel => "read",        href => "product/2",        method => "GET"    },
                             ]
                         }
                     ]
                 },
-                version => '6f2b0ecaeb1dfc8fc50c2bb0cae7c685969793ea2aee5016dd2075c76ae40a94',
+                version => 'b78904491118b188fecea1292b9385d06095e05c35f507ec1f79cdfb4f1ab537',
                 links => [
-                    { rel => "create",                            href => "cart/create",        method => "POST"   },
-                    { rel => "read",                              href => "cart/1",             method => "GET"    },
-                    { rel => "my/shoppingCart/target/addItem",    href => "cart/1/add_item",    method => "PUT"    },
-                    { rel => "my/shoppingCart/target/removeItem", href => "cart/1/remove_item", method => "PUT"    },
-                    { rel => "delete",                            href => "cart/1/delete",      method => "DELETE" },
+                { rel => "create",                            href => "cart/create",        method => "POST"   },
+                { rel => "delete",                            href => "cart/1/delete",      method => "DELETE" },
+                { rel => "my/shoppingCart/target/addItem",    href => "cart/1/add_item",    method => "PUT"    },
+                { rel => "my/shoppingCart/target/removeItem", href => "cart/1/remove_item", method => "PUT"    },
+                { rel => "read",                              href => "cart/1",             method => "GET"    },
                 ]
             },
             '... got the right value for creation'
@@ -584,12 +584,12 @@ test_psgi( app => $app, client => sub {
                         },
                         version => '7f53a57fae8a7548af8677e60a46c2526d85569b1752ac679b376880bdd4f2a2',
                         links => [
-                            { rel => "describedby", href => "user/schema",   method => "GET"    },
-                            { rel => "list",        href => "user",          method => "GET"    },
-                            { rel => "create",      href => "user/create",   method => "POST"   },
-                            { rel => "read",        href => "user/1",        method => "GET"    },
-                            { rel => "edit",        href => "user/1/edit",   method => "PUT"    },
-                            { rel => "delete",      href => "user/1/delete", method => "DELETE" },
+                        { rel => "create",      href => "user/create",   method => "POST"   },
+                        { rel => "delete",      href => "user/1/delete", method => "DELETE" },
+                        { rel => "describedby", href => "user/schema",   method => "GET"    },
+                        { rel => "edit",        href => "user/1/edit",   method => "PUT"    },
+                        { rel => "list",        href => "user",          method => "GET"    },
+                        { rel => "read",        href => "user/1",        method => "GET"    },
                         ]
                     },
                     items => [
@@ -601,12 +601,12 @@ test_psgi( app => $app, client => sub {
                             },
                             version => '07c302816348f4e67f0a8f3701aca90330c65a5030f48a2dbb891bcc6c18520d',
                             links => [
-                                { rel => "describedby", href => "product/schema",   method => "GET"    },
-                                { rel => "list",        href => "product",          method => "GET"    },
-                                { rel => "create",      href => "product/create",   method => "POST"   },
-                                { rel => "read",        href => "product/1",        method => "GET"    },
-                                { rel => "edit",        href => "product/1/edit",   method => "PUT"    },
-                                { rel => "delete",      href => "product/1/delete", method => "DELETE" },
+                            { rel => "create",      href => "product/create",   method => "POST"   },
+                            { rel => "delete",      href => "product/1/delete", method => "DELETE" },
+                            { rel => "describedby", href => "product/schema",   method => "GET"    },
+                            { rel => "edit",        href => "product/1/edit",   method => "PUT"    },
+                            { rel => "list",        href => "product",          method => "GET"    },
+                            { rel => "read",        href => "product/1",        method => "GET"    },
                             ]
                         },
                         {
@@ -617,23 +617,23 @@ test_psgi( app => $app, client => sub {
                             },
                             version => 'd2e63b1870594d57bc16999e7f61e1f84fe91ba1cd47388a85d52fda206cb1cc',
                             links => [
-                                { rel => "describedby", href => "product/schema",   method => "GET"    },
-                                { rel => "list",        href => "product",          method => "GET"    },
-                                { rel => "create",      href => "product/create",   method => "POST"   },
-                                { rel => "read",        href => "product/2",        method => "GET"    },
-                                { rel => "edit",        href => "product/2/edit",   method => "PUT"    },
-                                { rel => "delete",      href => "product/2/delete", method => "DELETE" },
+                            { rel => "create",      href => "product/create",   method => "POST"   },
+                            { rel => "delete",      href => "product/2/delete", method => "DELETE" },
+                            { rel => "describedby", href => "product/schema",   method => "GET"    },
+                            { rel => "edit",        href => "product/2/edit",   method => "PUT"    },
+                            { rel => "list",        href => "product",          method => "GET"    },
+                            { rel => "read",        href => "product/2",        method => "GET"    },
                             ]
                         }
                     ]
                 },
-                version => '6f2b0ecaeb1dfc8fc50c2bb0cae7c685969793ea2aee5016dd2075c76ae40a94',
+                version => 'b78904491118b188fecea1292b9385d06095e05c35f507ec1f79cdfb4f1ab537',
                 links => [
-                    { rel => "create",                            href => "cart/create",        method => "POST"   },
-                    { rel => "read",                              href => "cart/1",             method => "GET"    },
-                    { rel => "my/shoppingCart/target/addItem",    href => "cart/1/add_item",    method => "PUT"    },
-                    { rel => "my/shoppingCart/target/removeItem", href => "cart/1/remove_item", method => "PUT"    },
-                    { rel => "delete",                            href => "cart/1/delete",      method => "DELETE" },
+                { rel => "create",                            href => "cart/create",        method => "POST"   },
+                { rel => "delete",                            href => "cart/1/delete",      method => "DELETE" },
+                { rel => "my/shoppingCart/target/addItem",    href => "cart/1/add_item",    method => "PUT"    },
+                { rel => "my/shoppingCart/target/removeItem", href => "cart/1/remove_item", method => "PUT"    },
+                { rel => "read",                              href => "cart/1",             method => "GET"    },
                 ]
             },
             '... got the right value for creation'
@@ -659,12 +659,12 @@ test_psgi( app => $app, client => sub {
                         },
                         version => '7f53a57fae8a7548af8677e60a46c2526d85569b1752ac679b376880bdd4f2a2',
                         links => [
-                            { rel => "describedby", href => "user/schema",   method => "GET"    },
-                            { rel => "list",        href => "user",          method => "GET"    },
-                            { rel => "create",      href => "user/create",   method => "POST"   },
-                            { rel => "read",        href => "user/1",        method => "GET"    },
-                            { rel => "edit",        href => "user/1/edit",   method => "PUT"    },
-                            { rel => "delete",      href => "user/1/delete", method => "DELETE" },
+                        { rel => "create",      href => "user/create",   method => "POST"   },
+                        { rel => "delete",      href => "user/1/delete", method => "DELETE" },
+                        { rel => "describedby", href => "user/schema",   method => "GET"    },
+                        { rel => "edit",        href => "user/1/edit",   method => "PUT"    },
+                        { rel => "list",        href => "user",          method => "GET"    },
+                        { rel => "read",        href => "user/1",        method => "GET"    },
                         ]
                     },
                     items => [
@@ -676,12 +676,12 @@ test_psgi( app => $app, client => sub {
                             },
                             version => '07c302816348f4e67f0a8f3701aca90330c65a5030f48a2dbb891bcc6c18520d',
                             links => [
-                                { rel => "describedby", href => "product/schema",   method => "GET"    },
-                                { rel => "list",        href => "product",          method => "GET"    },
-                                { rel => "create",      href => "product/create",   method => "POST"   },
-                                { rel => "read",        href => "product/1",        method => "GET"    },
-                                { rel => "edit",        href => "product/1/edit",   method => "PUT"    },
-                                { rel => "delete",      href => "product/1/delete", method => "DELETE" },
+                            { rel => "create",      href => "product/create",   method => "POST"   },
+                            { rel => "delete",      href => "product/1/delete", method => "DELETE" },
+                            { rel => "describedby", href => "product/schema",   method => "GET"    },
+                            { rel => "edit",        href => "product/1/edit",   method => "PUT"    },
+                            { rel => "list",        href => "product",          method => "GET"    },
+                            { rel => "read",        href => "product/1",        method => "GET"    },
                             ]
                         },
                         {
@@ -692,12 +692,12 @@ test_psgi( app => $app, client => sub {
                             },
                             version => 'd2e63b1870594d57bc16999e7f61e1f84fe91ba1cd47388a85d52fda206cb1cc',
                             links => [
-                                { rel => "describedby", href => "product/schema",   method => "GET"    },
-                                { rel => "list",        href => "product",          method => "GET"    },
-                                { rel => "create",      href => "product/create",   method => "POST"   },
-                                { rel => "read",        href => "product/2",        method => "GET"    },
-                                { rel => "edit",        href => "product/2/edit",   method => "PUT"    },
-                                { rel => "delete",      href => "product/2/delete", method => "DELETE" },
+                            { rel => "create",      href => "product/create",   method => "POST"   },
+                            { rel => "delete",      href => "product/2/delete", method => "DELETE" },
+                            { rel => "describedby", href => "product/schema",   method => "GET"    },
+                            { rel => "edit",        href => "product/2/edit",   method => "PUT"    },
+                            { rel => "list",        href => "product",          method => "GET"    },
+                            { rel => "read",        href => "product/2",        method => "GET"    },
                             ]
                         },
                         {
@@ -708,23 +708,23 @@ test_psgi( app => $app, client => sub {
                             },
                             version => 'e13d199dae9e277e852c79b236106d4727ed52be9bee385c39fa66c9475aa4ff',
                             links => [
-                                { rel => "describedby", href => "product/schema",   method => "GET"    },
-                                { rel => "list",        href => "product",          method => "GET"    },
-                                { rel => "create",      href => "product/create",   method => "POST"   },
-                                { rel => "read",        href => "product/3",        method => "GET"    },
-                                { rel => "edit",        href => "product/3/edit",   method => "PUT"    },
-                                { rel => "delete",      href => "product/3/delete", method => "DELETE" },
+                            { rel => "create",      href => "product/create",   method => "POST"   },
+                            { rel => "delete",      href => "product/3/delete", method => "DELETE" },
+                            { rel => "describedby", href => "product/schema",   method => "GET"    },
+                            { rel => "edit",        href => "product/3/edit",   method => "PUT"    },
+                            { rel => "list",        href => "product",          method => "GET"    },
+                            { rel => "read",        href => "product/3",        method => "GET"    },
                             ]
                         }
                     ]
                 },
-                version => 'a59edbdb6b270e3cdb74e8e729f6a9ea2f82fc9b72db3813159f3516205fe29c',
+                version => 'fee6dadfcdafd23b9d7038dcaf344cec7908e70639c8b3d7a06328b645b61f5f',
                 links => [
-                    { rel => "create",                            href => "cart/create",        method => "POST"   },
-                    { rel => "read",                              href => "cart/1",             method => "GET"    },
-                    { rel => "my/shoppingCart/target/addItem",    href => "cart/1/add_item",    method => "PUT"    },
-                    { rel => "my/shoppingCart/target/removeItem", href => "cart/1/remove_item", method => "PUT"    },
-                    { rel => "delete",                            href => "cart/1/delete",      method => "DELETE" },
+                { rel => "create",                            href => "cart/create",        method => "POST"   },
+                { rel => "delete",                            href => "cart/1/delete",      method => "DELETE" },
+                { rel => "my/shoppingCart/target/addItem",    href => "cart/1/add_item",    method => "PUT"    },
+                { rel => "my/shoppingCart/target/removeItem", href => "cart/1/remove_item", method => "PUT"    },
+                { rel => "read",                              href => "cart/1",             method => "GET"    },
                 ]
             },
             '... got the right value for creation'
@@ -751,12 +751,12 @@ test_psgi( app => $app, client => sub {
                         },
                         version => '7f53a57fae8a7548af8677e60a46c2526d85569b1752ac679b376880bdd4f2a2',
                         links => [
-                            { rel => "describedby", href => "user/schema",   method => "GET"    },
-                            { rel => "list",        href => "user",          method => "GET"    },
-                            { rel => "create",      href => "user/create",   method => "POST"   },
-                            { rel => "read",        href => "user/1",        method => "GET"    },
-                            { rel => "edit",        href => "user/1/edit",   method => "PUT"    },
-                            { rel => "delete",      href => "user/1/delete", method => "DELETE" },
+                        { rel => "create",      href => "user/create",   method => "POST"   },
+                        { rel => "delete",      href => "user/1/delete", method => "DELETE" },
+                        { rel => "describedby", href => "user/schema",   method => "GET"    },
+                        { rel => "edit",        href => "user/1/edit",   method => "PUT"    },
+                        { rel => "list",        href => "user",          method => "GET"    },
+                        { rel => "read",        href => "user/1",        method => "GET"    },
                         ]
                     },
                     items => [
@@ -768,12 +768,12 @@ test_psgi( app => $app, client => sub {
                             },
                             version => '07c302816348f4e67f0a8f3701aca90330c65a5030f48a2dbb891bcc6c18520d',
                             links => [
-                                { rel => "describedby", href => "product/schema",   method => "GET"    },
-                                { rel => "list",        href => "product",          method => "GET"    },
-                                { rel => "create",      href => "product/create",   method => "POST"   },
-                                { rel => "read",        href => "product/1",        method => "GET"    },
-                                { rel => "edit",        href => "product/1/edit",   method => "PUT"    },
-                                { rel => "delete",      href => "product/1/delete", method => "DELETE" },
+                            { rel => "create",      href => "product/create",   method => "POST"   },
+                            { rel => "delete",      href => "product/1/delete", method => "DELETE" },
+                            { rel => "describedby", href => "product/schema",   method => "GET"    },
+                            { rel => "edit",        href => "product/1/edit",   method => "PUT"    },
+                            { rel => "list",        href => "product",          method => "GET"    },
+                            { rel => "read",        href => "product/1",        method => "GET"    },
                             ]
                         },
                         {
@@ -784,23 +784,23 @@ test_psgi( app => $app, client => sub {
                             },
                             version => 'd2e63b1870594d57bc16999e7f61e1f84fe91ba1cd47388a85d52fda206cb1cc',
                             links => [
-                                { rel => "describedby", href => "product/schema",   method => "GET"    },
-                                { rel => "list",        href => "product",          method => "GET"    },
-                                { rel => "create",      href => "product/create",   method => "POST"   },
-                                { rel => "read",        href => "product/2",        method => "GET"    },
-                                { rel => "edit",        href => "product/2/edit",   method => "PUT"    },
-                                { rel => "delete",      href => "product/2/delete", method => "DELETE" },
+                            { rel => "create",      href => "product/create",   method => "POST"   },
+                            { rel => "delete",      href => "product/2/delete", method => "DELETE" },
+                            { rel => "describedby", href => "product/schema",   method => "GET"    },
+                            { rel => "edit",        href => "product/2/edit",   method => "PUT"    },
+                            { rel => "list",        href => "product",          method => "GET"    },
+                            { rel => "read",        href => "product/2",        method => "GET"    },
                             ]
                         },
                     ]
                 },
-                version => '6f2b0ecaeb1dfc8fc50c2bb0cae7c685969793ea2aee5016dd2075c76ae40a94',
+                version => 'b78904491118b188fecea1292b9385d06095e05c35f507ec1f79cdfb4f1ab537',
                 links => [
                     { rel => "create",                            href => "cart/create",        method => "POST"   },
-                    { rel => "read",                              href => "cart/1",             method => "GET"    },
+                    { rel => "delete",                            href => "cart/1/delete",      method => "DELETE" },
                     { rel => "my/shoppingCart/target/addItem",    href => "cart/1/add_item",    method => "PUT"    },
                     { rel => "my/shoppingCart/target/removeItem", href => "cart/1/remove_item", method => "PUT"    },
-                    { rel => "delete",                            href => "cart/1/delete",      method => "DELETE" },
+                    { rel => "read",                              href => "cart/1",             method => "GET"    },
                 ]
             },
             '... got the right value for creation'
@@ -811,7 +811,7 @@ test_psgi( app => $app, client => sub {
     diag("DELETE-ing cart (with conditional match)");
     {
         my $req = DELETE("http://localhost/cart/1/delete" => (
-            'If-Matches' => '6f2b0ecaeb1dfc8fc50c2bb0cae7c685969793ea2aee5016dd2075c76ae40a94'
+            'If-Matches' => 'b78904491118b188fecea1292b9385d06095e05c35f507ec1f79cdfb4f1ab537'
         ));
         my $res = $cb->($req);
         is($res->code, 204, '... got the right status for delete');

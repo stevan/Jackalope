@@ -76,7 +76,7 @@ sub build_router {
     my $router = Path::Router->new;
     my $schema = $self->compiled_schema;
 
-    foreach my $link ( @{ $schema->{'links'} }) {
+    foreach my $link ( values %{ $schema->{'links'} }) {
         $router->add_route(
             $link->{'href'},
             defaults => {
@@ -94,7 +94,7 @@ sub build_router {
 sub generate_read_link_for_resource {
     my ($self, $resource) = @_;
     my $schema = $self->compiled_schema;
-    my $link   = first { $_->{'rel'} eq 'read' } @{ $schema->{'links'} };
+    my $link   = first { $_->{'rel'} eq 'read' } values %{ $schema->{'links'} };
     # FIXME
     # This should just return undef or something
     # throwing an exception is kinda extreme
@@ -126,7 +126,7 @@ sub generate_links_for_resource {
                         : ())
                 )
             }
-        } @{ $schema->{'links'} }
+        } sort { $a->{rel} cmp $b->{rel} }values %{ $schema->{'links'} }
     );
 }
 
