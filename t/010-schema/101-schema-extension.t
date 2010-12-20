@@ -27,14 +27,20 @@ is(exception{
                 age        => { type => 'integer', greater_than => 0 },
                 sex        => { type => 'string', enum => [qw[ male female ]] }
             },
-            links => [
-                {
+            links => {
+                "self" => {
                     rel           => 'self',
                     href          => '/:id/read',
                     method        => 'GET',
                     target_schema => { '$ref' => '#' }
+                },
+                "edit" => {
+                    rel           => 'edit',
+                    href          => '/:id/update',
+                    method        => 'GET',
+                    target_schema => { '$ref' => '#' }
                 }
-            ]
+            }
         }
     )
 }, undef, '... did not die when registering this schema');
@@ -48,6 +54,14 @@ is(exception{
             properties => {
                 title   => { type => 'string' },
                 manager => { '$ref' => '#' }
+            },
+            links => {
+                "self" => {
+                    rel           => 'self',
+                    href          => '/:id',
+                    method        => 'GET',
+                    target_schema => { '$ref' => '#' }
+                }
             }
         }
     )
@@ -64,8 +78,11 @@ isnt($employee->{'links'}, $person->{'links'}, '... employee has a different lin
 
 is($employee->{'properties'}->{'manager'}, $employee, '... manager schema is inflated correctly');
 
-is($employee->{'links'}->[0]->{'target_schema'}, $employee, '... employee link goes to itself in the target_schema');
-is($person->{'links'}->[0]->{'target_schema'}, $person, '... person link goes to itself in the target_schema');
+is($employee->{'links'}->{'self'}->{'target_schema'}, $employee, '... employee link goes to itself in the target_schema');
+is($person->{'links'}->{'self'}->{'target_schema'}, $person, '... person link goes to itself in the target_schema');
+
+is($employee->{'links'}->{'edit'}->{'target_schema'}, $employee, '... employee link goes to itself in the target_schema');
+is($person->{'links'}->{'edit'}->{'target_schema'}, $person, '... person link goes to itself in the target_schema');
 
 
 done_testing;

@@ -27,8 +27,8 @@ is(exception{
                 age        => { type => 'integer', greater_than => 0 },
                 sex        => { type => 'string', enum => [qw[ male female ]] }
             },
-            links => [
-                {
+            links => {
+                create => {
                     rel         => 'create',
                     href        => '/create',
                     method      => 'PUT',
@@ -37,14 +37,14 @@ is(exception{
                         properties => {
                             id => { type => 'null' }
                         },
-                        links => []
+                        links => {}
                     },
                     metadata    => {
                         controller => 'person_manager',
                         action     => 'create'
                     }
                 }
-            ]
+            }
         }
     )
 }, undef, '... did not die when registering this schema');
@@ -52,7 +52,7 @@ is(exception{
 my $person = $repo->get_compiled_schema_by_uri('simple/person');
 
 is_deeply(
-    $person->{'links'}->[0]->{'data_schema'}->{'properties'},
+    $person->{'links'}->{'create'}->{'data_schema'}->{'properties'},
     {
         'id' => { 'type' => 'null' },
         'first_name' => { 'type' => 'string' },

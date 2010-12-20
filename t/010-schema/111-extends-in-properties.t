@@ -58,12 +58,14 @@ my $manager  = $repo->get_compiled_schema_by_uri('simple/manager');
 is_deeply(
     $manager,
     {
+        'links' => {},
         'additional_properties' => {},
         'type' => 'object',
         'id' => 'simple/manager',
         'title' => 'This is a simple manager schema',
         'properties' => {
             'assistant' => {
+                'links' => {},
                 'additional_properties' => {},
                 'title' => 'This is a simple employee schema',
                 'type' => 'object',

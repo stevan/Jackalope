@@ -367,11 +367,10 @@ sub any {
                 ]
             },
             links => {
-                type        => "array",
+                type        => "object",
                 items       => { '$ref' => "schema/core/linkrel" },
-                is_unique   => true,
                 description => q[
-                    This is an array of 'link' objects, the purpose
+                    This is an object of 'linkrel' objects, the purpose
                     of which is to provide a way to map services
                     to the objects described in a schema. In OOP terms,
                     you can think of them as methods, while the schema

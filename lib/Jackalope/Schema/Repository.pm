@@ -234,6 +234,7 @@ sub _flatten_extends {
         );
         $schema->{'compiled'}->{'properties'}            = $self->_merge_properties( properties            => $schema, $schema_map );
         $schema->{'compiled'}->{'additional_properties'} = $self->_merge_properties( additional_properties => $schema, $schema_map );
+        $schema->{'compiled'}->{'links'}                 = $self->_merge_properties( links                 => $schema, $schema_map );
         delete $schema->{'compiled'}->{'extends'};
     }
 }
@@ -243,7 +244,8 @@ sub _merge_schema {
     foreach my $key ( keys %{ $super->{'raw'} } ) {
         next if $key eq 'id'                     # ID should never be copied
              || $key eq 'properties'             # properties will be copied later
-             || $key eq 'additional_properties'; # additional_properties will be copied later
+             || $key eq 'additional_properties'  # additional_properties will be copied later
+             || $key eq 'links';                 # links will be copied later
         if ( not exists $schema->{'raw'}->{ $key } ) {
             $schema->{'compiled'}->{ $key } = ref $super->{'raw'}->{ $key }
                                             ? clone( $super->{'raw'}->{ $key } )
@@ -316,6 +318,7 @@ sub _resolve_embedded_extends {
                 );
                 $embedded_schema->{'compiled'}->{'properties'}            = $self->_merge_properties( properties            => $embedded_schema, $new_schema_map );
                 $embedded_schema->{'compiled'}->{'additional_properties'} = $self->_merge_properties( additional_properties => $embedded_schema, $new_schema_map );
+                $embedded_schema->{'compiled'}->{'links'}                 = $self->_merge_properties( links                 => $embedded_schema, $new_schema_map );
                 delete $embedded_schema->{'compiled'}->{'extends'};
                 $_ = $embedded_schema->{'compiled'};
             }
