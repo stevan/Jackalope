@@ -31,30 +31,33 @@ sub build_routes {
 
     my %routes;
     foreach my $link ( values %{ $schema->{'links'} } ) {
-        if ( not exists $routes{ $link->{'href'} } ) {
-            $routes{ $link->{'href'} } = {
-                matcher => $self->generate_matcher_for( $link->{'href'} ),
+        my $href = $self->base_href . $link->{'href'};
+        if ( not exists $routes{ $href } ) {
+            $routes{ $href } = {
+                matcher => $self->generate_matcher_for( $href ),
                 methods => {}
             };
         }
-        if ( not exists $routes{ $link->{'href'} }->{'methods'}->{ $link->{'method'} } ) {
-            $routes{ $link->{'href'} }->{'methods'}->{ $link->{'method'} } = $link;
+        if ( not exists $routes{ $href }->{'methods'}->{ $link->{'method'} } ) {
+            $routes{ $href }->{'methods'}->{ $link->{'method'} } = $link;
         }
         else {
-            die "Duplicate method (" . $link->{'method'} . ") for href (" . $link->{'href'} . ")";
+            die "Duplicate method (" . $link->{'method'} . ") for href (" . $href . ")";
         }
     }
     return \%routes;
 }
 
 sub generate_matcher_for {
-    my ($self, $href) = @_;
+    my $self = shift;
+    my $href = File::Spec::Unix->canonpath( shift );
 
     my @href = split '/' => $href;
 
-    if ( ((scalar @href) == 0) || ((scalar grep { /^\:/ } @href) == 0) ) {
+    if ( (scalar grep { /^\:/ } @href) == 0 ) {
         return sub {
             my $uri = File::Spec::Unix->canonpath( $_[0] );
+            #warn "$_[0] => $uri => $href";
             $href eq $uri ? [] : undef
         }
     }
@@ -86,10 +89,6 @@ sub generate_matcher_for {
 sub match {
     my ($self, $uri, $method) = @_;
 
-    if ( my $base = $self->base_href ) {
-        $uri =~ s/^$base//;
-    }
-
     # NOTE:
     # we want to sort the routes
     # here so that literal hrefs
@@ -99,6 +98,8 @@ sub match {
     # href matching a literal one.
     # - SL
     foreach my $href ( sort { $a =~ /\:/ ? 1 : ( $b =~ /\:/ ? -1 : ( $a cmp $b )) } keys %{ $self->routes } ) {
+
+        #warn "attempting to match $uri to $href";
 
         my $route = $self->routes->{ $href };
 
