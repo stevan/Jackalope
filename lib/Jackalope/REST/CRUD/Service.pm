@@ -78,15 +78,16 @@ sub get_target_for_link {
 sub to_app {
     my $self = shift;
     sub {
-        my $r     = Plack::Request->new( +shift );
-        my $match = $self->router->match( $r->path_info, $r->method );
+        my $r = Plack::Request->new( +shift );
 
-        return [ 404, [], [ 'Not Found' ] ] if not defined $match;
+        my ($match, $error);
+        try   { $match = $self->router->match( $r->path_info, $r->method ) }
+        catch { $error = $_ };
+
+        return $error->to_psgi if $error;
 
         my $target = $self->get_target_for_link( $match->{'link'} );
-
         $r->env->{'jackalope.router.match.mapping'} = $match->{'mapping'};
-
         return $target->to_app->( $r->env );
     }
 }

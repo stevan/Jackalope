@@ -400,11 +400,8 @@ test_psgi( app => $app, client => sub {
     {
         my $req = POST("http://localhost/schema");
         my $res = $cb->($req);
-        TODO: {
-            local $TODO = 'need to fix method not allowed feature';
-            is($res->code, 405, '... got the right status for bad method');
-            is($res->header('Allow'), 'GET', '... got the right Allow header');
-        }
+        is($res->code, 405, '... got the right status for bad method');
+        is($res->header('Allow'), 'GET', '... got the right Allow header');
     }
 
 });

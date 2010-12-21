@@ -4,6 +4,9 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use Jackalope::REST::Error::MethodNotAllowed;
+use Jackalope::REST::Error::ResourceNotFound;
+
 use File::Spec::Unix;
 
 has 'schema' => (
@@ -14,7 +17,7 @@ has 'schema' => (
 
 has 'routes' => (
     is      => 'ro',
-    isa     => 'ArrayRef',
+    isa     => 'HashRef',
     lazy    => 1,
     builder => 'build_routes'
 );
@@ -22,38 +25,45 @@ has 'routes' => (
 sub build_routes {
     my $self   = shift;
     my $schema = $self->schema;
-    my @routes;
+    my %routes;
     foreach my $link ( values %{ $schema->{'links'} } ) {
-        push @routes => {
-            matcher => $self->generate_matcher_for( $link ),
-            link    => $link
-        };
+        if ( not exists $routes{ $link->{'href'} } ) {
+            $routes{ $link->{'href'} } = {
+                matcher => $self->generate_matcher_for( $link->{'href'} ),
+                methods => {}
+            };
+        }
+
+        if ( not exists $routes{ $link->{'href'} }->{'methods'}->{ $link->{'method'} } ) {
+            $routes{ $link->{'href'} }->{'methods'}->{ $link->{'method'} } = $link;
+        }
+        else {
+            die "Duplicate method (" . $link->{'method'} . ") for href (" . $link->{'href'} . ")";
+        }
     }
-    return \@routes;
+    return \%routes;
 }
 
 sub generate_matcher_for {
-    my ($self, $link) = @_;
+    my ($self, $href) = @_;
 
-    my @path = split '/' => $link->{'href'};
+    my @href = split '/' => $href;
 
-    if ( ((scalar @path) == 0) || ((scalar grep { /^\:/ } @path) == 0) ) {
+    if ( ((scalar @href) == 0) || ((scalar grep { /^\:/ } @href) == 0) ) {
         return sub {
-            my ($uri, $method) = @_;
-            $link->{'href'} eq $uri && $link->{'method'} eq $method ? [] : undef
+            my $uri = File::Spec::Unix->canonpath( $_[0] );
+            $href eq $uri ? [] : undef
         }
     }
     else {
         return sub {
-            my ($uri, $method) = @_;
-
-            return undef unless $link->{'method'} eq $method;
+            my ($uri) = @_;
 
             my @uri = split '/' => File::Spec::Unix->canonpath( $uri );
-            return undef unless (scalar @uri) == (scalar @path);
+            return undef unless (scalar @uri) == (scalar @href);
 
             my @mapping;
-            foreach my $el (@path) {
+            foreach my $el (@href) {
                 my $x = shift @uri;
                 if ($el =~ /^\:(.*)/) {
                     my $key = $1;
@@ -71,12 +81,40 @@ sub generate_matcher_for {
 
 sub match {
     my ($self, $uri, $method) = @_;
-    foreach my $route ( @{ $self->routes } ) {
-        if ( my $mapping = $route->{'matcher'}->( $uri, $method ) ) {
-            return +{ link => $route->{'link'}, mapping => $mapping };
+
+    my $routes = $self->routes;
+
+    # NOTE:
+    # not sure if this sort is really
+    # the right way, should check this
+    # tomorrow when i am sober.
+    # - SL
+    foreach my $href ( sort { $a =~ /\:/ ? 1 : ( $b =~ /\:/ ? -1 : 1) } keys %$routes ) {
+
+        my $route = $routes->{ $href };
+
+        if ( my $mapping = $route->{'matcher'}->( $uri ) ) {
+
+            my $method_map = $route->{'methods'};
+
+            if ( my $link = $method_map->{ $method } ) {
+                return +{
+                    link    => $link,
+                    mapping => $mapping
+                };
+            }
+            else {
+                Jackalope::REST::Error::MethodNotAllowed->new(
+                    allowed_methods => [ keys %$method_map ],
+                    message         => "Method Not Allowed"
+                )->throw
+            }
         }
     }
-    return;
+
+    Jackalope::REST::Error::ResourceNotFound->throw(
+        "Could not find resource at ($uri) with method ($method)"
+    )
 }
 
 sub uri_for {

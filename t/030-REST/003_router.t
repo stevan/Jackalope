@@ -35,10 +35,11 @@ BEGIN {
     }, '... got the link we expected');
     is_deeply($match->{mapping}, [], '... got the mapping we expected');
 
-    ok(!$router->match('/foo', 'GET'), '... no match');
-    ok(!$router->match('/', 'GET'), '... no match');
-    ok(!$router->match('/', 'DELETE'), '... no match');
-    ok(!$router->match('/foo', 'POST'), '... no match');
+    isa_ok(exception { $router->match('/foo', 'GET') },  'Jackalope::REST::Error::ResourceNotFound');
+    isa_ok(exception { $router->match('/foo', 'POST') }, 'Jackalope::REST::Error::ResourceNotFound');
+
+    isa_ok(exception { $router->match('/', 'GET') },     'Jackalope::REST::Error::MethodNotAllowed');
+    isa_ok(exception { $router->match('/', 'DELETE') },  'Jackalope::REST::Error::MethodNotAllowed');
 
     is_deeply(
         $router->uri_for( 'create', {} ),
@@ -71,10 +72,11 @@ BEGIN {
     }, '... got the link we expected');
     is_deeply($match->{mapping}, [ { id => 10 } ], '... got the mapping we expected');
 
-    ok(!$router->match('/foo/bar', 'GET'), '... no match');
-    ok(!$router->match('/', 'GET'), '... no match');
-    ok(!$router->match('/', 'DELETE'), '... no match');
-    ok(!$router->match('/foo', 'POST'), '... no match');
+    isa_ok(exception { $router->match('/foo/bar', 'GET') }, 'Jackalope::REST::Error::ResourceNotFound');
+    isa_ok(exception { $router->match('/', 'GET') },        'Jackalope::REST::Error::ResourceNotFound');
+    isa_ok(exception { $router->match('/', 'DELETE') },     'Jackalope::REST::Error::ResourceNotFound');
+
+    isa_ok(exception { $router->match('/foo', 'POST') },    'Jackalope::REST::Error::MethodNotAllowed');
 
     is_deeply(
         $router->uri_for( 'read', { id => 10 } ),
@@ -107,12 +109,15 @@ BEGIN {
     }, '... got the link we expected');
     is_deeply($match->{mapping}, [ { id => 10 }, { item_id => 1 } ], '... got the mapping we expected');
 
-    ok(!$router->match('/10/item/10/foo', 'PUT'), '... no match');
-    ok(!$router->match('/foo/bar/10', 'PUT'), '... no match');
-    ok(!$router->match('/foo/bar', 'GET'), '... no match');
-    ok(!$router->match('/', 'GET'), '... no match');
-    ok(!$router->match('/', 'DELETE'), '... no match');
-    ok(!$router->match('/foo', 'POST'), '... no match');
+    isa_ok(exception { $router->match('/10/item/10/foo', 'PUT') }, 'Jackalope::REST::Error::ResourceNotFound');
+    isa_ok(exception { $router->match('/foo/bar/10', 'PUT') },     'Jackalope::REST::Error::ResourceNotFound');
+    isa_ok(exception { $router->match('/foo/bar', 'GET') },        'Jackalope::REST::Error::ResourceNotFound');
+    isa_ok(exception { $router->match('/', 'GET') },               'Jackalope::REST::Error::ResourceNotFound');
+    isa_ok(exception { $router->match('/', 'DELETE') },            'Jackalope::REST::Error::ResourceNotFound');
+    isa_ok(exception { $router->match('/foo', 'POST') },           'Jackalope::REST::Error::ResourceNotFound');
+
+    isa_ok(exception { $router->match('/foo/item/10', 'GET') },    'Jackalope::REST::Error::MethodNotAllowed');
+    isa_ok(exception { $router->match('/100/item/10', 'POST') },   'Jackalope::REST::Error::MethodNotAllowed');
 
     is_deeply(
         $router->uri_for( 'delete_item', { id => 10, item_id => 1 } ),
@@ -192,9 +197,11 @@ BEGIN {
         is_deeply($match->{mapping}, [], '... got the mapping we expected');
     }
 
-    ok(!$router->match('/foo/bar', 'GET'), '... no match');
-    ok(!$router->match('/', 'DELETE'), '... no match');
-    ok(!$router->match('/foo', 'POST'), '... no match');
+    isa_ok(exception { $router->match('/foo/bar', 'GET') }, 'Jackalope::REST::Error::ResourceNotFound');
+
+    isa_ok(exception { $router->match('/', 'DELETE') },     'Jackalope::REST::Error::MethodNotAllowed');
+    isa_ok(exception { $router->match('/', 'PUT') },        'Jackalope::REST::Error::MethodNotAllowed');
+    isa_ok(exception { $router->match('/foo', 'POST') },    'Jackalope::REST::Error::MethodNotAllowed');
 
     is_deeply(
         $router->uri_for( 'read', { id => 10 } ),
