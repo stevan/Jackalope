@@ -403,6 +403,12 @@ test_psgi( app => $app, client => sub {
         is($res->code, 405, '... got the right status for bad method');
         is($res->header('Allow'), 'GET', '... got the right Allow header');
     }
+    {
+        my $req = PUT("http://localhost/");
+        my $res = $cb->($req);
+        is($res->code, 405, '... got the right status for bad method');
+        is($res->header('Allow'), 'GET,POST', '... got the right Allow header');
+    }
 
 });
 

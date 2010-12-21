@@ -7,24 +7,12 @@ our $AUTHORITY = 'cpan:STEVAN';
 with 'Jackalope::REST::Service';
 
 use Jackalope::REST::Router;
-
 use Plack::Request;
+
 use Try::Tiny;
-use List::AllUtils 'first';
 use Class::Load 'load_class';
 
-has 'resource_repository' => (
-    is       => 'ro',
-    does     => 'Jackalope::REST::Resource::Repository',
-    required => 1
-);
-
-has 'schema' => (
-    is       => 'ro',
-    isa      => 'HashRef',
-    required => 1
-);
-
+has 'schema'          => ( is => 'ro', isa => 'HashRef', required => 1 );
 has 'compiled_schema' => (
     is      => 'ro',
     lazy    => 1,
@@ -34,61 +22,65 @@ has 'compiled_schema' => (
     }
 );
 
-has 'router' => (
+has 'resource_repository' => (
+    is       => 'ro',
+    does     => 'Jackalope::REST::Resource::Repository',
+    required => 1
+);
+
+has 'base_href' => ( is => 'ro', isa => 'Str', default => '' );
+has 'router'    => (
     is      => 'ro',
     isa     => 'Jackalope::REST::Router',
     lazy    => 1,
-    default => sub {
-        my $self = shift;
-        Jackalope::REST::Router->new( schema => $self->compiled_schema )
-    }
+    builder => 'build_router'
 );
 
-my %REL_TO_TARGET_CLASS = (
-    create      => 'Jackalope::REST::Service::Target::Create',
-    edit        => 'Jackalope::REST::Service::Target::Edit',
-    list        => 'Jackalope::REST::Service::Target::List',
-    read        => 'Jackalope::REST::Service::Target::Read',
-    delete      => 'Jackalope::REST::Service::Target::Delete',
-    describedby => 'Jackalope::REST::Service::Target::DescribedBy',
+has 'rel_to_target_class' => (
+    is      => 'ro',
+    isa     => 'HashRef[Str]',
+    lazy    => 1,
+    default => sub { +{} }
 );
 
-sub get_target_for_link {
-    my ($self, $link) = @_;
-
-    my $target_class;
-    if (exists $REL_TO_TARGET_CLASS{ lc $link->{'rel'} }) {
-        $target_class = $REL_TO_TARGET_CLASS{ lc $link->{'rel'} };
-    }
-    else {
-        $target_class = join '::' => map { ucfirst $_ } split '/' => $link->{'rel'};
-    }
-
-    (defined $target_class)
-        || confess "No target class found for rel (" . $link->{'rel'} . ")";
-
-    load_class( $target_class );
-
-    return $target_class->new(
-        service => $self,
-        link    => $link
+sub build_router {
+    my $self = shift;
+    Jackalope::REST::Router->new(
+        base_href => $self->base_href,
+        schema    => $self->compiled_schema
     );
 }
 
-sub to_app {
-    my $self = shift;
-    sub {
-        my $r = Plack::Request->new( +shift );
+{
+    my %REL_TO_TARGET_CLASS = (
+        create      => 'Jackalope::REST::Service::Target::Create',
+        edit        => 'Jackalope::REST::Service::Target::Edit',
+        list        => 'Jackalope::REST::Service::Target::List',
+        read        => 'Jackalope::REST::Service::Target::Read',
+        delete      => 'Jackalope::REST::Service::Target::Delete',
+        describedby => 'Jackalope::REST::Service::Target::DescribedBy',
+    );
 
-        my ($match, $error);
-        try   { $match = $self->router->match( $r->path_info, $r->method ) }
-        catch { $error = $_ };
+    sub get_target_for_link {
+        my ($self, $link) = @_;
 
-        return $error->to_psgi if $error;
+        my %rel_to_target_map = (
+            %REL_TO_TARGET_CLASS,
+            %{ $self->rel_to_target_class }
+        );
 
-        my $target = $self->get_target_for_link( $match->{'link'} );
-        $r->env->{'jackalope.router.match.mapping'} = $match->{'mapping'};
-        return $target->to_app->( $r->env );
+        my $target_class = $rel_to_target_map{ lc $link->{'rel'} };
+
+        Jackalope::REST::Error::ResourceNotFound->throw(
+            "No target class found for rel (" . $link->{'rel'} . ")"
+        ) unless defined $target_class;
+
+        load_class( $target_class );
+
+        return $target_class->new(
+            service => $self,
+            link    => $link
+        );
     }
 }
 
@@ -99,15 +91,40 @@ sub generate_read_link_for_resource {
 
 sub generate_links_for_resource {
     my ($self, $resource) = @_;
-    my $schema = $self->compiled_schema;
     $resource->add_links(
         map {
             $self->router->uri_for(
                 $_->{'rel'},
-                (exists $_->{'uri_schema'} ? { id => $resource->id } : {} )
+                (exists $_->{'uri_schema'}
+                    ? { id => $resource->id }
+                    : {} )
             )
-        } sort { $a->{rel} cmp $b->{rel} } values %{ $schema->{'links'} }
+        } sort {
+            $a->{rel} cmp $b->{rel}
+        } values %{ $self->compiled_schema->{'links'} }
     );
+}
+
+sub to_app {
+    my $self = shift;
+    sub {
+        my $r = Plack::Request->new( +shift );
+
+        my ($match, $target, $error);
+
+        try   { $match = $self->router->match( $r->path_info, $r->method ) }
+        catch { $error = $_ };
+
+        return $error->to_psgi if $error;
+
+        try   { $target = $self->get_target_for_link( $match->{'link'} ) }
+        catch { $error = $_ };
+
+        return $error->to_psgi if $error;
+
+        $r->env->{'jackalope.router.match.mapping'} = $match->{'mapping'};
+        return $target->to_app->( $r->env );
+    }
 }
 
 __PACKAGE__->meta->make_immutable;

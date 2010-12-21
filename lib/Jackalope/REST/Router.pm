@@ -9,13 +9,9 @@ use Jackalope::REST::Error::ResourceNotFound;
 
 use File::Spec::Unix;
 
-has 'schema' => (
-    is       => 'ro',
-    isa      => 'HashRef',
-    required => 1
-);
-
-has 'routes' => (
+has 'base_href' => ( is => 'ro', isa => 'Str',     default => '' );
+has 'schema'    => ( is => 'ro', isa => 'HashRef', required => 1 );
+has 'routes'    => (
     is      => 'ro',
     isa     => 'HashRef',
     lazy    => 1,
@@ -25,6 +21,14 @@ has 'routes' => (
 sub build_routes {
     my $self   = shift;
     my $schema = $self->schema;
+
+    # NOTE:
+    # construct a data structure where matching HREF values
+    # are collected and then a hash of HTTP methods are placed
+    # under them. This will allow us to more easily capture
+    # the other allowed methods for a given URI.
+    # - SL
+
     my %routes;
     foreach my $link ( values %{ $schema->{'links'} } ) {
         if ( not exists $routes{ $link->{'href'} } ) {
@@ -33,7 +37,6 @@ sub build_routes {
                 methods => {}
             };
         }
-
         if ( not exists $routes{ $link->{'href'} }->{'methods'}->{ $link->{'method'} } ) {
             $routes{ $link->{'href'} }->{'methods'}->{ $link->{'method'} } = $link;
         }
@@ -79,19 +82,25 @@ sub generate_matcher_for {
     }
 }
 
+
 sub match {
     my ($self, $uri, $method) = @_;
 
-    my $routes = $self->routes;
+    if ( my $base = $self->base_href ) {
+        $uri =~ s/^$base//;
+    }
 
     # NOTE:
-    # not sure if this sort is really
-    # the right way, should check this
-    # tomorrow when i am sober.
+    # we want to sort the routes
+    # here so that literal hrefs
+    # (no variables) are tested
+    # first, this will eliminate
+    # the possibility of a variable
+    # href matching a literal one.
     # - SL
-    foreach my $href ( sort { $a =~ /\:/ ? 1 : ( $b =~ /\:/ ? -1 : 1) } keys %$routes ) {
+    foreach my $href ( sort { $a =~ /\:/ ? 1 : ( $b =~ /\:/ ? -1 : ( $a cmp $b )) } keys %{ $self->routes } ) {
 
-        my $route = $routes->{ $href };
+        my $route = $self->routes->{ $href };
 
         if ( my $mapping = $route->{'matcher'}->( $uri ) ) {
 
@@ -130,7 +139,7 @@ sub uri_for {
     if ( ((scalar @path) == 0) || ((scalar grep { /^\:/ } @path) == 0) ) {
         return +{
             rel    => $link->{'rel'},
-            href   => $link->{'href'},
+            href   => $self->base_href . $link->{'href'},
             method => $link->{'method'},
         }
     }
@@ -152,7 +161,7 @@ sub uri_for {
 
         return +{
             rel    => $link->{'rel'},
-            href   => (join "/" => @href),
+            href   => $self->base_href . (join "/" => @href),
             method => $link->{'method'},
         }
     }

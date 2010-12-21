@@ -19,7 +19,7 @@ sub to_psgi {
     my $self = shift;
     [
         $self->code,
-        [ 'Allow' => join "," => @{ $self->allowed_methods } ],
+        [ 'Allow' => join "," => sort @{ $self->allowed_methods } ],
         [ $self->as_string ]
     ];
 }
