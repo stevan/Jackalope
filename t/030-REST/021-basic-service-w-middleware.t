@@ -3,8 +3,7 @@
 use strict;
 use warnings;
 
-use lib '/Users/stevan/Projects/CPAN/current/Bread-Board/lib',
-        '/Users/stevan/Projects/CPAN/current/Plack-App-Path-Router/lib';
+use lib '/Users/stevan/Projects/CPAN/current/Bread-Board/lib';
 
 use Test::More;
 use Test::Fatal;
@@ -18,10 +17,6 @@ BEGIN {
 }
 
 use Jackalope::REST::Resource::Repository::Simple;
-
-use Plack;
-use Plack::Builder;
-use Plack::App::Path::Router::PSGI;
 
 {
     package My::Service;
