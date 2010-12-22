@@ -22,25 +22,9 @@ sub execute {
 
 sub process_operation {
     my ($self, $operation, $r, $args) = @_;
-
-    my ($result, $error);
-    try {
-        my $params = $self->sanitize_and_prepare_input( $r );
-        $result = $self->resource_repository->$operation( @$args, $params );
-        $self->verify_and_prepare_output( $result );
-    } catch {
-        $error = $_;
-    };
-
-    if ( $error ) {
-        if ( $error->isa('Jackalope::REST::Error') ) {
-            return $error->to_psgi( $self->serializer );
-        }
-        else {
-            return [ 500, [], [ "Unknown Server Error : $error" ]]
-        }
-    }
-
+    my $params = $self->sanitize_and_prepare_input( $r );
+    my $result = $self->resource_repository->$operation( @$args, $params );
+    $self->verify_and_prepare_output( $result );
     return $self->process_psgi_output( $self->operation_callback( $result ) );
 }
 
