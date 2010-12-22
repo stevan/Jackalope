@@ -5,6 +5,7 @@ our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use Jackalope::REST::Service;
+use Jackalope::REST::Error::ResourceNotFound;
 
 has 'services' => (
     traits  => [ 'Array' ],
@@ -46,7 +47,20 @@ sub to_app {
                 return $service_map{ $uri_base }->to_app->( $env );
             }
         }
-        Jackalope::REST::Error::ResourceNotFound->throw("No service found at $path");
+        Jackalope::REST::Error::ResourceNotFound->new(
+            message => "No service found at $path"
+        )->to_psgi(
+            # NOTE:
+            # this isn't ideal, but we
+            # don't really have a simpler
+            # way to go about it yet. The
+            # worst (but unlikely) case is
+            # that the services have different
+            # serializers and this sends back
+            # the wrong type.
+            # - SL
+            $self->services->[0]->serializer
+        );
     };
 }
 

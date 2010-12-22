@@ -827,6 +827,21 @@ test_psgi( app => $app, client => sub {
             '... got the error we expected'
         );
     }
+
+    {
+        my $req = GET("http://localhost/foo");
+        my $res = $cb->($req);
+        is($res->code, 404, '... got the right status for creation');
+        is_deeply(
+            $serializer->deserialize( $res->content ),
+            {
+                code    => 404,
+                desc    => 'Resource Not Found',
+                message => 'No service found at /foo',
+            },
+            '... got the error we expected'
+        );
+    }
 });
 
 
