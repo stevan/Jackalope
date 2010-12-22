@@ -18,6 +18,8 @@ has 'serializer' => (
     required => 1
 );
 
+requires 'to_app';
+
 no Moose::Role; 1;
 
 __END__
