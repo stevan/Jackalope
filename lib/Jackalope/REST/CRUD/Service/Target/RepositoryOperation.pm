@@ -34,7 +34,7 @@ sub process_operation {
 
     if ( $error ) {
         if ( $error->isa('Jackalope::REST::Error') ) {
-            return $error->to_psgi;
+            return $error->to_psgi( $self->serializer );
         }
         else {
             return [ 500, [], [ "Unknown Server Error : $error" ]]

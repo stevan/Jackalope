@@ -113,12 +113,12 @@ sub to_app {
         try   { $match = $self->router->match( $env->{PATH_INFO}, $env->{REQUEST_METHOD} ) }
         catch { $error = $_ };
 
-        return $error->to_psgi if $error;
+        return $error->to_psgi( $self->serializer ) if $error;
 
         try   { $target = $self->get_target_for_link( $match->{'link'} ) }
         catch { $error = $_ };
 
-        return $error->to_psgi if $error;
+        return $error->to_psgi( $self->serializer ) if $error;
 
         $env->{'jackalope.router.match.mapping'} = $match->{'mapping'};
         return $target->to_app->( $env );
