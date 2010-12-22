@@ -28,7 +28,8 @@ sub build_service_map {
     my $self = shift;
     return +{
         map {
-            my $uri_base = $_->uri_base || confess "Services in a Service::Directory must have a uri-base";
+            my $uri_base = $_->uri_base
+                || confess "Services in a Service::Directory must have a uri-base";
             ($uri_base => $_)
         } $self->all_services
     };
