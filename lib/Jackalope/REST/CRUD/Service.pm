@@ -7,7 +7,6 @@ our $AUTHORITY = 'cpan:STEVAN';
 with 'Jackalope::REST::Service';
 
 use Jackalope::REST::Router;
-use Plack::Request;
 
 use Try::Tiny;
 use Class::Load 'load_class';
@@ -28,8 +27,7 @@ has 'resource_repository' => (
     required => 1
 );
 
-has 'base_href' => ( is => 'ro', isa => 'Str', default => '' );
-has 'router'    => (
+has 'router' => (
     is      => 'ro',
     isa     => 'Jackalope::REST::Router',
     lazy    => 1,
@@ -46,7 +44,7 @@ has 'rel_to_target_class' => (
 sub build_router {
     my $self = shift;
     Jackalope::REST::Router->new(
-        base_href => $self->base_href,
+        uri_base => $self->uri_base,
         schema    => $self->compiled_schema
     );
 }
@@ -108,11 +106,11 @@ sub generate_links_for_resource {
 sub to_app {
     my $self = shift;
     sub {
-        my $r = Plack::Request->new( +shift );
+        my $env = shift;
 
         my ($match, $target, $error);
 
-        try   { $match = $self->router->match( $r->path_info, $r->method ) }
+        try   { $match = $self->router->match( $env->{PATH_INFO}, $env->{REQUEST_METHOD} ) }
         catch { $error = $_ };
 
         return $error->to_psgi if $error;
@@ -122,8 +120,8 @@ sub to_app {
 
         return $error->to_psgi if $error;
 
-        $r->env->{'jackalope.router.match.mapping'} = $match->{'mapping'};
-        return $target->to_app->( $r->env );
+        $env->{'jackalope.router.match.mapping'} = $match->{'mapping'};
+        return $target->to_app->( $env );
     }
 }
 

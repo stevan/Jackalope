@@ -4,6 +4,8 @@ use Moose::Role;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+has 'uri_base' => ( is => 'ro', isa => 'Str', default => '' );
+
 has 'schema_repository' => (
     is       => 'ro',
     isa      => 'Jackalope::Schema::Repository',

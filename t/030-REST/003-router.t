@@ -228,7 +228,7 @@ BEGIN {
 
 {
     my $router = Jackalope::REST::Router->new(
-        base_href => '/test',
+        uri_base => '/test',
         schema    => {
             type => "object",
             links => {
@@ -326,7 +326,7 @@ BEGIN {
 
 {
     my $router = Jackalope::REST::Router->new(
-        base_href => 'test/foo',
+        uri_base => 'test/foo',
         schema    => {
             type => "object",
             links => {

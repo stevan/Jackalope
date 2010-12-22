@@ -9,7 +9,7 @@ use Jackalope::REST::Error::ResourceNotFound;
 
 use File::Spec::Unix;
 
-has 'base_href' => ( is => 'ro', isa => 'Str',     default => '' );
+has 'uri_base' => ( is => 'ro', isa => 'Str',     default => '' );
 has 'schema'    => ( is => 'ro', isa => 'HashRef', required => 1 );
 has 'routes'    => (
     is      => 'ro',
@@ -31,7 +31,7 @@ sub build_routes {
 
     my %routes;
     foreach my $link ( values %{ $schema->{'links'} } ) {
-        my $href = $self->base_href . $link->{'href'};
+        my $href = $self->uri_base . $link->{'href'};
         if ( not exists $routes{ $href } ) {
             $routes{ $href } = {
                 matcher => $self->generate_matcher_for( $href ),
@@ -140,7 +140,7 @@ sub uri_for {
     if ( ((scalar @path) == 0) || ((scalar grep { /^\:/ } @path) == 0) ) {
         return +{
             rel    => $link->{'rel'},
-            href   => $self->base_href . $link->{'href'},
+            href   => $self->uri_base . $link->{'href'},
             method => $link->{'method'},
         }
     }
@@ -162,7 +162,7 @@ sub uri_for {
 
         return +{
             rel    => $link->{'rel'},
-            href   => $self->base_href . (join "/" => @href),
+            href   => $self->uri_base . (join "/" => @href),
             method => $link->{'method'},
         }
     }
