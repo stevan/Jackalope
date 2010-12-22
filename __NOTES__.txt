@@ -1,19 +1,67 @@
 
 = TODOS =
 
-- Jackalope::REST::Client
-    - write it
-
 - Jackalope::REST::Service::Directory
-    - write this
+    - this could also encapsulate a media-type of some kind
+      because it would have multiple schemas in it
     - this should collect services and key them by schema->id
       and then the services should have access to them, this
       should simplify some of the 030-multi-schema-service.t stuff
       by allowing the resource/ref stuff to find the correct
       resource-repository for us
 
-- Jackalope::REST::Schema::Spec
-    - perhaps support a simpler web/service, maybe a read-only one?
+- ponder removing "rel" from the linkrel, it might be best implied
+  from the object key instead, hard to really say.
+
+- Jackalope::REST::Service::Target::
+    - consider stuffing the describedby schema URL into the "Link" header (ex: `Link: </schema>; rel="describedby";`)
+        - perhaps we do this with OPTIONS request?
+
+- Jackalope::REST::Service::Target::DescribedBy
+    - the described-by relation should probably return a more
+      complete (compiled) schema, and any referenced schemas
+      should have their complete URIs, not just the reference
+    - something like:
+        {
+            id   => 'some/schema/foo',
+            type => "object",
+            properties => {
+                name => { type => 'string' },
+                thing => { rel => 'describedby', href => 'bar/schema', method => 'GET' },
+                ....
+            }
+        }
+      this way you can get a schema, which itself might refer
+      to other schemas, and you can follow those hyperlinks to
+      get to those other schemas if you want/need.
+      Ideally though, this is like the compiled schema, only
+      with the ref replacement step hijacked.
+
+- Jackalope::REST::Client
+    - write it
+    - set of actions
+        - download schema
+            - download any links schemas
+        - analyze schema for possible steps/entry points
+            - construct URLs for those
+        - then we just tell the object to
+          perform some actions
+            - send message, validate message
+            - get response, validate result
+            - etc.
+    - should be possible to script one of these
+      objects, a Jackalope::REST::Client::Harness
+      of sorts, it could take a JSON state machine
+      as input.
+
+- Jackalope::REST::Service
+    - look into Plack::Middleware::MethodOverride
+    - might want to return 412 Precondition Failed when delete If-Matches fails
+    - Caching options
+        - we should support eTags
+    - Media (binary data)
+        - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#media-link-entries
+
 
 - Jackalope::REST::Resource::Repository
     - not sure I really like having to return NotImplmented in the
@@ -29,19 +77,6 @@
           take advantage of ETags
             - read up on http://en.wikipedia.org/wiki/HTTP_ETag
 
-- Jackalope::REST::Service
-    - look into Plack::Middleware::MethodOverride
-    - might want to return 412 Precondition Failed when delete If-Matches fails
-    - Caching options
-        - we should support eTags
-    - Media (binary data)
-        - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#media-link-entries
-
-- Jackalope::REST::Service::Target::DescribedBy
-    - the described-by relation should probably return a more
-      complete (compiled) schema, and any referenced schemas
-      should have their complete URIs, not just the reference
-
 - ponder spliting things up
     - Jackalope
     - Jackalope::Web::REST
@@ -54,8 +89,8 @@
   to something more sensible, like ...
     - jackalope/core/ref
     - jackalope/core/type/any, etc...
+    - jackalope/core/hypermedia/linkrel
     - jackalope/core/hypermedia/hyperlink
-    - jackalope/core/hypermedia/xlink
     - jackalope/web/rest/resource
     - jackalope/web/rest/service
 
