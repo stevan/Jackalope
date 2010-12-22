@@ -38,7 +38,7 @@ sub to_psgi {
     [
         $self->code,
         [ 'Content-Type' => $serializer->content_type ],
-        [ $serializer->serialize( $self->pack, { canonical => 1 } ) ]
+        [ $serializer->serialize( $self->pack ) ]
     ];
 }
 
