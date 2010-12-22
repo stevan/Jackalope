@@ -7,6 +7,7 @@ our $AUTHORITY = 'cpan:STEVAN';
 with 'Jackalope::REST::Service';
 
 use Jackalope::REST::Router;
+use Jackalope::REST::Error::InternalServerError;
 
 use Try::Tiny;
 use Class::Load 'load_class';
@@ -69,7 +70,7 @@ sub build_router {
 
         my $target_class = $rel_to_target_map{ lc $link->{'rel'} };
 
-        Jackalope::REST::Error::ResourceNotFound->throw(
+        Jackalope::REST::Error::NotImplemented->throw(
             "No target class found for rel (" . $link->{'rel'} . ")"
         ) unless defined $target_class;
 
@@ -107,22 +108,27 @@ sub to_app {
     my $self = shift;
     sub {
         my $env = shift;
-
-        my ($match, $target, $error);
-
-        try   { $match = $self->router->match( $env->{PATH_INFO}, $env->{REQUEST_METHOD} ) }
-        catch { $error = $_ };
-
+        my ($result, $error);
+        try {
+            my $match  = $self->router->match( $env->{PATH_INFO}, $env->{REQUEST_METHOD} );
+            my $target = $self->get_target_for_link( $match->{'link'} );
+            $env->{'jackalope.router.match.mapping'} = $match->{'mapping'};
+            $result = $target->to_app->( $env );
+        } catch {
+            if (blessed $_) {
+                # assume this is one of ours
+                $error = $_;
+            }
+            else {
+                # otherwise wrap it up in one of ours
+                $error = Jackalope::REST::Error::InternalServerError->new(
+                    message => $_
+                );
+            }
+        };
         return $error->to_psgi( $self->serializer ) if $error;
-
-        try   { $target = $self->get_target_for_link( $match->{'link'} ) }
-        catch { $error = $_ };
-
-        return $error->to_psgi( $self->serializer ) if $error;
-
-        $env->{'jackalope.router.match.mapping'} = $match->{'mapping'};
-        return $target->to_app->( $env );
-    }
+        return $result;
+    };
 }
 
 __PACKAGE__->meta->make_immutable;
