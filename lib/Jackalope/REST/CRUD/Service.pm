@@ -51,11 +51,11 @@ sub build_router {
 
 {
     my %REL_TO_TARGET_CLASS = (
-        create      => 'Jackalope::REST::Service::Target::Create',
-        edit        => 'Jackalope::REST::Service::Target::Edit',
-        list        => 'Jackalope::REST::Service::Target::List',
-        read        => 'Jackalope::REST::Service::Target::Read',
-        delete      => 'Jackalope::REST::Service::Target::Delete',
+        create      => 'Jackalope::REST::CRUD::Service::Target::Create',
+        edit        => 'Jackalope::REST::CRUD::Service::Target::Update',
+        list        => 'Jackalope::REST::CRUD::Service::Target::List',
+        read        => 'Jackalope::REST::CRUD::Service::Target::Read',
+        delete      => 'Jackalope::REST::CRUD::Service::Target::Delete',
         describedby => 'Jackalope::REST::Service::Target::DescribedBy',
     );
 

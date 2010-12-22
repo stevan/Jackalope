@@ -1,4 +1,4 @@
-package Jackalope::REST::Service::Target::Edit;
+package Jackalope::REST::CRUD::Service::Target::Read;
 use Moose;
 
 our $VERSION   = '0.01';
@@ -6,15 +6,8 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 with 'Jackalope::REST::CRUD::Service::Target::RepositoryOperation';
 
-sub repository_operation { 'update_resource' }
-sub operation_callback   { [ 202, [], [ $_[1] ] ] }
-
-around 'sanitize_and_prepare_input' => sub {
-    my $next = shift;
-    my $self = shift;
-    my $input = $self->$next( @_ );
-    $self->resource_repository->resource_class->new( $input );
-};
+sub repository_operation { 'get_resource' }
+sub operation_callback   { [ 200, [], [ $_[1] ] ] }
 
 __PACKAGE__->meta->make_immutable;
 
@@ -26,11 +19,11 @@ __END__
 
 =head1 NAME
 
-Jackalope::REST::Service::Target::Edit - A Moosey solution to this problem
+Jackalope::REST::CRUD::Service::Target::Read - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use Jackalope::REST::Service::Target::Edit;
+  use Jackalope::REST::CRUD::Service::Target::Read;
 
 =head1 DESCRIPTION
 

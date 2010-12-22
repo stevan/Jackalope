@@ -1,4 +1,4 @@
-package Jackalope::REST::Service::Target::Delete;
+package Jackalope::REST::CRUD::Service::Target::Delete;
 use Moose;
 
 our $VERSION   = '0.01';
@@ -29,11 +29,11 @@ __END__
 
 =head1 NAME
 
-Jackalope::REST::Service::Target::Delete - A Moosey solution to this problem
+Jackalope::REST::CRUD::Service::Target::Delete - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use Jackalope::REST::Service::Target::Delete;
+  use Jackalope::REST::CRUD::Service::Target::Delete;
 
 =head1 DESCRIPTION
 

@@ -1,4 +1,4 @@
-package Jackalope::REST::Service::Target::Create;
+package Jackalope::REST::CRUD::Service::Target::List;
 use Moose;
 
 our $VERSION   = '0.01';
@@ -6,15 +6,8 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 with 'Jackalope::REST::CRUD::Service::Target::RepositoryOperation';
 
-sub repository_operation { 'create_resource' }
-sub operation_callback {
-    my ($self, $resource) = @_;
-    [
-        201,
-        [ 'Location' => $self->service->generate_read_link_for_resource( $resource ) ],
-        [ $resource ]
-    ]
-}
+sub repository_operation { 'list_resources' }
+sub operation_callback   { [ 200, [], [ $_[1] ] ] }
 
 __PACKAGE__->meta->make_immutable;
 
@@ -26,11 +19,11 @@ __END__
 
 =head1 NAME
 
-Jackalope::REST::Service::Target::Create - A Moosey solution to this problem
+Jackalope::REST::CRUD::Service::Target::List - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use Jackalope::REST::Service::Target::Create;
+  use Jackalope::REST::CRUD::Service::Target::List;
 
 =head1 DESCRIPTION
 
