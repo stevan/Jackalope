@@ -23,7 +23,8 @@ has 'version' => (
     is      => 'ro',
     isa     => 'Str',
     lazy    => 1,
-    builder => 'generate_version'
+    builder => 'generate_version',
+    clearer => 'recalculate_version'
 );
 
 has 'links' => (
