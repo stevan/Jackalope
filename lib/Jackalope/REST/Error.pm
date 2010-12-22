@@ -24,12 +24,21 @@ around 'as_string' => sub {
     $self->code . " " . $self->desc . " : " . $self->message;
 };
 
-sub to_psgi {
+sub pack {
     my $self = shift;
+    {
+        code    => $self->code,
+        desc    => $self->desc,
+        message => $self->message,
+    }
+}
+
+sub to_psgi {
+    my ($self, $serializer) = @_;
     [
         $self->code,
         [],
-        [ $self->as_string ]
+        [ $serializer->serialize( $self->pack, { canonical => 1 } ) ]
     ];
 }
 
