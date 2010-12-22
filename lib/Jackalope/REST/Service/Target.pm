@@ -4,9 +4,10 @@ use Moose::Role;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use Jackalope::REST::Error::BadRequest;
+use Jackalope::REST::Error::BadRequest::ValidationError;
+
 use Plack::Request;
-use Data::Dump;
-use Jackalope::REST::Error::InternalServerError;
 
 has 'service' => (
     is       => 'ro',
@@ -62,15 +63,19 @@ sub check_uri_schema {
         # we can check the mappings against it
         foreach my $key ( keys %{ $self->link->{'uri_schema'} } ) {
             unless (exists $mapping->{ $key }) {
-                Jackalope::REST::Error::InternalServerError->throw(
-                    "Required URI Param $key did not exist"
-                )
-            }
-            my $result = $self->schema_repository->validate( $self->link->{'uri_schema'}->{ $key }, $mapping->{ $key } );
-            if ($result->{'error'}) {
-                Jackalope::REST::Error::InternalServerError->throw(
-                    "URI Params failed to validate against uri_schema because : " . (Data::Dump::dump $result)
+                Jackalope::REST::Error::BadRequest->throw(
+                    "Required URI Param '$key' did not exist"
                 );
+            }
+            my $result = $self->schema_repository->validate(
+                $self->link->{'uri_schema'}->{ $key },
+                $mapping->{ $key }
+            );
+            if ($result->{'error'}) {
+                Jackalope::REST::Error::BadRequest::ValidationError->new(
+                    validation_error => $result,
+                    message          => "URI Params failed to validate against uri_schema"
+                )->throw;
             }
         }
     }
@@ -99,9 +104,10 @@ sub check_data_schema {
         # params against it
         my $result = $self->schema_repository->validate( $self->link->{'data_schema'}, $params );
         if ($result->{'error'}) {
-            Jackalope::REST::Error::InternalServerError->throw(
-                "Params failed to validate against data_schema because : " . (Data::Dump::dump $result)
-            );
+            Jackalope::REST::Error::BadRequest::ValidationError->new(
+                validation_error => $result,
+                message          => "Params failed to validate against data_schema"
+            )->throw;
         }
     }
 
@@ -116,9 +122,10 @@ sub check_target_schema {
         # check the output against the target_schema
         my $result = $self->schema_repository->validate( $self->link->{'target_schema'}, $result );
         if ($result->{'error'}) {
-            Jackalope::REST::Error::InternalServerError->throw(
-                "Output failed to validate against target_schema because : " . (Data::Dump::dump $result)
-            );
+            Jackalope::REST::Error::BadRequest::ValidationError->new(
+                validation_error => $result,
+                message          => "Output failed to validate against target_schema"
+            )->throw;
         }
     }
 }
