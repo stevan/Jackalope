@@ -817,7 +817,15 @@ test_psgi( app => $app, client => sub {
         my $req = GET("http://localhost/cart/1");
         my $res = $cb->($req);
         is($res->code, 404, '... got the right status for creation');
-        like( $res->content, qr/404 Resource Not Found \: no resource for id \(1\)/, '... got the right value for the 404' );
+        is_deeply(
+            $serializer->deserialize( $res->content ),
+            {
+                code    => 404,
+                desc    => 'Resource Not Found',
+                message => 'no resource for id (1)',
+            },
+            '... got the error we expected'
+        );
     }
 });
 

@@ -173,8 +173,22 @@ test_psgi( app => $app, client => sub {
             Authorization => "Basic YWRtaW46czNjcjN0"
         ));
         my $res = $cb->($req);
-        is($res->code, 500, '... got the right status for this exception');
-        like($res->content, qr/Params failed to validate against data_schema/, '... got the error we expected');
+        is($res->code, 400, '... got the right status for this exception');
+        is_deeply(
+            $serializer->deserialize( $res->content ),
+            {
+                code             => 400,
+                desc             => 'Bad Request',
+                message          => 'Params failed to validate against data_schema',
+                validation_error => {
+                    error => '{ first_name: "Stevan", last_name: "Little" } did not pass properties check',
+                    sub_errors => {
+                        error => "property 'age' didn't exist"
+                    }
+                }
+            },
+            '... got the error we expected'
+        );
     }
 
     #diag("Listing resources (expecting one in set)");
@@ -240,6 +254,15 @@ test_psgi( app => $app, client => sub {
         my $req = GET("http://localhost/2");
         my $res = $cb->($req);
         is($res->code, 404, '... got the right status for not found');
+        is_deeply(
+            $serializer->deserialize( $res->content ),
+            {
+                code    => 404,
+                desc    => 'Resource Not Found',
+                message => 'no resource for id (2)',
+            },
+            '... got the error we expected'
+        );
     }
 
     #diag("PUTing updates to the resource we just posted");
@@ -280,8 +303,22 @@ test_psgi( app => $app, client => sub {
             Authorization => "Basic YWRtaW46czNjcjN0"
         ));
         my $res = $cb->($req);
-        is($res->code, 500, '... got the right status for this exception');
-        like($res->content, qr/Params failed to validate against data_schema/, '... got the error we expected');
+        is($res->code, 400, '... got the right status for this exception');
+        is_deeply(
+            $serializer->deserialize( $res->content ),
+            {
+                code             => 400,
+                desc             => 'Bad Request',
+                message          => 'Params failed to validate against data_schema',
+                validation_error => {
+                    error => '{ body: { age: 38, first_name: "Stevan", last_name: "Little" }, id: 1, versi: "fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2" } did not pass properties check',
+                    sub_errors => {
+                        error => "property 'version' didn't exist"
+                    }
+                }
+            },
+            '... got the error we expected'
+        );
     }
     {
         my $req = PUT("http://localhost/2/" => (
@@ -290,7 +327,15 @@ test_psgi( app => $app, client => sub {
         ));
         my $res = $cb->($req);
         is($res->code, 400, '... got the right status for this exception');
-        like($res->content, qr/the id does not match the id of the updated resource/, '... got the error we expected');
+        is_deeply(
+            $serializer->deserialize( $res->content ),
+            {
+                code    => 400,
+                desc    => 'Bad Request',
+                message => 'the id does not match the id of the updated resource'
+            },
+            '... got the error we expected'
+        );
     }
     {
         my $req = PUT("http://localhost/2" => (
@@ -299,6 +344,15 @@ test_psgi( app => $app, client => sub {
         ));
         my $res = $cb->($req);
         is($res->code, 404, '... got the right status for not found');
+        is_deeply(
+            $serializer->deserialize( $res->content ),
+            {
+                code    => 404,
+                desc    => 'Resource Not Found',
+                message => 'no resource for id (2)',
+            },
+            '... got the error we expected'
+        );
     }
     {
         my $req = PUT("http://localhost/1" => (
@@ -307,7 +361,15 @@ test_psgi( app => $app, client => sub {
         ));
         my $res = $cb->($req);
         is($res->code, 409, '... got the right status for this exception');
-        like($res->content, qr/resource submitted has out of date version/, '... got the error we expected');
+        is_deeply(
+            $serializer->deserialize( $res->content ),
+            {
+                code    => 409,
+                desc    => 'Conflict Detected',
+                message => 'resource submitted has out of date version',
+            },
+            '... got the error we expected'
+        );
     }
     {
         my $req = PUT("http://localhost/1/" => (
@@ -364,7 +426,15 @@ test_psgi( app => $app, client => sub {
         ));
         my $res = $cb->($req);
         is($res->code, 409, '... got the right status for this exception');
-        like($res->content, qr/resource submitted has out of date version/, '... got the error we expected');
+        is_deeply(
+            $serializer->deserialize( $res->content ),
+            {
+                code    => 409,
+                desc    => 'Conflict Detected',
+                message => 'resource submitted has out of date version',
+            },
+            '... got the error we expected'
+        );
     }
     {
         my $req = DELETE("http://localhost/1" => (
