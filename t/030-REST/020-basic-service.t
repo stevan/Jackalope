@@ -77,7 +77,7 @@ my $serializer = $c->resolve(
 test_psgi( app => $app, client => sub {
     my $cb = shift;
 
-    diag("Listing resources (expecting empty set)");
+    #diag("Listing resources (expecting empty set)");
     {
         my $req = GET("http://localhost/");
         my $res = $cb->($req);
@@ -89,7 +89,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("POSTing resource");
+    #diag("POSTing resource");
     {
         my $req = POST("http://localhost/" => (
             Content => '{"first_name":"Stevan","last_name":"Little","age":37}'
@@ -120,7 +120,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("Error check");
+    #diag("Error check");
     {
         my $req = POST("http://localhost/" => (
             Content => '{"first_name":"Stevan","last_name":"Little"}'
@@ -130,7 +130,7 @@ test_psgi( app => $app, client => sub {
         like($res->content, qr/Params failed to validate against data_schema/, '... got the error we expected');
     }
 
-    diag("Listing resources (expecting one in set)");
+    #diag("Listing resources (expecting one in set)");
     {
         my $req = GET("http://localhost/");
         my $res = $cb->($req);
@@ -160,7 +160,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("GETing resource we just posted");
+    #diag("GETing resource we just posted");
     {
         my $req = GET("http://localhost/1");
         my $res = $cb->($req);
@@ -188,14 +188,14 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("Error check");
+    #diag("Error check");
     {
         my $req = GET("http://localhost/2");
         my $res = $cb->($req);
         is($res->code, 404, '... got the right status for not found');
     }
 
-    diag("PUTing updates to the resource we just posted");
+    #diag("PUTing updates to the resource we just posted");
     {
         my $req = PUT("http://localhost/1" => (
             Content => '{"id":"1","version":"fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2","body":{"first_name":"Stevan","last_name":"Little","age":38}}'
@@ -225,7 +225,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("Error check");
+    #diag("Error check");
     {
         my $req = PUT("http://localhost/1" => (
             Content => '{"id":"1","versi":"fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2","body":{"first_name":"Stevan","last_name":"Little","age":38}}'
@@ -259,7 +259,7 @@ test_psgi( app => $app, client => sub {
     }
 
 
-    diag("GETing resource we just updated");
+    #diag("GETing resource we just updated");
     {
         my $req = GET("http://localhost/1" );
         my $res = $cb->($req);
@@ -287,7 +287,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("Errors");
+    #diag("Errors");
     {
         my $req = DELETE("http://localhost/1" => (
             'If-Matches' => '9d4a75302bb63df050d6b838b050b978bea1460d5879618e8e3ae8c291247f'
@@ -297,7 +297,7 @@ test_psgi( app => $app, client => sub {
         like($res->content, qr/resource submitted has out of date version/, '... got the error we expected');
     }
 
-    diag("DELETEing resource we just updated (with conditional match)");
+    #diag("DELETEing resource we just updated (with conditional match)");
     {
         my $req = DELETE("http://localhost/1" => (
             'If-Matches' => '9d4a75302bb634edf050d6b838b050b978bea1460d5879618e8e3ae8c291247f'
@@ -307,7 +307,7 @@ test_psgi( app => $app, client => sub {
         is_deeply( $res->content, '', '... got the right value for delete' );
     }
 
-    diag("Listing resources (expecting empty set)");
+    #diag("Listing resources (expecting empty set)");
     {
         my $req = GET( "http://localhost/");
         my $res = $cb->($req);
@@ -319,7 +319,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("POSTing resource");
+    #diag("POSTing resource");
     {
         my $req = POST("http://localhost/" => (
             Content => '{"first_name":"Stevan","last_name":"Little","age":37}'
@@ -350,7 +350,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("DELETEing resource we just updated (without conditional match)");
+    #diag("DELETEing resource we just updated (without conditional match)");
     {
         my $req = DELETE("http://localhost/2");
         my $res = $cb->($req);
@@ -358,7 +358,7 @@ test_psgi( app => $app, client => sub {
         is_deeply( $res->content, '', '... got the right value for delete' );
     }
 
-    diag("Listing resources (expecting empty set)");
+    #diag("Listing resources (expecting empty set)");
     {
         my $req = GET( "http://localhost/");
         my $res = $cb->($req);
@@ -370,7 +370,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("Calling the DescribedBy");
+    #diag("Calling the DescribedBy");
     {
         my $req = GET( "http://localhost/schema");
         my $res = $cb->($req);
@@ -391,7 +391,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("Errors");
+    #diag("Errors");
     {
         my $req = POST("http://localhost/schema");
         my $res = $cb->($req);

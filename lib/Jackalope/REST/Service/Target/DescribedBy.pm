@@ -4,17 +4,14 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use Try::Tiny;
-
 with 'Jackalope::REST::Service::Target';
 
 sub execute {
     my ($self, $r, @args) = @_;
-
     return $self->process_psgi_output([
         200,
         [],
-        [ $self->serializer->serialize( $self->service->schema ) ]
+        [ $self->service->schema ]
     ]);
 }
 

@@ -4,17 +4,16 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-with 'Jackalope::REST::Service::Target';
+with 'Jackalope::REST::CRUD::Service::Target::RepositoryOperation';
 
-sub execute {
-    my ($self, $r, @args) = @_;
-    my ($resource, $error) = $self->process_operation( 'create_resource' => ( $r, @args ) );
-    return $error if $error;
-    return $self->process_psgi_output([
+sub repository_operation { 'create_resource' }
+sub operation_callback {
+    my ($self, $resource) = @_;
+    [
         201,
         [ 'Location' => $self->service->generate_read_link_for_resource( $resource ) ],
         [ $resource ]
-    ]);
+    ]
 }
 
 __PACKAGE__->meta->make_immutable;

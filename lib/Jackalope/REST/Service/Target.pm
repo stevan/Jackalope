@@ -4,7 +4,6 @@ use Moose::Role;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use Try::Tiny;
 use Plack::Request;
 use Data::Dump;
 use Jackalope::REST::Error::InternalServerError;
@@ -27,83 +26,32 @@ has 'link' => (
     required => 1
 );
 
-sub throw_server_error {
+requires 'execute';
+
+sub to_app {
     my $self = shift;
-    Jackalope::REST::Error::InternalServerError->throw( @_ )
-}
-
-sub process_operation {
-    my ($self, $operation, $r, @args) = @_;
-
-    my ($result, $error);
-    try {
-        my $params = $self->sanitize_and_prepare_input( $r );
-        $result = $self->call_repository_operation( $operation => ( @args, $params ) );
-        $self->verify_and_prepare_output( $result );
-    } catch {
-        $error = $_;
-    };
-
-    if ( $error ) {
-        if ( $error->isa('Jackalope::REST::Error') ) {
-            $error = $error->to_psgi;
-        }
-        else {
-            $error = [ 500, [], [ "Unknown Server Error : $error" ]]
-        }
+    return sub {
+        my $env = shift;
+        $self->execute(
+            Plack::Request->new( $env ),
+            map { values %{ $_ } } @{ $env->{'jackalope.router.match.mapping'} }
+        );
     }
-
-    return ($result, $error);
 }
 
-sub sanitize_and_prepare_input {
-    my ($self, $r ) = @_;
-    $self->check_uri_schema( $r );
-    $self->check_data_schema( $r );
-}
-
-sub verify_and_prepare_output {
-    my ($self, $result) = @_;
-
-    if (ref $result eq 'ARRAY') {
-        foreach my $resource ( @$result) {
-            $self->service->generate_links_for_resource( $resource );
-        }
-        $self->check_target_schema( [ map { $_->pack } @$result ] );
-    }
-    elsif (blessed $result) {
-        $self->service->generate_links_for_resource( $result );
-        $self->check_target_schema( $result->pack );
-    }
-
-    $result;
-}
-
-# TODO:
-# need to make this also support ETags
-# - SL
 sub process_psgi_output {
     my ($self, $psgi) = @_;
-    if ( scalar @{ $psgi->[2] } ) {
 
-        push @{ $psgi->[1] } => ('Content-Type' => $self->serializer->content_type);
+    return $psgi unless scalar @{ $psgi->[2] };
 
-        if (ref $psgi->[2]->[0] eq 'ARRAY') {
-            # an array of resources
-            $psgi->[2]->[0] = $self->serializer->serialize( [ map { $_->pack } @{ $psgi->[2]->[0] } ] );
-        }
-        elsif (blessed $psgi->[2]->[0]) {
-            # a resource
-            $psgi->[2]->[0] = $self->serializer->serialize( $psgi->[2]->[0]->pack );
-        }
-        else {
-            # just leave it alone ...
-        }
-    }
+    push @{ $psgi->[1] } => ('Content-Type' => $self->serializer->content_type);
+
+    $psgi->[2]->[0] = $self->serializer->serialize( $psgi->[2]->[0] );
+
     $psgi;
 }
 
-# ...
+## Schema Checking
 
 sub check_uri_schema {
     my ($self, $r) = @_;
@@ -114,11 +62,15 @@ sub check_uri_schema {
         # we can check the mappings against it
         foreach my $key ( keys %{ $self->link->{'uri_schema'} } ) {
             unless (exists $mapping->{ $key }) {
-                $self->throw_server_error("Required URI Param $key did not exist")
+                Jackalope::REST::Error::InternalServerError->throw(
+                    "Required URI Param $key did not exist"
+                )
             }
             my $result = $self->schema_repository->validate( $self->link->{'uri_schema'}->{ $key }, $mapping->{ $key } );
             if ($result->{'error'}) {
-                $self->throw_server_error("URI Params failed to validate against uri_schema because : " . (Data::Dump::dump $result));
+                Jackalope::REST::Error::InternalServerError->throw(
+                    "URI Params failed to validate against uri_schema because : " . (Data::Dump::dump $result)
+                );
             }
         }
     }
@@ -147,32 +99,13 @@ sub check_data_schema {
         # params against it
         my $result = $self->schema_repository->validate( $self->link->{'data_schema'}, $params );
         if ($result->{'error'}) {
-            $self->throw_server_error("Params failed to validate against data_schema because : " . (Data::Dump::dump $result));
+            Jackalope::REST::Error::InternalServerError->throw(
+                "Params failed to validate against data_schema because : " . (Data::Dump::dump $result)
+            );
         }
     }
 
     return $params;
-}
-
-sub call_repository_operation {
-    my ($self, $operation, @args) = @_;
-    my $error;
-    my $result = try {
-        $self->resource_repository->$operation( @args );
-    } catch {
-        $error = $_;
-    };
-
-    if ( $error ) {
-        if ( $error->isa('Jackalope::REST::Error') ) {
-            die $error;
-        }
-        else {
-            $self->throw_server_error("repository operation ($operation) failed, because $error")
-        }
-    }
-
-    return $result;
 }
 
 sub check_target_schema {
@@ -183,23 +116,13 @@ sub check_target_schema {
         # check the output against the target_schema
         my $result = $self->schema_repository->validate( $self->link->{'target_schema'}, $result );
         if ($result->{'error'}) {
-            $self->throw_server_error("Output failed to validate against target_schema because : " . (Data::Dump::dump $result));
+            Jackalope::REST::Error::InternalServerError->throw(
+                "Output failed to validate against target_schema because : " . (Data::Dump::dump $result)
+            );
         }
     }
 }
 
-requires 'execute';
-
-sub to_app {
-    my $self = shift;
-    return sub {
-        my $env = shift;
-        $self->execute(
-            Plack::Request->new( $env ),
-            map { values %{ $_ } } @{ $env->{'jackalope.router.match.mapping'} }
-        );
-    }
-}
 
 no Moose::Role; 1;
 

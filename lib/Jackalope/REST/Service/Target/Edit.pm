@@ -4,14 +4,10 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-with 'Jackalope::REST::Service::Target';
+with 'Jackalope::REST::CRUD::Service::Target::RepositoryOperation';
 
-sub execute {
-    my ($self, $r, @args) = @_;
-    my ($resource, $error) = $self->process_operation( 'update_resource' => ( $r, @args ) );
-    return $error if $error;
-    return $self->process_psgi_output([ 202, [], [ $resource ] ]);
-}
+sub repository_operation { 'update_resource' }
+sub operation_callback   { [ 202, [], [ $_[1] ] ] }
 
 around 'sanitize_and_prepare_input' => sub {
     my $next = shift;

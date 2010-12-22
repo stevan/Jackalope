@@ -4,14 +4,10 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-with 'Jackalope::REST::Service::Target';
+with 'Jackalope::REST::CRUD::Service::Target::RepositoryOperation';
 
-sub execute {
-    my ($self, $r, @args) = @_;
-    my ($resource, $error) = $self->process_operation( 'get_resource' => ( $r, @args ) );
-    return $error if $error;
-    return $self->process_psgi_output([ 200, [], [ $resource ] ]);
-}
+sub repository_operation { 'get_resource' }
+sub operation_callback   { [ 200, [], [ $_[1] ] ] }
 
 __PACKAGE__->meta->make_immutable;
 

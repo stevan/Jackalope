@@ -98,14 +98,10 @@ use Jackalope::REST::Resource::Repository::Simple;
     our $VERSION   = '0.01';
     our $AUTHORITY = 'cpan:STEVAN';
 
-    with 'Jackalope::REST::Service::Target';
+    with 'Jackalope::REST::CRUD::Service::Target::RepositoryOperation';
 
-    sub execute {
-        my ($self, $r, @args) = @_;
-        my ($resource, $error) = $self->process_operation( 'add_item' => ( $r, @args ) );
-        return $error if $error;
-        return $self->process_psgi_output([ 202, [], [ $resource ] ]);
-    }
+    sub repository_operation { 'add_item' }
+    sub operation_callback { [ 202, [], [ $_[1] ] ] }
 }
 
 {
@@ -115,14 +111,10 @@ use Jackalope::REST::Resource::Repository::Simple;
     our $VERSION   = '0.01';
     our $AUTHORITY = 'cpan:STEVAN';
 
-    with 'Jackalope::REST::Service::Target';
+    with 'Jackalope::REST::CRUD::Service::Target::RepositoryOperation';
 
-    sub execute {
-        my ($self, $r, @args) = @_;
-        my ($resource, $error) = $self->process_operation( 'remove_item' => ( $r, @args ) );
-        return $error if $error;
-        return $self->process_psgi_output([ 202, [], [ $resource ] ]);
-    }
+    sub repository_operation { 'remove_item' }
+    sub operation_callback { [ 202, [], [ $_[1] ] ] }
 }
 
 my $j = Jackalope::REST->new;
@@ -142,7 +134,7 @@ my $c = container $j => as {
     service 'ProductService' => (
         lifecycle    => 'Singleton',
         class        => 'Jackalope::REST::CRUD::Service',
-        parameters   => { base_href => { isa => 'Str', optional => 1 } },
+        parameters   => { uri_base => { isa => 'Str', optional => 1 } },
         dependencies => {
             schema_repository   => 'type:Jackalope::Schema::Repository',
             resource_repository => 'type:Jackalope::REST::Resource::Repository::Simple',
@@ -166,7 +158,7 @@ my $c = container $j => as {
     service 'UserService' => (
         lifecycle    => 'Singleton',
         class        => 'Jackalope::REST::CRUD::Service',
-        parameters   => { base_href => { isa => 'Str', optional => 1 } },
+        parameters   => { uri_base => { isa => 'Str', optional => 1 } },
         dependencies => {
             schema_repository   => 'type:Jackalope::Schema::Repository',
             resource_repository => 'type:Jackalope::REST::Resource::Repository::Simple',
@@ -305,7 +297,7 @@ my $c = container $j => as {
     service 'ShoppingCartService' => (
         lifecycle    => 'Singleton',
         class        => 'Jackalope::REST::CRUD::Service',
-        parameters   => { base_href => { isa => 'Str', optional => 1 } },
+        parameters   => { uri_base => { isa => 'Str', optional => 1 } },
         dependencies => {
             schema_repository   => 'type:Jackalope::Schema::Repository',
             resource_repository => 'MyShoppingCartRepo',
@@ -321,14 +313,18 @@ my $c = container $j => as {
 
 };
 
-my $product_service = $c->resolve( service => 'ProductService',      parameters => { base_href => '/product' });
-my $user_service    = $c->resolve( service => 'UserService',         parameters => { base_href => '/user'    });
-my $cart_service    = $c->resolve( service => 'ShoppingCartService', parameters => { base_href => '/cart'    });
+my $product_service = $c->resolve( service => 'ProductService',      parameters => { uri_base => '/product' });
+my $user_service    = $c->resolve( service => 'UserService',         parameters => { uri_base => '/user'    });
+my $cart_service    = $c->resolve( service => 'ShoppingCartService', parameters => { uri_base => '/cart'    });
 
-my $app = Plack::App::Cascade->new;
-$app->add( $product_service->to_app );
-$app->add( $user_service->to_app );
-$app->add( $cart_service->to_app );
+use Jackalope::REST::Service::Directory;
+my $app = Jackalope::REST::Service::Directory->new(
+    services => [
+        $product_service,
+        $user_service,
+        $cart_service,
+    ]
+)->to_app;
 
 my $serializer = $c->resolve(
     service    => 'Jackalope::Serializer',
@@ -338,7 +334,7 @@ my $serializer = $c->resolve(
 test_psgi( app => $app, client => sub {
     my $cb = shift;
 
-    diag("POST-ing user");
+    #diag("POST-ing user");
     {
         my $req = POST("http://localhost/user/" => (
             Content => '{"username":"stevan"}'
@@ -367,7 +363,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("GET-ing user");
+    #diag("GET-ing user");
     {
         my $req = GET("http://localhost/user/1");
         my $res = $cb->($req);
@@ -393,7 +389,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("POST-ing product");
+    #diag("POST-ing product");
     {
         my $req = POST("http://localhost/product/" => (
             Content => '{"sku":"123456","desc":"disco-ball"}'
@@ -423,7 +419,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("POST-ing product");
+    #diag("POST-ing product");
     {
         my $req = POST("http://localhost/product/" => (
             Content => '{"sku":"227272","desc":"dancin-shoes"}'
@@ -453,7 +449,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("POST-ing product");
+    #diag("POST-ing product");
     {
         my $req = POST("http://localhost/product/" => (
             Content => '{"sku":"3838372","desc":"polyester-suit"}'
@@ -483,7 +479,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("POST-ing cart");
+    #diag("POST-ing cart");
     {
         my $req = POST("http://localhost/cart/" => (
             Content => $serializer->serialize({
@@ -565,7 +561,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("GET-ing cart");
+    #diag("GET-ing cart");
     {
         my $req = GET("http://localhost/cart/1");
         my $res = $cb->($req);
@@ -638,7 +634,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("PUT-ing a new item");
+    #diag("PUT-ing a new item");
     {
         my $req = PUT("http://localhost/cart/1/add_item" => (
             Content => '{"$id":"3","type_of":"test/product"}'
@@ -729,7 +725,7 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    diag("PUT-ing to delete the new item from cart");
+    #diag("PUT-ing to delete the new item from cart");
     {
         my $req = PUT("http://localhost/cart/1/remove_item" => (
             Content => '{"$id":"3","type_of":"test/product"}'
@@ -806,7 +802,7 @@ test_psgi( app => $app, client => sub {
     }
 
 
-    diag("DELETE-ing cart (with conditional match)");
+    #diag("DELETE-ing cart (with conditional match)");
     {
         my $req = DELETE("http://localhost/cart/1/" => (
             'If-Matches' => '92a761d69048f90f95b31d40e9141c3b9213012fb76a0b69dbcf8f51be07b0ea'
@@ -816,7 +812,7 @@ test_psgi( app => $app, client => sub {
         is( $res->content, '', '... got the right value for delete' );
     }
 
-    diag("GET-ing cart (but get 404 because we deleted it)");
+    #diag("GET-ing cart (but get 404 because we deleted it)");
     {
         my $req = GET("http://localhost/cart/1");
         my $res = $cb->($req);
