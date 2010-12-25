@@ -105,6 +105,21 @@ sub register_schema {
     return $compiled_schema->{'compiled'};
 }
 
+sub register_schemas {
+    my ($self, $schemas) = @_;
+    (exists $_->{id})
+        || confess "Can only register schemas that have an 'id'"
+            foreach @$schemas;
+
+    my $schema_map = $self->_compile_schemas( @$schemas );
+    return [
+        map {
+            $self->_insert_compiled_schema( $_ );
+            $_->{'compiled'};
+        } values %$schema_map
+    ];
+}
+
 # ...
 
 sub _validate_schema {
@@ -164,11 +179,12 @@ sub _compile_schema {
     return $schema;
 }
 
-sub _compile_core_schemas {
-    my $self = shift;
+sub _compile_schemas {
+    my $self    = shift;
+    my @schemas = map {
+        $self->_prepare_schema_for_compiling( $_ )
+    } @_;
 
-    my $spec       = $self->spec->get_spec;
-    my @schemas    = map { $self->_prepare_schema_for_compiling( $_ ) } values %{ $spec->{'schema_map'} };
     my $schema_map = $self->_generate_schema_map( @schemas );
 
     foreach my $schema ( @schemas ) {
@@ -188,6 +204,11 @@ sub _compile_core_schemas {
     }
 
     return $schema_map;
+}
+
+sub _compile_core_schemas {
+    my $self = shift;
+    $self->_compile_schemas( values %{ $self->spec->get_spec->{'schema_map'} } );
 }
 
 sub _prepare_schema_for_compiling {
