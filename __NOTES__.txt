@@ -1,6 +1,15 @@
 
 = TODOS =
 
+- we should be doing content-length stuff everywhere too
+- perhaps centralize all the content-type handling too
+- perhaps put all this plack fiddling into Jackalope::Util (or Jackalope::REST::Util)
+
+- Jackalope::REST::Service
+    - this should check the result in to_app to
+      look for errors and wrap them up in our
+      exception objects accordingly
+
 - Jackalope::REST::Service::Directory
     - this could also encapsulate a media-type of some kind
       because it would have multiple schemas in it
