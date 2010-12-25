@@ -10,8 +10,8 @@ use Jackalope::REST::Error::ResourceNotFound;
 use File::Spec::Unix;
 
 has 'uri_base' => ( is => 'ro', isa => 'Str',     default => '' );
-has 'schema'    => ( is => 'ro', isa => 'HashRef', required => 1 );
-has 'routes'    => (
+has 'linkrels' => ( is => 'ro', isa => 'HashRef', required => 1 );
+has 'routes'   => (
     is      => 'ro',
     isa     => 'HashRef',
     lazy    => 1,
@@ -19,8 +19,7 @@ has 'routes'    => (
 );
 
 sub build_routes {
-    my $self   = shift;
-    my $schema = $self->schema;
+    my $self  = shift;
 
     # NOTE:
     # construct a data structure where matching HREF values
@@ -30,7 +29,7 @@ sub build_routes {
     # - SL
 
     my %routes;
-    foreach my $link ( values %{ $schema->{'links'} } ) {
+    foreach my $link ( values %{ $self->linkrels } ) {
         my $href = $self->uri_base . $link->{'href'};
         if ( not exists $routes{ $href } ) {
             $routes{ $href } = {
@@ -130,7 +129,7 @@ sub match {
 sub uri_for {
     my ($self, $linkrel, $mapping) = @_;
 
-    my $link = $self->schema->{'links'}->{ $linkrel };
+    my $link = $self->linkrels->{ $linkrel };
 
     (defined $link)
         || confess "Could not find link for $linkrel";

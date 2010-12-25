@@ -14,14 +14,11 @@ BEGIN {
 
 {
     my $router = Jackalope::REST::Router->new(
-        schema => {
-            type => "object",
-            links => {
-                create => {
-                    rel    => 'create',
-                    href   => '/',
-                    method => 'POST',
-                }
+        linkrels => {
+            create => {
+                rel    => 'create',
+                href   => '/',
+                method => 'POST',
             }
         }
     );
@@ -51,14 +48,11 @@ BEGIN {
 
 {
     my $router = Jackalope::REST::Router->new(
-        schema => {
-            type => "object",
-            links => {
-                read => {
-                    rel    => 'read',
-                    href   => '/:id',
-                    method => 'GET',
-                }
+        linkrels => {
+            read => {
+                rel    => 'read',
+                href   => '/:id',
+                method => 'GET',
             }
         }
     );
@@ -88,14 +82,11 @@ BEGIN {
 
 {
     my $router = Jackalope::REST::Router->new(
-        schema => {
-            type => "object",
-            links => {
-                delete_item => {
-                    rel    => 'delete_item',
-                    href   => '/:id/item/:item_id',
-                    method => 'PUT',
-                }
+        linkrels => {
+            delete_item => {
+                rel    => 'delete_item',
+                href   => '/:id/item/:item_id',
+                method => 'PUT',
             }
         }
     );
@@ -131,29 +122,26 @@ BEGIN {
 
 {
     my $router = Jackalope::REST::Router->new(
-        schema => {
-            type => "object",
-            links => {
-                create => {
-                    rel    => 'create',
-                    href   => '/',
-                    method => 'POST',
-                },
-                list => {
-                    rel    => 'list',
-                    href   => '/',
-                    method => 'GET',
-                },
-                read => {
-                    rel    => 'read',
-                    href   => '/:id',
-                    method => 'GET',
-                },
-                edit => {
-                    rel    => 'edit',
-                    href   => '/:id',
-                    method => 'PUT',
-                }
+        linkrels => {
+            create => {
+                rel    => 'create',
+                href   => '/',
+                method => 'POST',
+            },
+            list => {
+                rel    => 'list',
+                href   => '/',
+                method => 'GET',
+            },
+            read => {
+                rel    => 'read',
+                href   => '/:id',
+                method => 'GET',
+            },
+            edit => {
+                rel    => 'edit',
+                href   => '/:id',
+                method => 'PUT',
             }
         }
     );
@@ -229,29 +217,26 @@ BEGIN {
 {
     my $router = Jackalope::REST::Router->new(
         uri_base => '/test',
-        schema    => {
-            type => "object",
-            links => {
-                create => {
-                    rel    => 'create',
-                    href   => '/',
-                    method => 'POST',
-                },
-                list => {
-                    rel    => 'list',
-                    href   => '/',
-                    method => 'GET',
-                },
-                read => {
-                    rel    => 'read',
-                    href   => '/:id',
-                    method => 'GET',
-                },
-                edit => {
-                    rel    => 'edit',
-                    href   => '/:id',
-                    method => 'PUT',
-                }
+        linkrels => {
+            create => {
+                rel    => 'create',
+                href   => '/',
+                method => 'POST',
+            },
+            list => {
+                rel    => 'list',
+                href   => '/',
+                method => 'GET',
+            },
+            read => {
+                rel    => 'read',
+                href   => '/:id',
+                method => 'GET',
+            },
+            edit => {
+                rel    => 'edit',
+                href   => '/:id',
+                method => 'PUT',
             }
         }
     );
@@ -327,29 +312,26 @@ BEGIN {
 {
     my $router = Jackalope::REST::Router->new(
         uri_base => 'test/foo',
-        schema    => {
-            type => "object",
-            links => {
-                create => {
-                    rel    => 'create',
-                    href   => '/',
-                    method => 'POST',
-                },
-                list => {
-                    rel    => 'list',
-                    href   => '/',
-                    method => 'GET',
-                },
-                read => {
-                    rel    => 'read',
-                    href   => '/:id',
-                    method => 'GET',
-                },
-                edit => {
-                    rel    => 'edit',
-                    href   => '/:id',
-                    method => 'PUT',
-                }
+        linkrels => {
+            create => {
+                rel    => 'create',
+                href   => '/',
+                method => 'POST',
+            },
+            list => {
+                rel    => 'list',
+                href   => '/',
+                method => 'GET',
+            },
+            read => {
+                rel    => 'read',
+                href   => '/:id',
+                method => 'GET',
+            },
+            edit => {
+                rel    => 'edit',
+                href   => '/:id',
+                method => 'PUT',
             }
         }
     );

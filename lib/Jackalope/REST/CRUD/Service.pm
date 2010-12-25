@@ -46,7 +46,7 @@ sub build_router {
     my $self = shift;
     Jackalope::REST::Router->new(
         uri_base => $self->uri_base,
-        schema    => $self->compiled_schema
+        linkrels => $self->compiled_schema->{'links'}
     );
 }
 
