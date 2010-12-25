@@ -107,7 +107,7 @@ var examples = {
         instructions : 'This will retrieve a list of people objects that have been created so far.'
     },
     'create' : {
-        url     : 'people/create',
+        url     : 'people/',
         method  : 'POST',
         content : {
             first_name : 'stevan',
@@ -122,7 +122,7 @@ var examples = {
         instructions : '<p>This will fetch a person object based on the ID in the url.</p><p>Try changing the ID to something invalid to see a 404 Not Found error.</p>'
     },
     'edit'   : {
-        url     : 'people/1/edit',
+        url     : 'people/1',
         method  : 'PUT',
         content : {
             id      : '1',
@@ -136,7 +136,7 @@ var examples = {
         instructions : '<p>This will edit a person object based on the ID in the url. You must have a valid "version" string (in the content JSON) from the existing person object otherwise a 409 Conflict error will happen.</p><p>If you change the ID in the URL or the content, a 400 Bad Request error will happen. Note the 202 Accepted in the response.</p>'
     },
     'delete' : {
-        url     : 'people/1/delete',
+        url     : 'people/1',
         method  : 'DELETE',
         headers : {
             'If-Matches' : '<insert a version here>'

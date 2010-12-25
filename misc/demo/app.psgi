@@ -3,18 +3,15 @@
 use strict;
 use warnings;
 
-use lib '/Users/stevan/Projects/CPAN/current/Bread-Board/lib',
-        '/Users/stevan/Projects/CPAN/current/Plack-App-Path-Router/lib';
+use lib '/Users/stevan/Projects/CPAN/current/Bread-Board/lib';
 
 use Bread::Board;
-use Path::Router;
 use Jackalope::REST;
 use Jackalope::REST::Resource::Repository::Simple;
 
 use Plack;
 use Plack::Request;
 use Plack::Builder;
-use Plack::App::Path::Router::PSGI;
 
 my $j = Jackalope::REST->new;
 my $c = container $j => as {
@@ -34,6 +31,7 @@ my $c = container $j => as {
 
     service 'MyService' => (
         class        => 'Jackalope::REST::CRUD::Service',
+        parameters   => { uri_base => { isa => 'Str', optional => 1 } },
         dependencies => {
             schema_repository   => 'type:Jackalope::Schema::Repository',
             resource_repository => 'type:Jackalope::REST::Resource::Repository::Simple',
@@ -47,46 +45,43 @@ my $c = container $j => as {
     );
 };
 
-my $service = $c->resolve( service => 'MyService' );
-my $router  = Path::Router->new;
-$router->add_route( '/' => (
-    target => sub {
-        [ 302, [ 'Location' => 'static/index.html' ], []]
-    }
-));
-$router->add_route( 'schemas/core/' => (
-    target => sub {
-        my $r = Plack::Request->new( shift );
-
-        my $schema_name = $r->param('schema');
-        my $serializer  = $service->serializer;
-        my $schema      = Data::Visitor::Callback->new(
-            hash => sub {
-                my ($v, $data) = @_;
-                if (exists $data->{'description'} && not ref $data->{'description'}) {
-                    delete $data->{'description'};
-                }
-                return $data;
-            }
-        )->visit( $service->schema_repository->spec->$schema_name );
-
-        [
-            200,
-            [ 'Content-Type' => $serializer->content_type ],
-            [ $serializer->serialize( $schema, { pretty => 1, canonical => 1 } ) ]
-        ];
-    }
-));
-$router->include_router( 'people/' => $service->router );
-$service->update_router( $router );
-
-my $app = Plack::App::Path::Router::PSGI->new( router => $router );
+my $service = $c->resolve( service => 'MyService', parameters => { uri_base => '/people' } );
 
 builder {
     enable "Plack::Middleware::Static" => (
         path => sub { s!^/static/!! },
         root => './htdocs/'
     );
-    $app;
+    sub {
+        my $r = Plack::Request->new( shift );
+        if ( $r->path eq '/' ) {
+            return [ 302, [ 'Location' => 'static/index.html' ], []];
+        }
+        if ( $r->path eq '/favicon.ico' ) {
+            return [ 200, [], []];
+        }
+        elsif ( $r->path eq '/schemas/core/' ) {
+            my $schema_name = $r->param('schema');
+            my $serializer  = $service->serializer;
+            my $schema      = Data::Visitor::Callback->new(
+                hash => sub {
+                    my ($v, $data) = @_;
+                    if (exists $data->{'description'} && not ref $data->{'description'}) {
+                        delete $data->{'description'};
+                    }
+                    return $data;
+                }
+            )->visit( $service->schema_repository->spec->$schema_name );
+
+            return [
+                200,
+                [ 'Content-Type' => $serializer->content_type ],
+                [ $serializer->serialize( $schema, { pretty => 1, canonical => 1 } ) ]
+            ];
+        }
+        else {
+            $service->to_app->( $r->env );
+        }
+    };
 };
 
