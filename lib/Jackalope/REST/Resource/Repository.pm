@@ -128,11 +128,34 @@ Jackalope::REST::Resource::Repository - A Moosey solution to this problem
 
 =head1 DESCRIPTION
 
+This is a role that, when consumed, requires that you implement the
+following set of methods, implementing the following type signatures.
+
+  list    : () => Array of [ Id, Data ]
+  create  : (Data) => Id
+  get     : (Id) => Data
+  update  : (Id, Data) => Data
+  delete  : (Id) => ()
+
+The role will then wrap these things up in a L<Jackalope::REST::Resource>
+accordingly and respond to the methods listed below.
+
+=head2 TESTABILITY
+
+One nice side effect of this approach is that since this is the only
+code you write, it is also really the only code you need to test.
+So you can focus purely on this knowing that the wrapped *_resource
+versions of these methods should work fine.
+
 =head1 METHODS
 
 =over 4
 
-=item B<>
+=item B<list_resource>
+=item B<create_resource>
+=item B<get_resource>
+=item B<update_resource>
+=item B<delete_resource>
 
 =back
 
