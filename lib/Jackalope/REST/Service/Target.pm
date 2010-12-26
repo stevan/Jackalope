@@ -11,13 +11,11 @@ use Plack::Request;
 
 has 'service' => (
     is       => 'ro',
-    isa      => 'Jackalope::REST::CRUD::Service',
+    does     => 'Jackalope::REST::Service',
     required => 1,
     handles  => [qw[
-        resource_repository
         schema_repository
         serializer
-        router
     ]]
 );
 

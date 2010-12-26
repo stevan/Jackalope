@@ -11,6 +11,25 @@ with 'Jackalope::REST::Service::Target';
 requires 'repository_operation';
 requires 'operation_callback';
 
+# NOTE:
+# This is not ideal, I would rather do a
+# +service in the attribute, but that is
+# not allowed since this is a role. While
+# we could switch this to a class, we would
+# then load the 'requires' above. The other
+# option is to make Jackalope::REST::Service::Target
+# a parameterized role which can take a service
+# type, however, that seems perhaps like
+# overkill. Either way, this works for now.
+# - SL
+sub BUILD {}
+after BUILD => sub {
+    ((shift)->service->isa('Jackalope::REST::CRUD::Service'))
+        || confess "The service must be a 'Jackalope::REST::CRUD::Service'";
+};
+
+sub resource_repository { (shift)->service->resource_repository }
+
 sub execute {
     my ($self, $r, @args) = @_;
     $self->process_operation(
