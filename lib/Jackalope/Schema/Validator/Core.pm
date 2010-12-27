@@ -168,9 +168,11 @@ sub array {
     if (exists $schema->{items}) {
         my $item_schema = $schema->{items};
         my $validator   = $self->can( $item_schema->{type} );
+        return {
+            error => "could not find validator for '" . $item_schema->{type} . "' for array items"
+        } if not defined $validator;
         my @results     = map { $self->$validator( $item_schema, $_ ) } @$data;
         my @errors      = grep { exists $_->{error} } @results;
-
         return {
             error      => (Devel::PartialDump::dump $data) . ' did not pass the test for ' . $item_schema->{type} . ' schemas',
             sub_errors => \@errors
@@ -222,10 +224,11 @@ sub object {
     if (exists $schema->{items}) {
         my $item_schema = $schema->{items};
         my $validator   = $self->can( $item_schema->{type} );
-
+        return {
+            error => "could not find validator for '" . $item_schema->{type} . "' for object items"
+        } if not defined $validator;
         my @results     = map { $self->$validator( $item_schema, $_ )  } values %$data;
         my @errors      = grep { exists $_->{error} } @results;
-
         return {
             error      => (Devel::PartialDump::dump $data) . ' did not pass the test for ' . $item_schema->{type} . ' schemas',
             sub_errors => \@errors
