@@ -52,6 +52,12 @@ sub process_psgi_output {
 
 ## Schema Checking
 
+sub sanitize_and_prepare_input {
+    my ($self, $r ) = @_;
+    $self->check_uri_schema( $r );
+    $self->check_data_schema( $r );
+}
+
 sub check_uri_schema {
     my ($self, $r) = @_;
     # look for a uri-schema ...
@@ -113,12 +119,12 @@ sub check_data_schema {
 }
 
 sub check_target_schema {
-    my ($self, $result) = @_;
+    my ($self, $target) = @_;
     # if we have a target_schema
     # then we are expecting output
     if ( exists $self->link->{'target_schema'} ) {
         # check the output against the target_schema
-        my $result = $self->schema_repository->validate( $self->link->{'target_schema'}, $result );
+        my $result = $self->schema_repository->validate( $self->link->{'target_schema'}, $target );
         if ($result->{'error'}) {
             Jackalope::REST::Error::BadRequest::ValidationError->new(
                 validation_error => $result,
@@ -126,6 +132,7 @@ sub check_target_schema {
             )->throw;
         }
     }
+    return $target;
 }
 
 

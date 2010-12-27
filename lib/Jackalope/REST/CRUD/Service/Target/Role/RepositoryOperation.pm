@@ -73,12 +73,6 @@ around 'process_psgi_output' => sub {
 
 # input and output processing
 
-sub sanitize_and_prepare_input {
-    my ($self, $r ) = @_;
-    $self->check_uri_schema( $r );
-    $self->check_data_schema( $r );
-}
-
 sub verify_and_prepare_output {
     my ($self, $result) = @_;
 
