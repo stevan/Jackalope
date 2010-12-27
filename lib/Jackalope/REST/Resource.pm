@@ -44,6 +44,9 @@ sub BUILD { (shift)->version }
 
 sub generate_version {
     my $self = shift;
+    if ( blessed( $self->body ) && $self->body->can('generate_version') ) {
+        return $self->body->generate_version;
+    }
     Digest->new("SHA-256")
           ->add( encode_json( $self->body, { canonical => 1 } ) )
           ->hexdigest
