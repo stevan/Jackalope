@@ -1,4 +1,4 @@
-package Jackalope::REST::CRUD::Service::Target::RepositoryOperation;
+package Jackalope::REST::CRUD::Service::Target::Role::RepositoryOperation;
 use Moose::Role;
 
 our $VERSION   = '0.01';
@@ -104,11 +104,11 @@ __END__
 
 =head1 NAME
 
-Jackalope::REST::CRUD::Service::Target::RepositoryOperation - A Moosey solution to this problem
+Jackalope::REST::CRUD::Service::Target::Role::RepositoryOperation - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use Jackalope::REST::CRUD::Service::Target::RepositoryOperation;
+  use Jackalope::REST::CRUD::Service::Target::Role::RepositoryOperation;
 
 =head1 DESCRIPTION
 

@@ -98,7 +98,7 @@ use Jackalope::REST::Resource::Repository::Simple;
     our $VERSION   = '0.01';
     our $AUTHORITY = 'cpan:STEVAN';
 
-    with 'Jackalope::REST::CRUD::Service::Target::RepositoryOperation';
+    with 'Jackalope::REST::CRUD::Service::Target::Role::RepositoryOperation';
 
     sub repository_operation { 'add_item' }
     sub operation_callback { [ 202, [], [ $_[1] ] ] }
@@ -111,7 +111,7 @@ use Jackalope::REST::Resource::Repository::Simple;
     our $VERSION   = '0.01';
     our $AUTHORITY = 'cpan:STEVAN';
 
-    with 'Jackalope::REST::CRUD::Service::Target::RepositoryOperation';
+    with 'Jackalope::REST::CRUD::Service::Target::Role::RepositoryOperation';
 
     sub repository_operation { 'remove_item' }
     sub operation_callback { [ 202, [], [ $_[1] ] ] }

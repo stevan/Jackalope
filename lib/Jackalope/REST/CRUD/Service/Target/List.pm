@@ -4,7 +4,7 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-with 'Jackalope::REST::CRUD::Service::Target::RepositoryOperation';
+with 'Jackalope::REST::CRUD::Service::Target::Role::RepositoryOperation';
 
 sub repository_operation { 'list_resources' }
 sub operation_callback   { [ 200, [], [ $_[1] ] ] }
