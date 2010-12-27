@@ -61,43 +61,34 @@ use Jackalope::REST::Resource;
 
     sub execute {
         my ($self, $r, $doctor_id) = @_;
-        $self->check_uri_schema( $r );
-        my $params = $self->check_data_schema( $r );
-
+        my $params = $self->sanitize_and_prepare_input( $r );
         my $result = [
-            Jackalope::REST::Resource->new(
-                id   => '1234',
-                body => {
-                    date   => $params->{'date'},
-                    start  => 1400,
-                    end    => 1450,
-                    doctor => { name => 'mjones' },
-                },
-                links => [
-                    { rel => 'slot.book', href => 'slots/1234', method => 'POST' }
-                ]
-            )->pack,
-            Jackalope::REST::Resource->new(
-                id   => '5678',
-                body => {
-                    date   => $params->{'date'},
-                    start  => 1500,
-                    end    => 1550,
-                    doctor => { name => 'mjones' },
-                },
-                links => [
-                    { rel => 'slot.book', href => 'slots/5678', method => 'POST' }
-                ]
-            )->pack
+            map {
+                $_->add_links( $self->service->router->uri_for( 'slot.book' => $_ ) );
+                $_->pack
+            } (
+                Jackalope::REST::Resource->new(
+                    id   => '1234',
+                    body => {
+                        date   => $params->{'date'},
+                        start  => 1400,
+                        end    => 1450,
+                        doctor => { name => $doctor_id },
+                    }
+                ),
+                Jackalope::REST::Resource->new(
+                    id   => '5678',
+                    body => {
+                        date   => $params->{'date'},
+                        start  => 1500,
+                        end    => 1550,
+                        doctor => { name => $doctor_id },
+                    }
+                )
+            )
         ];
-
-        $self->check_target_schema( $result );
         $self->process_psgi_output(
-            [
-                200,
-                [],
-                [ $result ]
-            ]
+            [ 200, [], [ $self->check_target_schema( $result ) ] ]
         );
     }
 
@@ -273,11 +264,7 @@ test_psgi( app => $app, client => sub {
                     },
                     'version' => '3a827c91daff9650f999d08692ac708302633dff7eb2762ee58e807a8bbd9ebb',
                     'links' => [
-                        {
-                            'rel' => 'slot.book',
-                            'href' => 'slots/1234',
-                            'method' => 'POST'
-                        }
+                        { 'rel' => 'slot.book', 'href' => '/slots/1234', 'method' => 'POST' }
                     ]
                 },
                 {
@@ -290,11 +277,7 @@ test_psgi( app => $app, client => sub {
                     },
                     'version' => '666f00cded59bf01b9634c11628a2a0007c5edeb20bf75a2577bff0da5cbb095',
                     'links' => [
-                        {
-                            'rel' => 'slot.book',
-                            'href' => 'slots/5678',
-                            'method' => 'POST'
-                        }
+                        { 'rel' => 'slot.book', 'href' => '/slots/5678', 'method' => 'POST' }
                     ]
                 }
             ],
