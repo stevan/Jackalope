@@ -9,10 +9,10 @@ use Clone 'clone';
 use Data::Visitor::Callback;
 
 has '_compiled_schemas' => (
-    is      => 'ro',
+    is      => 'rw',
     isa     => 'HashRef',
     lazy    => 1,
-    builder => '_build_compiled_schemas'
+    default => sub { +{} }
 );
 
 has 'validator' => (
@@ -55,7 +55,7 @@ sub BUILD {
     }
 
     # compile all the schemas ...
-    $self->_compiled_schemas;
+    $self->_compiled_schemas( $self->_compile_core_schemas );
 }
 
 ## Schema Accessors
@@ -148,11 +148,6 @@ sub _validate_schema {
 
 # private compiled schema stuff
 
-sub _build_compiled_schemas {
-    # by default we load in the core ...
-    return (shift)->_compile_core_schemas;
-}
-
 sub _insert_compiled_schema {
     my ($self, $schema) = @_;
     $self->_compiled_schemas->{ $schema->{'compiled'}->{'id'} } = $schema;
@@ -240,7 +235,10 @@ sub _is_schema_compiled {
 
 sub _generate_schema_map {
     my ($self, @schemas) = @_;
-    return +{ map { $_->{'compiled'}->{'id'} => $_ } @schemas }
+    return +{
+        %{ $self->_compiled_schemas },
+        (map { $_->{'compiled'}->{'id'} => $_ } @schemas)
+    }
 }
 
 # compiling extensions
@@ -248,9 +246,12 @@ sub _generate_schema_map {
 sub _flatten_extends {
     my ($self, $schema, $schema_map) = @_;
     if ( exists $schema->{'raw'}->{'extends'} && $self->_is_ref( $schema->{'raw'}->{'extends'} ) ) {
+        my $super_schema = $self->_resolve_ref( $schema->{'raw'}->{'extends'}, $schema_map );
+        (defined $super_schema)
+            || confess "Could not find '" . $schema->{'raw'}->{'extends'}->{'$ref'} . "' schema to extend";
         $self->_merge_schema(
             $schema,
-            $self->_resolve_ref( $schema->{'raw'}->{'extends'}, $schema_map ),
+            $super_schema,
             $schema_map
         );
         $schema->{'compiled'}->{'properties'}            = $self->_merge_properties( properties            => $schema, $schema_map );
@@ -274,9 +275,12 @@ sub _merge_schema {
         }
     }
     if ( $super->{'raw'}->{'extends'} && $self->_is_ref( $super->{'raw'}->{'extends'} ) ) {
+        my $super_schema = $self->_resolve_ref( $super->{'raw'}->{'extends'}, $schema_map );
+        (defined $super_schema)
+            || confess "Could not find '" . $super->{'raw'}->{'extends'}->{'$ref'} . "' schema to extend";
         $self->_merge_schema(
             $schema,
-            $self->_resolve_ref( $super->{'raw'}->{'extends'}, $schema_map ),
+            $super_schema,
             $schema_map
         );
     }
@@ -332,9 +336,12 @@ sub _resolve_embedded_extends {
             if ( exists $data->{'extends'} && $self->_is_ref( $data->{'extends'} ) ) {
                 my $embedded_schema = $self->_prepare_schema_for_compiling( $data );
                 my $new_schema_map  = { %$schema_map, '#' => $schema };
+                my $super_schema    = $self->_resolve_ref( $data->{'extends'}, $new_schema_map );
+                (defined $super_schema)
+                    || confess "Could not find '" . $data->{'extends'}->{'$ref'} . "' schema to extend";
                 $self->_merge_schema(
                     $embedded_schema,
-                    $self->_resolve_ref( $data->{'extends'}, $new_schema_map ),
+                    $super_schema,
                     $new_schema_map
                 );
                 $embedded_schema->{'compiled'}->{'properties'}            = $self->_merge_properties( properties            => $embedded_schema, $new_schema_map );
