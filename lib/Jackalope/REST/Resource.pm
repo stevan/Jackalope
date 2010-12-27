@@ -67,7 +67,7 @@ sub pack {
         # not sure we actually need it though
         # - SL
         id      => "" . $self->id,
-        body    => $self->body,
+        body    => (blessed $self->body && $self->body->can('pack') ? $self->body->pack : $self->body),
         version => $self->version,
         links   => $self->links
     };
