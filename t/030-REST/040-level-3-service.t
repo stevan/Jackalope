@@ -134,7 +134,7 @@ is(exception{
     $compiled = $repo->register_schemas( \@schemas )
 }, undef, '... did not die when registering this schema');
 
-use Data::Dumper; warn Dumper $compiled;
+#use Data::Dumper; warn Dumper $compiled;
 
 
 
