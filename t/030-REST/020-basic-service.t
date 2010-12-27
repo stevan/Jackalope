@@ -110,7 +110,6 @@ test_psgi( app => $app, client => sub {
                 links => [
                     { rel => "create",      href => "/",       method => "POST"   },
                     { rel => "delete",      href => "/1",      method => "DELETE" },
-                    { rel => "describedby", href => "/schema", method => "GET"    },
                     { rel => "edit",        href => "/1",      method => "PUT"    },
                     { rel => "list",        href => "/",       method => "GET"    },
                     { rel => "read",        href => "/1",      method => "GET"    }
@@ -163,7 +162,6 @@ test_psgi( app => $app, client => sub {
                     links => [
                         { rel => "create",      href => "/",       method => "POST"   },
                         { rel => "delete",      href => "/1",      method => "DELETE" },
-                        { rel => "describedby", href => "/schema", method => "GET"    },
                         { rel => "edit",        href => "/1",      method => "PUT"    },
                         { rel => "list",        href => "/",       method => "GET"    },
                         { rel => "read",        href => "/1",      method => "GET"    }
@@ -192,7 +190,6 @@ test_psgi( app => $app, client => sub {
                 links => [
                     { rel => "create",      href => "/",       method => "POST"   },
                     { rel => "delete",      href => "/1",      method => "DELETE" },
-                    { rel => "describedby", href => "/schema", method => "GET"    },
                     { rel => "edit",        href => "/1",      method => "PUT"    },
                     { rel => "list",        href => "/",       method => "GET"    },
                     { rel => "read",        href => "/1",      method => "GET"    }
@@ -238,7 +235,6 @@ test_psgi( app => $app, client => sub {
                 links => [
                     { rel => "create",      href => "/",       method => "POST"   },
                     { rel => "delete",      href => "/1",      method => "DELETE" },
-                    { rel => "describedby", href => "/schema", method => "GET"    },
                     { rel => "edit",        href => "/1",      method => "PUT"    },
                     { rel => "list",        href => "/",       method => "GET"    },
                     { rel => "read",        href => "/1",      method => "GET"    }
@@ -339,7 +335,6 @@ test_psgi( app => $app, client => sub {
                 links => [
                     { rel => "create",      href => "/",       method => "POST"   },
                     { rel => "delete",      href => "/1",      method => "DELETE" },
-                    { rel => "describedby", href => "/schema", method => "GET"    },
                     { rel => "edit",        href => "/1",      method => "PUT"    },
                     { rel => "list",        href => "/",       method => "GET"    },
                     { rel => "read",        href => "/1",      method => "GET"    }
@@ -410,7 +405,6 @@ test_psgi( app => $app, client => sub {
                 links => [
                     { rel => "create",      href => "/",       method => "POST"   },
                     { rel => "delete",      href => "/2",      method => "DELETE" },
-                    { rel => "describedby", href => "/schema", method => "GET"    },
                     { rel => "edit",        href => "/2",      method => "PUT"    },
                     { rel => "list",        href => "/",       method => "GET"    },
                     { rel => "read",        href => "/2",      method => "GET"    }
@@ -440,44 +434,6 @@ test_psgi( app => $app, client => sub {
         );
     }
 
-    #diag("Calling the DescribedBy");
-    {
-        my $req = GET( "http://localhost/schema");
-        my $res = $cb->($req);
-        is($res->code, 200, '... got the right status for list ');
-        is_deeply(
-           $serializer->deserialize( $res->content ),
-           {
-               id         => 'simple/person',
-               title      => 'This is a simple person schema',
-               extends    => { '$ref' => 'schema/web/service/crud' },
-               properties => {
-                   first_name => { type => 'string' },
-                   last_name  => { type => 'string' },
-                   age        => { type => 'integer', greater_than => 0 },
-               }
-           },
-            '... got the right value for list'
-        );
-    }
-
-    #diag("Errors");
-    {
-        my $req = POST("http://localhost/schema");
-        my $res = $cb->($req);
-        is($res->code, 405, '... got the right status for bad method');
-        is($res->header('Allow'), 'GET', '... got the right Allow header');
-        is_deeply(
-            $serializer->deserialize( $res->content ),
-            {
-                code            => 405,
-                desc            => 'Method Not Allowed',
-                message         => 'Method Not Allowed',
-                allowed_methods => [ 'GET' ]
-            },
-            '... got the error we expected'
-        );
-    }
     {
         my $req = PUT("http://localhost/");
         my $res = $cb->($req);

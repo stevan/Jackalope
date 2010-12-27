@@ -162,12 +162,6 @@ sub service_readonly {
         title => 'This is a simple read-only REST enabled schema',
         type  => 'object',
         links => {
-            describedby => {
-                rel           => 'describedby',
-                href          => '/schema',
-                method        => 'GET',
-                target_schema => { '$ref' => 'schema/types/schema' },
-            },
             list => {
                 rel           => 'list',
                 href          => '/',
