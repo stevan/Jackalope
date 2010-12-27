@@ -299,11 +299,11 @@ my $c = container $j => as {
         class        => 'Jackalope::REST::CRUD::Service',
         parameters   => { uri_base => { isa => 'Str', optional => 1 } },
         dependencies => {
-            schema_repository   => 'type:Jackalope::Schema::Repository',
-            resource_repository => 'MyShoppingCartRepo',
-            schema              => 'ShoppingCartSchema',
-            rel_to_target_class => 'ShoppingCartLinkRels',
-            serializer          => {
+            schema_repository        => 'type:Jackalope::Schema::Repository',
+            resource_repository      => 'MyShoppingCartRepo',
+            schema                   => 'ShoppingCartSchema',
+            linkrels_to_target_class => 'ShoppingCartLinkRels',
+            serializer               => {
                 'Jackalope::Serializer' => {
                     'format' => 'JSON'
                 }

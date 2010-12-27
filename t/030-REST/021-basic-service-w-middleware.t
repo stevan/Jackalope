@@ -25,7 +25,7 @@ use Jackalope::REST::Resource::Repository::Simple;
 
     use Plack::Middleware::Auth::Basic;
 
-    around 'get_target_for_link' => sub {
+    around 'get_target_for_linkrel' => sub {
         my $next = shift;
         my ($self, $link) = @_;
         if ($link->{'rel'} eq 'read' || $link->{'rel'} eq 'list') {

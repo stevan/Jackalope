@@ -4,6 +4,7 @@ use Moose::Role;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+sub uri_base {} # *sigh*, stupid Moose :(
 has 'uri_base' => ( is => 'ro', isa => 'Str', default => '' );
 
 has 'schema_repository' => (

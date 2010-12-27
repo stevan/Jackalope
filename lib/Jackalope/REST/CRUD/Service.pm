@@ -4,13 +4,8 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-with 'Jackalope::REST::Service';
-
-use Jackalope::REST::Router;
-use Jackalope::REST::Error::InternalServerError;
-
-use Try::Tiny;
-use Class::Load 'load_class';
+with 'Jackalope::REST::Service',
+     'Jackalope::REST::Service::Role::WithRouter';
 
 has 'schema'          => ( is => 'ro', isa => 'HashRef', required => 1 );
 has 'compiled_schema' => (
@@ -28,27 +23,7 @@ has 'resource_repository' => (
     required => 1
 );
 
-has 'router' => (
-    is      => 'ro',
-    isa     => 'Jackalope::REST::Router',
-    lazy    => 1,
-    builder => 'build_router'
-);
-
-has 'rel_to_target_class' => (
-    is      => 'ro',
-    isa     => 'HashRef[Str]',
-    lazy    => 1,
-    default => sub { +{} }
-);
-
-sub build_router {
-    my $self = shift;
-    Jackalope::REST::Router->new(
-        uri_base => $self->uri_base,
-        linkrels => $self->compiled_schema->{'links'}
-    );
-}
+sub get_all_linkrels { (shift)->compiled_schema->{'links'} }
 
 {
     my %REL_TO_TARGET_CLASS = (
@@ -60,27 +35,14 @@ sub build_router {
         describedby => 'Jackalope::REST::Service::Target::DescribedBy',
     );
 
-    sub get_target_for_link {
-        my ($self, $link) = @_;
-
-        my %rel_to_target_map = (
+    around 'get_linkrels_to_target_map' => sub {
+        my $next = shift;
+        my $self = shift;
+        return +{
             %REL_TO_TARGET_CLASS,
-            %{ $self->rel_to_target_class }
-        );
-
-        my $target_class = $rel_to_target_map{ lc $link->{'rel'} };
-
-        Jackalope::REST::Error::NotImplemented->throw(
-            "No target class found for rel (" . $link->{'rel'} . ")"
-        ) unless defined $target_class;
-
-        load_class( $target_class );
-
-        return $target_class->new(
-            service => $self,
-            link    => $link
-        );
-    }
+            %{ $self->$next() }
+        }
+    };
 }
 
 sub generate_read_link_for_resource {
@@ -102,33 +64,6 @@ sub generate_links_for_resource {
             $a->{rel} cmp $b->{rel}
         } values %{ $self->compiled_schema->{'links'} }
     );
-}
-
-sub to_app {
-    my $self = shift;
-    sub {
-        my $env = shift;
-        my ($result, $error);
-        try {
-            my $match  = $self->router->match( $env->{PATH_INFO}, $env->{REQUEST_METHOD} );
-            my $target = $self->get_target_for_link( $match->{'link'} );
-            $env->{'jackalope.router.match.mapping'} = $match->{'mapping'};
-            $result = $target->to_app->( $env );
-        } catch {
-            if (blessed $_) {
-                # assume this is one of ours
-                $error = $_;
-            }
-            else {
-                # otherwise wrap it up in one of ours
-                $error = Jackalope::REST::Error::InternalServerError->new(
-                    message => $_
-                );
-            }
-        };
-        return $error->to_psgi( $self->serializer ) if $error;
-        return $result;
-    };
 }
 
 __PACKAGE__->meta->make_immutable;
