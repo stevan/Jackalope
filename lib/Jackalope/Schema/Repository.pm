@@ -110,10 +110,10 @@ sub register_schemas {
     (exists $_->{id})
         || confess "Can only register schemas that have an 'id'"
             foreach @$schemas;
-
     my $schema_map = $self->_compile_schemas( @$schemas );
     return [
         map {
+            $self->_validate_schema( $_->{'compiled'} );
             $self->_insert_compiled_schema( $_ );
             $_->{'compiled'};
         } values %$schema_map

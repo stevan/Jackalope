@@ -27,9 +27,9 @@ my @schemas = (
         properties => {
             name => { type => 'string' }
         },
-        links => [
+        links => {
             # Query the open slots the doctor has ...
-            {
+            'doctor.open_slots' => {
                 rel          => 'doctor.open_slots',
                 href         => 'doctors/:id/slots/open',
                 method       => 'GET',
@@ -47,7 +47,7 @@ my @schemas = (
                     items => { '$ref' => '/schemas/slot' }
                 },
             }
-        ]
+        }
     },
     # Slot Schema
     {
@@ -59,9 +59,9 @@ my @schemas = (
             end    => { type => 'number' },
             doctor => { '$ref' => '/schemas/doctor' },
         },
-        links => [
+        links => {
             # link to book an appointment
-            {
+            'slot.book' => {
                 rel           => 'slot.book',
                 href          => 'slots/:id',
                 method        => 'POST',
@@ -69,7 +69,7 @@ my @schemas = (
                 data_schema   => { '$ref' => '/schemas/patient' },    # INPUT : patient object
                 target_schema => { '$ref' => '/schemas/appointment' } # OUTPUT : appointment object
             }
-        ]
+        }
     },
     # Appointment Schema
     {
@@ -79,16 +79,17 @@ my @schemas = (
             slot    => { '$ref' => '/schemas/slot' },
             patient => { '$ref' => '/schemas/patient' },
         },
-        links => [
+        links => {
             # way to just view the appointment ...
-            {
+            'appointment.read' => {
                 rel           => 'appointment.read',
                 href          => 'appointment/:id',
+                method        => 'GET',
                 uri_schema    => { id => { type => 'number' } },
                 target_schema => { '$ref' => '#' }
             },
             # method to cancel the appointment (note the DELETE)
-            {
+            'appointment.cancel' => {
                 rel          => 'appointment.cancel',
                 href         => 'appointment/:id',
                 method       => 'DELETE',
@@ -101,7 +102,7 @@ my @schemas = (
                     }
                 },
             },
-        ]
+        }
     }
 );
 
@@ -112,7 +113,7 @@ isa_ok($repo, 'Jackalope::Schema::Repository');
 
 my $compiled;
 is(exception{
-    $compiled = $repo->register_schemas( \@schemas )
+    $compiled = $repo->register_schemas( \@schemas );
 }, undef, '... did not die when registering this schema');
 
 done_testing;
