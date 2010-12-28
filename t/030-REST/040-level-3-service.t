@@ -21,7 +21,7 @@ BEGIN {
 This is meant to model the Level 3 web service described in here:
 http://martinfowler.com/articles/richardsonMaturityModel.html
 
-It also illustrates
+See the embedded comments below
 
 =cut
 
@@ -33,10 +33,18 @@ use Jackalope::REST::Error::ConflictDetected;
     package Level3::Service;
     use Moose;
 
+    # this is a basic service, with
+    # the router added in, check out
+    # the source for both to see what
+    # is added.
     with 'Jackalope::REST::Service',
          'Jackalope::REST::Service::Role::WithRouter';
 
-    has 'schemas'          => ( is => 'ro', isa => 'ArrayRef[HashRef]', required => 1 );
+    # these are our raw schemas ..
+    has 'schemas' => ( is => 'ro', isa => 'ArrayRef[HashRef]', required => 1 );
+
+    # but we need the compiled versions
+    # to really do anything with 'em
     has 'compiled_schemas' => (
         is      => 'ro',
         lazy    => 1,
@@ -46,12 +54,17 @@ use Jackalope::REST::Error::ConflictDetected;
         }
     );
 
+    # we will define this below ...
     has 'resource_repository' => (
         is       => 'ro',
         isa      => 'Level3::Service::ResourceRepository',
         required => 1
     );
 
+    # this maps all the linkrels
+    # that our schemas define to
+    # target classes, which are
+    # the endpoints of the router
     has '+linkrels_to_target_class' => (
         default => sub {
             return +{
@@ -63,6 +76,9 @@ use Jackalope::REST::Error::ConflictDetected;
         }
     );
 
+    # the router needs these
+    # so we build a hash here
+    # for them
     sub get_all_linkrels {
         my $self = shift;
         return +{
@@ -79,7 +95,10 @@ use Jackalope::REST::Error::ConflictDetected;
     # NOTE:
     # This is pretty much just a Mock
     # object to illustrate the other
-    # bits of this test.
+    # bits of this test. Note that we
+    # are free to throw exceptions
+    # in here and they will get handled
+    # automagically on up the chain.
     # - SL
 
     has 'slots' => (
@@ -141,6 +160,13 @@ use Jackalope::REST::Error::ConflictDetected;
         my $slot = $self->get_slot_by_id( $slot_id );
         (defined $slot)
             || Jackalope::REST::Error::ConflictDetected->throw("Slot $slot_id is no longer available");
+            # this ^ exception is basically
+            # saying that the slot is no longer
+            # available, which we are assuming
+            # means that it has already been
+            # booked. In a real application
+            # it would be more sophisticated
+            # then this.
 
         my $id = ++$APPOINTMENT_COUNTER;
         $self->appointments->{ $id } = {
@@ -175,6 +201,13 @@ use Jackalope::REST::Error::ConflictDetected;
         return;
     }
 
+    ## TARGETS
+
+    # These now are our target classes. They are
+    # really just simple methods that call other
+    # methods (brought in by the target role) to
+    # check the input and verify the output.
+
     package Level3::Service::Target::QueryOpenSlots;
     use Moose;
     with 'Jackalope::REST::Service::Target';
@@ -190,7 +223,9 @@ use Jackalope::REST::Error::ConflictDetected;
 
         my $result = [
             map {
+                # add hyperlinks to our resource
                 $_->add_links( $self->service->router->uri_for( 'slot.book' => $_ ) );
+                # and pack it for serialization
                 $_->pack;
             } @$open_slots
         ];
@@ -213,6 +248,7 @@ use Jackalope::REST::Error::ConflictDetected;
             patient => $patient
         );
 
+        # add some hyperlinks to our resource
         $appointment->add_links(
             $self->service->router->uri_for( $_ => $appointment )
         ) foreach qw[ appointment.read appointment.cancel ];
@@ -232,6 +268,7 @@ use Jackalope::REST::Error::ConflictDetected;
         my $params      = $self->sanitize_and_prepare_input( $r );
         my $appointment = $self->service->resource_repository->get_appointment( $appt_id );
 
+        # add some hyperlinks to our resource
         $appointment->add_links(
             $self->service->router->uri_for( $_ => $appointment )
         ) foreach qw[ appointment.read appointment.cancel ];
@@ -250,6 +287,10 @@ use Jackalope::REST::Error::ConflictDetected;
 
         my $params = $self->sanitize_and_prepare_input( $r );
 
+        # allow the optional If-Matches header to check
+        # to make sure that the versions match, if not
+        # we will throw an exception that will be handled
+        # by the Service object (in the Router role)
         if ( my $if_matches = $r->headers->header('If-Matches') ) {
             my $appointment = $self->service->resource_repository->get_appointment( $appt_id );
             ($appointment->compare_version( $if_matches ))
@@ -263,8 +304,13 @@ use Jackalope::REST::Error::ConflictDetected;
     }
 }
 
+# Now we create out Bread::Board containers
+
 my $j = Jackalope::REST->new;
 my $c = container $j => as {
+
+    # we can define out raw schemas as
+    # a bread-board literal service
 
     service 'Level3Schemas' => [
         # Simple Patient Schema
@@ -296,7 +342,7 @@ my $c = container $j => as {
                             date => { type => 'number' }
                         }
                     },
-                    # OUTPUT: a list of slot objects
+                    # OUTPUT: a list of slot objects (wrapped as resources)
                     target_schema => {
                         type  => 'array',
                         items => {
@@ -328,7 +374,7 @@ my $c = container $j => as {
                     uri_schema    => { id => { type => 'string' } },
                     # INPUT : patient object
                     data_schema   => { '$ref' => '/schemas/patient' },
-                    # OUTPUT : appointment object
+                    # OUTPUT : appointment object (wrapped as resource)
                     target_schema => {
                         extends    => { '$ref' => 'schema/web/resource' },
                         properties => {
@@ -353,6 +399,7 @@ my $c = container $j => as {
                     href          => '/appointment/:id',
                     method        => 'GET',
                     uri_schema    => { id => { type => 'string' } },
+                    # OUTPUT : appointment object (wrapped as resource)
                     target_schema => {
                         extends    => { '$ref' => 'schema/web/resource' },
                         properties => {
@@ -371,8 +418,10 @@ my $c = container $j => as {
         }
     ];
 
+    # create our resource repository through inferrence
     typemap 'Level3::Service::ResourceRepository' => infer;
 
+    # and now join it all together as a service
     service 'Level3Service' => (
         class        => 'Level3::Service',
         dependencies => {
