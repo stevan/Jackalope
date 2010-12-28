@@ -16,7 +16,18 @@ BEGIN {
     use_ok('Jackalope::REST');
 }
 
+=pod
+
+This is meant to model the Level 3 web service described in here:
+http://martinfowler.com/articles/richardsonMaturityModel.html
+
+It also illustrates
+
+=cut
+
 use Jackalope::REST::Resource;
+use Jackalope::REST::Error::ResourceNotFound;
+use Jackalope::REST::Error::ConflictDetected;
 
 {
     package Level3::Service;
@@ -35,13 +46,19 @@ use Jackalope::REST::Resource;
         }
     );
 
+    has 'resource_repository' => (
+        is       => 'ro',
+        isa      => 'Level3::Service::ResourceRepository',
+        required => 1
+    );
+
     has '+linkrels_to_target_class' => (
         default => sub {
             return +{
                 'doctor.open_slots'  => 'Level3::Service::Target::QueryOpenSlots',
                 'slot.book'          => 'Level3::Service::Target::BookSlot',
                 'appointment.read'   => 'Level3::Service::Target::AppointmentRead',
-                'appointment.cancel' => 'Level3::Service::Target::AppointmentRead',
+                'appointment.cancel' => 'Level3::Service::Target::AppointmentCancel',
             }
         }
     );
@@ -55,38 +72,129 @@ use Jackalope::REST::Resource;
         }
     }
 
+    package Level3::Service::ResourceRepository;
+    use Moose;
+    use MooseX::Params::Validate;
+
+    # NOTE:
+    # This is pretty much just a Mock
+    # object to illustrate the other
+    # bits of this test.
+    # - SL
+
+    has 'slots' => (
+        traits  => [ 'Hash' ],
+        is      => 'ro',
+        isa     => 'HashRef',
+        default => sub {
+            return +{
+                '1234' => {
+                    date   => 20101227,
+                    start  => 1400,
+                    end    => 1450,
+                    doctor => { name => 'mjones' },
+                },
+                '5678' => {
+                    date   => 20101227,
+                    start  => 1500,
+                    end    => 1550,
+                    doctor => { name => 'mjones' },
+                }
+            }
+        },
+        handles => {
+            'get_all_slots'  => 'elements',
+            'get_slot_by_id' => 'get'
+        }
+    );
+
+    my $APPOINTMENT_COUNTER = 0;
+    has 'appointments' => (
+        is      => 'ro',
+        isa     => 'HashRef',
+        default => sub { +{} },
+    );
+
+    sub get_all_slots_for {
+        my ($self, $doctor_id, $date) = validated_list(\@_,
+            doctor => { isa => 'Str' },
+            date   => { isa => 'Int' }
+        );
+        # This isn't actually for real :)
+        my %open_slots = $self->get_all_slots;
+        return [
+            map {
+                Jackalope::REST::Resource->new(
+                    id   => $_,
+                    body => $open_slots{ $_ }
+                ),
+            } sort keys %open_slots
+        ];
+    }
+
+    sub create_appointment_for {
+        my ($self, $slot_id, $patient) = validated_list(\@_,
+            slot_id => { isa => 'Int' },
+            patient => { isa => 'HashRef[Str]' }
+        );
+
+        my $slot = $self->get_slot_by_id( $slot_id );
+        (defined $slot)
+            || Jackalope::REST::Error::ConflictDetected->throw("Slot $slot_id is no longer available");
+
+        my $id = ++$APPOINTMENT_COUNTER;
+        $self->appointments->{ $id } = {
+            patient => $patient,
+            slot    => $slot
+        };
+        Jackalope::REST::Resource->new(
+            id   => $id,
+            body => $self->appointments->{ $id }
+        );
+    }
+
+    sub get_appointment {
+        my ($self, $appt_id) = @_;
+
+        (exists $self->appointments->{ $appt_id })
+            || Jackalope::REST::Error::ResourceNotFound->throw("Appointment $appt_id is not found");
+
+        Jackalope::REST::Resource->new(
+            id   => $appt_id,
+            body => $self->appointments->{ $appt_id }
+        );
+    }
+
+    sub cancel_appointment {
+        my ($self, $appt_id) = @_;
+
+        (exists $self->appointments->{ $appt_id })
+            || Jackalope::REST::Error::ResourceNotFound->throw("Appointment $appt_id is no longer available");
+
+        delete $self->appointments->{ $appt_id };
+        return;
+    }
+
     package Level3::Service::Target::QueryOpenSlots;
     use Moose;
     with 'Jackalope::REST::Service::Target';
 
     sub execute {
         my ($self, $r, $doctor_id) = @_;
-        my $params = $self->sanitize_and_prepare_input( $r );
+
+        my $params     = $self->sanitize_and_prepare_input( $r );
+        my $open_slots = $self->service->resource_repository->get_all_slots_for(
+            doctor => $doctor_id,
+            date   => $params->{'date'}
+        );
+
         my $result = [
             map {
                 $_->add_links( $self->service->router->uri_for( 'slot.book' => $_ ) );
-                $_->pack
-            } (
-                Jackalope::REST::Resource->new(
-                    id   => '1234',
-                    body => {
-                        date   => $params->{'date'},
-                        start  => 1400,
-                        end    => 1450,
-                        doctor => { name => $doctor_id },
-                    }
-                ),
-                Jackalope::REST::Resource->new(
-                    id   => '5678',
-                    body => {
-                        date   => $params->{'date'},
-                        start  => 1500,
-                        end    => 1550,
-                        doctor => { name => $doctor_id },
-                    }
-                )
-            )
+                $_->pack;
+            } @$open_slots
         ];
+
         $self->process_psgi_output(
             [ 200, [], [ $self->check_target_schema( $result ) ] ]
         );
@@ -99,6 +207,19 @@ use Jackalope::REST::Resource;
     sub execute {
         my ($self, $r, $slot_id) = @_;
 
+        my $patient     = $self->sanitize_and_prepare_input( $r );
+        my $appointment = $self->service->resource_repository->create_appointment_for(
+            slot_id => $slot_id,
+            patient => $patient
+        );
+
+        $appointment->add_links(
+            $self->service->router->uri_for( $_ => $appointment )
+        ) foreach qw[ appointment.read appointment.cancel ];
+
+        $self->process_psgi_output(
+            [ 201, [], [ $self->check_target_schema( $appointment->pack ) ] ]
+        );
     }
 
     package Level3::Service::Target::AppointmentRead;
@@ -107,6 +228,17 @@ use Jackalope::REST::Resource;
 
     sub execute {
         my ($self, $r, $appt_id) = @_;
+
+        my $params      = $self->sanitize_and_prepare_input( $r );
+        my $appointment = $self->service->resource_repository->get_appointment( $appt_id );
+
+        $appointment->add_links(
+            $self->service->router->uri_for( $_ => $appointment )
+        ) foreach qw[ appointment.read appointment.cancel ];
+
+        $self->process_psgi_output(
+            [ 200, [], [ $self->check_target_schema( $appointment->pack ) ] ]
+        );
     }
 
     package Level3::Service::Target::AppointmentCancel;
@@ -115,6 +247,19 @@ use Jackalope::REST::Resource;
 
     sub execute {
         my ($self, $r, $appt_id) = @_;
+
+        my $params = $self->sanitize_and_prepare_input( $r );
+
+        if ( my $if_matches = $r->headers->header('If-Matches') ) {
+            my $appointment = $self->service->resource_repository->get_appointment( $appt_id );
+            ($appointment->compare_version( $if_matches ))
+                || Jackalope::REST::Error::ConflictDetected->throw("resource submitted has out of date version");
+        }
+
+        $self->service->resource_repository->cancel_appointment( $appt_id );
+        $self->process_psgi_output(
+            [ 204, [], [] ]
+        );
     }
 }
 
@@ -181,8 +326,15 @@ my $c = container $j => as {
                     href          => '/slots/:id',
                     method        => 'POST',
                     uri_schema    => { id => { type => 'string' } },
-                    data_schema   => { '$ref' => '/schemas/patient' },    # INPUT : patient object
-                    target_schema => { '$ref' => '/schemas/appointment' } # OUTPUT : appointment object
+                    # INPUT : patient object
+                    data_schema   => { '$ref' => '/schemas/patient' },
+                    # OUTPUT : appointment object
+                    target_schema => {
+                        extends    => { '$ref' => 'schema/web/resource' },
+                        properties => {
+                            body => { '$ref' => '/schemas/appointment' }
+                        }
+                    }
                 }
             }
         },
@@ -201,7 +353,12 @@ my $c = container $j => as {
                     href          => '/appointment/:id',
                     method        => 'GET',
                     uri_schema    => { id => { type => 'string' } },
-                    target_schema => { '$ref' => '#' }
+                    target_schema => {
+                        extends    => { '$ref' => 'schema/web/resource' },
+                        properties => {
+                            body => { '$ref' => '#' }
+                        }
+                    }
                 },
                 # method to cancel the appointment (note the DELETE)
                 'appointment.cancel' => {
@@ -209,24 +366,20 @@ my $c = container $j => as {
                     href         => '/appointment/:id',
                     method       => 'DELETE',
                     uri_schema   => { id => { type => 'string' } },
-                    # INPUT : optionaly provide a reason for cancelation
-                    data_schema  => {
-                        type       => 'object',
-                        properties => {
-                            reason => { type => 'string' }
-                        }
-                    },
                 },
             }
         }
     ];
 
+    typemap 'Level3::Service::ResourceRepository' => infer;
+
     service 'Level3Service' => (
         class        => 'Level3::Service',
         dependencies => {
-            schema_repository => 'type:Jackalope::Schema::Repository',
-            schemas           => 'Level3Schemas',
-            serializer        => {
+            schema_repository   => 'type:Jackalope::Schema::Repository',
+            resource_repository => 'type:Level3::Service::ResourceRepository',
+            schemas             => 'Level3Schemas',
+            serializer          => {
                 'Jackalope::Serializer' => {
                     'format' => 'JSON'
                 }
@@ -246,23 +399,22 @@ my $serializer = $c->resolve(
 test_psgi( app => $app, client => sub {
     my $cb = shift;
 
-    #diag("Listing resources (expecting empty set)");
     {
         my $req = GET("http://localhost/doctors/mjones/slots/open?date=20101227");
         my $res = $cb->($req);
-        is($res->code, 200, '... got the right status for list ');
+        is($res->code, 200, '... got the right status for query-ing open slots');
         is_deeply(
            $serializer->deserialize( $res->content ),
            [
                 {
                     'id' => '1234',
                     'body' => {
-                        'date'   => '20101227',
+                        'date'   => 20101227,
                         'start'  => 1400,
                         'end'    => 1450,
                         'doctor' => { 'name' => 'mjones' },
                     },
-                    'version' => '3a827c91daff9650f999d08692ac708302633dff7eb2762ee58e807a8bbd9ebb',
+                    'version' => '4003b4f63156c825263eab5221d707f3bd69f774c63555c949897fc896d42314',
                     'links' => [
                         { 'rel' => 'slot.book', 'href' => '/slots/1234', 'method' => 'POST' }
                     ]
@@ -270,18 +422,139 @@ test_psgi( app => $app, client => sub {
                 {
                     'id' => '5678',
                     'body' => {
-                        'date'   => '20101227',
+                        'date'   => 20101227,
                         'start'  => 1500,
                         'end'    => 1550,
                         'doctor' => { 'name' => 'mjones' },
                     },
-                    'version' => '666f00cded59bf01b9634c11628a2a0007c5edeb20bf75a2577bff0da5cbb095',
+                    'version' => '265358df6a5742773a6402427da4acc68db3dabf18de4335c90ce378b68e0fc6',
                     'links' => [
                         { 'rel' => 'slot.book', 'href' => '/slots/5678', 'method' => 'POST' }
                     ]
                 }
             ],
-            '... got the right value for list'
+            '... got the right value for query-ing open slots'
+        );
+    }
+    {
+        my $req = POST("http://localhost/slots/1234" => (
+            Content => '{"name":"jsmith"}'
+        ));
+        my $res = $cb->($req);
+        is($res->code, 201, '... got the right status for booking a slot ');
+        is_deeply(
+            $serializer->deserialize( $res->content ),
+            {
+                'id' => '1',
+                'body' => {
+                    'patient' => { 'name' => 'jsmith' },
+                    'slot'    => {
+                        'date'   => 20101227,
+                        'start'  => 1400,
+                        'end'    => 1450,
+                        'doctor' => { 'name' => 'mjones' },
+                    }
+                },
+                'version' => '60d074abd47f78a18a541c38fe045e0dd0b70bc0ea7a2e0d2c64e8349501ed8c',
+                'links' => [
+                    { 'rel' => 'appointment.read', 'href' => '/appointment/1', 'method' => 'GET' },
+                    { 'rel' => 'appointment.cancel', 'href' => '/appointment/1', 'method' => 'DELETE' }
+                ]
+            },
+            '... got the right value for booking a slot'
+        );
+    }
+    {
+        my $req = POST("http://localhost/slots/12345" => (
+            Content => '{"name":"jsmith"}'
+        ));
+        my $res = $cb->($req);
+        is($res->code, 409, '... got the right status for booking a slot that doesnt exist');
+        is_deeply(
+            $serializer->deserialize( $res->content ),
+            {
+                'code'    => 409,
+                'desc'    => 'Conflict Detected',
+                'message' => 'Slot 12345 is no longer available'
+            },
+            '... got the right value for booking  a slot that doesnt exist'
+        );
+    }
+    {
+        my $req = GET("http://localhost//appointment/1");
+        my $res = $cb->($req);
+        is($res->code, 200, '... got the right status for apptointment read');
+        is_deeply(
+           $serializer->deserialize( $res->content ),
+           {
+               'id' => '1',
+               'body' => {
+                   'patient' => { 'name' => 'jsmith' },
+                   'slot'    => {
+                       'date'   => 20101227,
+                       'start'  => 1400,
+                       'end'    => 1450,
+                       'doctor' => { 'name' => 'mjones' },
+                   }
+               },
+               'version' => '60d074abd47f78a18a541c38fe045e0dd0b70bc0ea7a2e0d2c64e8349501ed8c',
+               'links' => [
+                   { 'rel' => 'appointment.read', 'href' => '/appointment/1', 'method' => 'GET' },
+                   { 'rel' => 'appointment.cancel', 'href' => '/appointment/1', 'method' => 'DELETE' }
+               ]
+           },
+            '... got the right value for apptointment read'
+        );
+    }
+    {
+        my $req = DELETE("http://localhost//appointment/1" => (
+            'If-Matches' => 'bogus'
+        ));
+        my $res = $cb->($req);
+        is($res->code, 409, '... got the right status for apptointment delete (error)');
+        is_deeply(
+            $serializer->deserialize( $res->content ),
+            {
+                'code'    => 409,
+                'desc'    => 'Conflict Detected',
+                'message' => 'resource submitted has out of date version'
+            },
+            '... got the right value for apptointment delete (error)'
+        );
+    }
+    {
+        my $req = DELETE("http://localhost//appointment/1" => (
+            'If-Matches' => '60d074abd47f78a18a541c38fe045e0dd0b70bc0ea7a2e0d2c64e8349501ed8c'
+        ));
+        my $res = $cb->($req);
+        is($res->code, 204, '... got the right status for apptointment delete');
+    }
+    {
+        my $req = GET("http://localhost//appointment/1");
+        my $res = $cb->($req);
+        is($res->code, 404, '... got the right status for apptointment read (error)');
+        is_deeply(
+            $serializer->deserialize( $res->content ),
+            {
+                'code'    => 404,
+                'desc'    => 'Resource Not Found',
+                'message' => 'Appointment 1 is not found'
+            },
+            '... got the right value for apptointment read (error)'
+        );
+    }
+    {
+        my $req = DELETE("http://localhost//appointment/1");
+        my $res = $cb->($req);
+        is($res->code, 404, '... got the right status for apptointment delete (error)');
+        is_deeply(
+            $serializer->deserialize( $res->content ),
+            {
+                'code'    => 404,
+                'desc'    => 'Resource Not Found',
+                'message' => 'Appointment 1 is no longer available'
+            },
+            '... got the right value for apptointment delete (error)'
         );
     }
 });
