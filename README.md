@@ -53,30 +53,36 @@ for describing the concrete implementation of a 'linkrel'. It is perhaps useful 
 think of a 'linkrel' like a class and 'hyperlink' like an object instance, they have
 a similar relationship to one another.
 
-The base 'any' schema type provides an optional 'links' property, which is an array
-of 'linkrels'. These are meant to describe the possible actions that can be taken
-against a given schema. Think of them as methods, where the schema is the class. These
-are also used by the REST style web services to generate the routes that can be called
-on the service, and used to generate a set of hypermedia controls for an instance of
-the schema.
+The base 'any' schema type provides an optional 'links' property, which is a key-value
+mapping of 'linkrels' where the 'rel' name is the key. These are meant to describe the
+possible actions that can be taken against a given schema. Think of them as methods,
+where the schema is the class. These are also used by the REST style web services to
+generate the routes that can be called on the service, and used to generate a set of
+hypermedia controls for an instance of the schema.
 
 ### REST style web services
 
 This part of Jackalope starts to get more opinionated. Currently it provides a
-basic set of tools for exposing discoverable services to manage a collection a
-resources in a CRUD like manner. It borrows some of the basic HTTP interactions
-from the ATOM publishing protocol and Microsoft's Cannonical REST Entity model,
-then mixed up with some of my personal opinions.
+basic set of tools for exposing discoverable services and another set of tools
+to manage a collection a resources in a CRUD like manner. It borrows some of the
+basic HTTP interactions from the ATOM publishing protocol and Microsoft's Cannonical
+REST Entity model, then mixed up with some of my personal opinions.
 
 It should be noted that there is more to REST then simple CRUD actions on
-resource collections, but currently this is what is available "out of the box"
-with plans for more later on. At this point if you wanted a more complex flow
-it would be possible to do it manually with the tools in Jackalope.
+resource collections. Jackalope provides all the building blocks for constructing
+a REST application using any kind of custom workflow you would like. However,
+because CRUD is so common, currently it is available "out of the box" with
+Jackalope.
 
 We extend the base Jackalope spec for this part, adding to it a 'web/resource' and
-'web/resource/ref schemas and an 'web/service' schema, those can seen in
-Jackalope::REST::Schema::Spec. These are the two core components of the REST part
-of Jackalope.
+'web/resource/ref' schemas to help you manage your resources. And the
+'schema/web/service/read-only', 'schema/web/service/non-editable' and
+'schema/web/service/crud' schemas, which can be extended to add a reasonable
+set of default 'linkrels' for a schema. These can all be seen in the
+Jackalope::REST::Schema::Spec module.
+
+These are the two core components of the REST part of Jackalope, Resources and
+Services, which will discuss more below.
 
 #### Resources
 
@@ -112,25 +118,20 @@ as described above and could be used in your code to check that the resource bei
 referred to has not changed. We also optionally have a 'link', which is an 'hyperlink'
 of the 'read' service for this resource (basically a link to the resource itself).
 
-The next concept is the resource repository. Currently we supply a role that will
-wrap around your data repository, you only need worry about the 'body' of the resource
+The next concept is the resource repository. Currently we supply a basic role that will
+wrap around your data repository and you only need worry about the 'body' of the resource
 and it will handle wrapping that into a proper resource as well as the generation and
-checking the version string.
-
-So, once you have a resource and a repository for them, you can plug them into a
-service.
+checking the version string. This currently plugs in directly to the built-in CRUD
+service, but can also be useful outside of that as well.
 
 #### Services
 
-Currently the services in Jackalope only offer a basic set of services for managing
-a collection of resources, however this is not all it can do, just what is written
-right now. The services take a schema, typically one that extends the 'web/service'
-schema from Jackalope::REST::Schema::Spec, and a resource repository and creates
-a web service with the following features.
+Currently the services in Jackalope are really only building blocks, it is up to you
+to assemble them in the way you need. We do however offer a built-in CRUD service for
+managing a collection of resources in a uniform way. The services take a schema,
+typically one that extends the 'schema/web/service/crud' schema, and a resource
+repository and creates a web service with the following features.
 
-- describedby
-    - This is done by doing a GET to the describedby URI (/schema)
-    - This returns the schema that the service was created with.
 - listing
     - This is done by doing a GET to the URI of a collection (/)
     - The result is a list of resources, each with embedded hypermedia controls
@@ -138,19 +139,18 @@ a web service with the following features.
     - TODO:
         - This should take search params and paging params as well
 - creation
-    - Creation is done by doing a POST to the specified creation URI (/create) with the body of a resource as the content
+    - Creation is done by doing a POST to the specified creation URI (/) with the body of a resource as the content
     - The newly created resource is returned in the body of the response
         - the resource will include links that provide hrefs for the various other actions
         - It returns a 201 (Created) status code
         - the response Location header provides the link to read the resource
-            - NOTE: this may be removed since it duplicates what is in the hypermedia controls
 - read
     - Reading is done by doing a GET the specified reading URI (/:id) with the ID for the resource embedded in the URL
     - The resource is returned in the body of the response
         - It returns a 200 (OK) status code
         - If the resource is not found it returns a 404 (Not Found) status code
 - update
-    - Updating is done by doing a PUT to the specified update URI (/:id/edit) with ...
+    - Updating is done by doing a PUT to the specified update URI (/:id) with ...
         - The resource id embedded in the URL
         - You need to PUT the full wrapped resource (minus the links metadata) so that it can test the version string to make sure it is in sync
     - the updated resource is sent back in the body of the request
@@ -159,7 +159,7 @@ a web service with the following features.
         - If the resource is out of sync (versions don't match), a 409 (Conflict) status is returned with no content
         - If the ID in the URL does not match the ID in the resource, a 400 (Bad Request) status is returned with no content
 - delete
-    - deletion is done by doing a DELETE to the specified deletion URI (/:id/delete) with the ID for the resource embedded in the URL
+    - deletion is done by doing a DELETE to the specified deletion URI (/:id) with the ID for the resource embedded in the URL
         - It returns a 204 (No Content) status code
         - An optional If-Matches header is supported for version checking
             - it should contain the version string of the resource you want to delete and we will check it against the current one before deletion
@@ -168,6 +168,56 @@ a web service with the following features.
 We also check to make sure that the proper HTTP method is used for the proper
 URI and throw a 405 (Method Not Allowed) error with an 'Allow' header properly
 populated.
+
+## Installation
+
+To install this module type the following:
+
+    perl Makefile.PL
+    make
+    make test
+    make install
+
+## Dependencies
+
+This module requires these other modules and libraries:
+
+    Moose
+    MooseX::Getopt
+    MooseX::Types::Path::Class
+    MooseX::Params::Validate
+    Bread::Board
+    Throwable::Error
+    Plack
+    JSON::XS
+    Try::Tiny
+    Class::Load
+    Clone
+    Digest
+    File::Spec::Unix
+    List::AllUtils
+    Data::Visitor::Callback
+    Scalar::Util
+    Data::Peek
+    Data::Dumper
+    Devel::PartialDump
+    Template
+    FindBin
+
+    Test::More
+    Test::Moose
+    Test::Fatal
+    Test::Builder
+    HTTP::Request::Common
+
+## Copyright and License
+
+Copyright (C) 2010-2011 Infinity Interactive, Inc.
+
+(http://www.iinteractive.com)
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
 
 ## References
 
