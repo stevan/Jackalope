@@ -7,7 +7,6 @@ our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use Test::Builder ();
-use Data::Dumper  ();
 use Sub::Exporter;
 
 my @exports = qw/
@@ -47,6 +46,7 @@ sub validation_fail {
 
 sub _dump_result {
     my ($result) = @_;
+    require Data::Dumper;
     local $Data::Dumper::Indent = 0;
     my $out = Data::Dumper::Dumper($result);
     $out =~ s/\$VAR\d\s*=\s*//;

@@ -10,7 +10,6 @@ use Test::Fatal;
 use Test::Moose;
 use Bread::Board;
 use Plack::Test;
-use Plack::App::Cascade;
 use HTTP::Request::Common qw[ GET PUT POST DELETE ];
 
 BEGIN {

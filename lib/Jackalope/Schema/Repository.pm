@@ -4,7 +4,6 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use Data::UUID;
 use Clone 'clone';
 use Data::Visitor::Callback;
 
@@ -27,8 +26,8 @@ has 'spec' => (
     required => 1
 );
 
-use Data::Dumper;
 sub DUMP {
+    require Data::Dumper;
     local $Data::Dumper::Sortkeys = 1;
     return Dumper(
         Data::Visitor::Callback->new(
