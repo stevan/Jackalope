@@ -127,10 +127,15 @@ service, but can also be useful outside of that as well.
 #### Services
 
 Currently the services in Jackalope are really only building blocks, it is up to you
-to assemble them in the way you need. We do however offer a built-in CRUD service for
-managing a collection of resources in a uniform way. The services take a schema,
-typically one that extends the 'schema/web/service/crud' schema, and a resource
-repository and creates a web service with the following features.
+to assemble them in the way you need. The goal is to provide enough of a framework
+so that mechanics of good HTTP friendly REST applications are easy and simple to
+build. As this framework grows we will likely incorporate larger and more opinionated
+building blocks to make development even easier.
+
+Currently Jackalope does offer a built-in CRUD service for managing a collection of
+resources in a uniform way. The services take a schema, typically one that extends the
+'schema/web/service/crud' schema, and a resource repository and creates a web service
+with the following features.
 
 - listing
     - This is done by doing a GET to the URI of a collection (/)
