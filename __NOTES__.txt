@@ -1,12 +1,18 @@
 
 = TODOS =
 
+- Jackalope::Schema::Repository
+    - need a compile_for_transport method
+        - it will compile the schema from the raw and do everything except
+          resolve the references, it will leave them in place
+        - it will return a schema-map that contains the schema requested
+          as well as any schemas references by those schemas
+        - this will make it easy to serialize this to JSON and send over
+          the wire to a client
+
 - we should be doing content-length stuff everywhere too
 - perhaps centralize all the content-type handling too
 - perhaps put all this plack fiddling into Jackalope::Util (or Jackalope::REST::Util)
-
-- ponder removing "rel" from the linkrel, it might be best implied
-  from the object key instead, hard to really say.
 
 - Jackalope::REST::Service
     - this should check the result in to_app to
@@ -74,7 +80,6 @@
     - Media (binary data)
         - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#media-link-entries
 
-
 - Jackalope::REST::Resource::Repository
     - not sure I really like having to return NotImplmented in the
       repo subclass in 030-multi-schema-service.t, it would be nice
@@ -96,15 +101,6 @@
         - the reasoning being that some parts are
           more opinionated then others and it would
           be nice to give people flexibility
-
-- think about renaming the schema URIs
-  to something more sensible, like ...
-    - jackalope/core/ref
-    - jackalope/core/type/any, etc...
-    - jackalope/core/hypermedia/linkrel
-    - jackalope/core/hypermedia/hyperlink
-    - jackalope/web/rest/resource
-    - jackalope/web/rest/service
 
 == KNOWN ISSUES ==
 
