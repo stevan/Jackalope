@@ -1,6 +1,6 @@
 
 test(
-    "Core test",
+    "Basic Resource test",
     function() {
 
         var resource = new Jackalope.Client.Resource ({
@@ -71,6 +71,19 @@ test(
 
         resource.set({ 'last_name' : 'Little Jr.' });
         equal(resource.get('last_name'), 'Little Jr.', '... got the last name correctly (and only "update" event fired)');
+        equal(update_event, 3, '... the update event fired three times');
+        equal(update_first_name_event, 2, '... the update:first_name event (still) fired twice only');
+        equal(update_first_name_second_event, 1, '... the second update:first_name event (still) fired once only');
+
+        resource.set(
+            {
+                'first_name' : 'Stevan',
+                'last_name'  : 'Little'
+            },
+            { silent : true }
+        );
+        equal(resource.get('first_name'), 'Stevan', '... got the first name correctly (and no events fired)');
+        equal(resource.get('last_name'), 'Little', '... got the last name correctly (and no events fired)');
         equal(update_event, 3, '... the update event fired three times');
         equal(update_first_name_event, 2, '... the update:first_name event (still) fired twice only');
         equal(update_first_name_second_event, 1, '... the second update:first_name event (still) fired once only');
