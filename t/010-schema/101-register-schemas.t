@@ -116,4 +116,6 @@ is(exception{
     $compiled = $repo->register_schemas( \@schemas );
 }, undef, '... did not die when registering this schema');
 
+is((scalar @$compiled), 4, '... got 4 back');
+
 done_testing;
