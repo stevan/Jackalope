@@ -82,6 +82,16 @@ sub get_compiled_schema_by_ref {
     $schema->{'compiled'};
 }
 
+sub get_schema_compiled_for_transport {
+    my ($self, $uri) = @_;
+    my $schema = $self->_compiled_schemas->{ $uri }
+        || confess "Could not find schema for $uri";
+    unless ( $self->_is_schema_compiled_for_transport( $schema ) ) {
+        $schema = $self->_compile_schema_for_tranport( $schema );
+    }
+    $self->_create_transport_schema_map( $schema );
+}
+
 ## Validators
 
 sub validate {
@@ -109,13 +119,14 @@ sub register_schemas {
     (exists $_->{id})
         || confess "Can only register schemas that have an 'id'"
             foreach @$schemas;
+    my @schema_ids = map { $_->{'id'} } @$schemas;
     my $schema_map = $self->_compile_schemas( @$schemas );
     return [
         map {
             $self->_validate_schema( $_->{'compiled'} );
             $self->_insert_compiled_schema( $_ );
             $_->{'compiled'};
-        } values %$schema_map
+        } @{ $schema_map }{ @schema_ids }
     ];
 }
 
@@ -125,6 +136,9 @@ sub _validate_schema {
     my ($self, $schema) = @_;
 
     my $schema_type = $schema->{'type'};
+
+    (defined $schema_type)
+        || confess "schema id(" . $schema->{'id'} . ") does not have a type specified";
 
     my $result = $self->validator->validate(
         $self->get_compiled_schema_for_type( $schema_type ),
@@ -154,6 +168,14 @@ sub _insert_compiled_schema {
 
 # Schema compilation
 
+sub _compile_schema_for_tranport {
+    my ( $self, $schema ) = @_;
+    $schema = $self->_prepare_schema_for_transport( $schema );
+    $self->_flatten_extends( 'for_transport', $schema, $self->_compiled_schemas );
+    $self->_resolve_embedded_extends( 'for_transport', $schema, $self->_compiled_schemas );
+    $schema;
+}
+
 sub _compile_schema {
     my ($self, $schema) = @_;
 
@@ -164,9 +186,9 @@ sub _compile_schema {
 
     unless ( $self->_is_schema_compiled( $schema ) ) {
         $schema = $self->_prepare_schema_for_compiling( $schema );
-        $self->_flatten_extends( $schema, $self->_compiled_schemas );
-        $self->_resolve_embedded_extends( $schema, $self->_compiled_schemas );
-        $self->_resolve_refs( $schema, $self->_compiled_schemas );
+        $self->_flatten_extends( 'compiled', $schema, $self->_compiled_schemas );
+        $self->_resolve_embedded_extends( 'compiled', $schema, $self->_compiled_schemas );
+        $self->_resolve_refs( 'compiled', $schema, $self->_compiled_schemas );
         $self->_mark_as_compiled( $schema );
     }
 
@@ -182,15 +204,15 @@ sub _compile_schemas {
     my $schema_map = $self->_generate_schema_map( @schemas );
 
     foreach my $schema ( @schemas ) {
-        $self->_flatten_extends( $schema, $schema_map );
+        $self->_flatten_extends( 'compiled', $schema, $schema_map );
     }
 
     foreach my $schema ( @schemas ) {
-        $self->_resolve_embedded_extends( $schema, $schema_map );
+        $self->_resolve_embedded_extends( 'compiled', $schema, $schema_map );
     }
 
     foreach my $schema ( @schemas ) {
-        $self->_resolve_refs( $schema, $schema_map );
+        $self->_resolve_refs( 'compiled', $schema, $schema_map );
     }
 
     foreach my $schema ( @schemas ) {
@@ -222,6 +244,12 @@ sub _prepare_schema_for_compiling {
     return $schema;
 }
 
+sub _prepare_schema_for_transport {
+    my ($self, $schema) = @_;
+    $schema->{'for_transport'} = clone( $schema->{'raw'} );
+    return $schema;
+}
+
 sub _mark_as_compiled {
     my ($self, $schema) = @_;
     $schema->{'is_compiled'} = 1;
@@ -232,6 +260,11 @@ sub _is_schema_compiled {
     (exists $schema->{'is_compiled'} && $schema->{'is_compiled'} == 1) ? 1 : 0
 }
 
+sub _is_schema_compiled_for_transport {
+    my ($self, $schema) = @_;
+    exists $schema->{'for_transport'} ? 1 : 0
+}
+
 sub _generate_schema_map {
     my ($self, @schemas) = @_;
     return +{
@@ -240,35 +273,71 @@ sub _generate_schema_map {
     }
 }
 
+sub _create_transport_schema_map {
+    my ($self, $schema, $transport_map) = @_;
+
+    $transport_map ||= {
+        $schema->{'compiled'}->{'id'} => $schema->{'for_transport'}
+    };
+
+    my $schema_map = $self->_compiled_schemas;
+    Data::Visitor::Callback->new(
+        ignore_return_values => 1,
+        hash => sub {
+            my ($v, $data) = @_;
+            if (exists $data->{'$ref'} && $self->_is_ref( $data )) {
+                unless ($self->_is_self_ref( $data )) {
+                    unless ( exists $transport_map->{ $data->{'$ref'} } ) {
+                        my $s = $self->_resolve_ref( $data, $schema_map );
+                        (defined $s)
+                            || confess "Could not find schema for " . $data->{'$ref'};
+                        unless ( $self->_is_schema_compiled_for_transport( $s ) ) {
+                            $s = $self->_compile_schema_for_tranport( $s );
+                        }
+                        $transport_map->{ $s->{'compiled'}->{'id'} } = $s->{'for_transport'};
+                        $self->_create_transport_schema_map( $s, $transport_map );
+                    }
+                }
+            }
+        }
+    )->visit(
+        $schema->{'for_transport'}
+    );
+
+    $transport_map;
+}
+
+
 # compiling extensions
 
 sub _flatten_extends {
-    my ($self, $schema, $schema_map) = @_;
+    my ($self, $which, $schema, $schema_map) = @_;
     if ( exists $schema->{'raw'}->{'extends'} && $self->_is_ref( $schema->{'raw'}->{'extends'} ) ) {
         my $super_schema = $self->_resolve_ref( $schema->{'raw'}->{'extends'}, $schema_map );
         (defined $super_schema)
             || confess "Could not find '" . $schema->{'raw'}->{'extends'}->{'$ref'} . "' schema to extend";
         $self->_merge_schema(
+            $which,
             $schema,
             $super_schema,
             $schema_map
         );
-        $schema->{'compiled'}->{'properties'}            = $self->_merge_properties( properties            => $schema, $schema_map );
-        $schema->{'compiled'}->{'additional_properties'} = $self->_merge_properties( additional_properties => $schema, $schema_map );
-        $schema->{'compiled'}->{'links'}                 = $self->_merge_properties( links                 => $schema, $schema_map );
-        delete $schema->{'compiled'}->{'extends'};
+        $schema->{ $which }->{'properties'}            = $self->_merge_properties( properties            => $schema, $schema_map );
+        $schema->{ $which }->{'additional_properties'} = $self->_merge_properties( additional_properties => $schema, $schema_map );
+        $schema->{ $which }->{'links'}                 = $self->_merge_properties( links                 => $schema, $schema_map );
+        delete $schema->{ $which }->{'extends'};
     }
 }
 
 sub _merge_schema {
-    my ($self, $schema, $super, $schema_map) = @_;
+    my ($self, $which, $schema, $super, $schema_map) = @_;
     foreach my $key ( keys %{ $super->{'raw'} } ) {
         next if $key eq 'id'                     # ID should never be copied
              || $key eq 'properties'             # properties will be copied later
              || $key eq 'additional_properties'  # additional_properties will be copied later
              || $key eq 'links';                 # links will be copied later
         if ( not exists $schema->{'raw'}->{ $key } ) {
-            $schema->{'compiled'}->{ $key } = ref $super->{'raw'}->{ $key }
+            $schema->{ $which }->{ $key } = ref $super->{'raw'}->{ $key }
                                             ? clone( $super->{'raw'}->{ $key } )
                                             : $super->{'raw'}->{ $key };
         }
@@ -278,6 +347,7 @@ sub _merge_schema {
         (defined $super_schema)
             || confess "Could not find '" . $super->{'raw'}->{'extends'}->{'$ref'} . "' schema to extend";
         $self->_merge_schema(
+            $which,
             $schema,
             $super_schema,
             $schema_map
@@ -304,30 +374,30 @@ sub _merge_properties {
 # resolving references in a schema
 
 sub _resolve_refs {
-    my ($self, $schema, $schema_map) = @_;
+    my ($self, $which, $schema, $schema_map) = @_;
     Data::Visitor::Callback->new(
         ignore_return_values => 1,
         hash => sub {
             my ($v, $data) = @_;
             if (exists $data->{'$ref'} && $self->_is_ref( $data )) {
                 if ($self->_is_self_ref( $data )) {
-                    $_ = $schema->{'compiled'};
+                    $_ = $schema->{ $which };
                 }
                 else {
                     my $s = $self->_resolve_ref( $data, $schema_map );
                     (defined $s)
                         || confess "Could not find schema for " . $data->{'$ref'};
-                    $_ = $s->{'compiled'};
+                    $_ = $s->{ $which };
                 }
             }
         }
     )->visit(
-        $schema->{'compiled'}
+        $schema->{ $which }
     );
 }
 
 sub _resolve_embedded_extends {
-    my ($self, $schema, $schema_map) = @_;
+    my ($self, $which, $schema, $schema_map) = @_;
     Data::Visitor::Callback->new(
         ignore_return_values => 1,
         hash => sub {
@@ -339,19 +409,20 @@ sub _resolve_embedded_extends {
                 (defined $super_schema)
                     || confess "Could not find '" . $data->{'extends'}->{'$ref'} . "' schema to extend";
                 $self->_merge_schema(
+                    $which,
                     $embedded_schema,
                     $super_schema,
                     $new_schema_map
                 );
-                $embedded_schema->{'compiled'}->{'properties'}            = $self->_merge_properties( properties            => $embedded_schema, $new_schema_map );
-                $embedded_schema->{'compiled'}->{'additional_properties'} = $self->_merge_properties( additional_properties => $embedded_schema, $new_schema_map );
-                $embedded_schema->{'compiled'}->{'links'}                 = $self->_merge_properties( links                 => $embedded_schema, $new_schema_map );
-                delete $embedded_schema->{'compiled'}->{'extends'};
-                $_ = $embedded_schema->{'compiled'};
+                $embedded_schema->{ $which }->{'properties'}            = $self->_merge_properties( properties            => $embedded_schema, $new_schema_map );
+                $embedded_schema->{ $which }->{'additional_properties'} = $self->_merge_properties( additional_properties => $embedded_schema, $new_schema_map );
+                $embedded_schema->{ $which }->{'links'}                 = $self->_merge_properties( links                 => $embedded_schema, $new_schema_map );
+                delete $embedded_schema->{ $which }->{'extends'};
+                $_ = $embedded_schema->{ $which };
             }
         }
     )->visit(
-        $schema->{'compiled'}
+        $schema->{ $which }
     );
 }
 
