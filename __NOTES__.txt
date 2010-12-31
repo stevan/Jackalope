@@ -1,15 +1,6 @@
 
 = TODOS =
 
-- Jackalope::Schema::Repository
-    - need a compile_for_transport method
-        - it will compile the schema from the raw and do everything except
-          resolve the references, it will leave them in place
-        - it will return a schema-map that contains the schema requested
-          as well as any schemas references by those schemas
-        - this will make it easy to serialize this to JSON and send over
-          the wire to a client
-
 - we should be doing content-length stuff everywhere too
 - perhaps centralize all the content-type handling too
 - perhaps put all this plack fiddling into Jackalope::Util (or Jackalope::REST::Util)
