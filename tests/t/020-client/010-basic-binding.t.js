@@ -103,5 +103,40 @@ test(
             ok(r.get('age') === 100, "... got the right value for updated resource after changing DOM and applying tranformer");
         })();
 
+        (function () {
+            var r = new Jackalope.Client.Resource ({
+                "id"   : "stevan",
+                "body" : {
+                    "name" : {
+                        "first" : "Stevan",
+                        "last"  : "Little",
+                    }
+                },
+                "version" : "fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2",
+                "links"   : [
+                    { "rel" : "create", "href" : "/",  "method" : "POST"   },
+                    { "rel" : "delete", "href" : "/1", "method" : "DELETE" },
+                    { "rel" : "edit",   "href" : "/1", "method" : "PUT"    },
+                    { "rel" : "list",   "href" : "/",  "method" : "GET"    },
+                    { "rel" : "read",   "href" : "/1", "method" : "GET"    }
+                ]
+            });
+
+            var binding = new Jackalope.Client.Binding ({
+                element     : "<input type='text'/>",
+                resource    : r,
+                property    : "name.first",
+            });
+
+            equal(binding.element.val(), "Stevan", "... got the right value for the DOM after initial binding and deep accessor");
+
+            r.set({ "name.first" : "Steve" });
+            equal(binding.element.val(), "Steve", "... got the right value for the DOM after changing resource with deep accessor");
+
+            binding.element.val("Scott");
+            binding.element.trigger('change'); // gotta manually trigger this in the test
+            equal(r.get('name.first'), "Scott", "... got the right value for updated resource after changing DOM and deep accessor");
+        })();
+
     }
 );

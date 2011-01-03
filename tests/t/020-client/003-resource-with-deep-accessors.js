@@ -33,5 +33,18 @@ test(
 
         r.set({ 'age.months' : 4 });
         equal(r.get('age.months'), 4, '... got the autovivified value for age.months');
+
+        var update_age_months_event = 0;
+        r.bind('update:age.months', function (self, value) {
+            ok(true, '... age.months has been changed correctly');
+            equal(value, 5, '... age.months has been passed to the event correctly');
+            ok(self === r, '... passed in our self');
+            update_age_months_event++;
+        });
+
+        r.set({ 'age.months' : 5 });
+        equal(r.get('age.months'), 5, '... got the value for age.months');
+        equal(update_age_months_event, 1, '... our event fired');
+
     }
 );
