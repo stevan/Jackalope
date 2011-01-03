@@ -23,7 +23,7 @@ my $c = container $j => as {
         properties => {
             first_name => { type => 'string' },
             last_name  => { type => 'string' },
-            age        => { type => 'integer', greater_than => 0 },
+            age        => { type => 'integer', greater_than => 0, less_than => 125 },
         }
     };
 
@@ -51,6 +51,14 @@ builder {
     enable "Plack::Middleware::Static" => (
         path => sub { s!^/static/!! },
         root => './htdocs/'
+    );
+    enable "Plack::Middleware::Static" => (
+        path => sub { s!^/core/!! },
+        root => '/Users/stevan/Desktop/jackalope/lib/Jackalope/JS/'
+    );
+    enable "Plack::Middleware::Static" => (
+        path => sub { s!^/spec/!! },
+        root => '/Users/stevan/Desktop/jackalope/tests/spec/'
     );
     sub {
         my $r = Plack::Request->new( shift );

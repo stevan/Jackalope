@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<style type="text/css">
+
+.label {
+    float : left;
+    width : 200px;
+}
+
+</style>
+<script type="text/javascript" src="/static/js/jquery.js"></script>
+<script type="text/javascript" src="/static/js/json2.js"></script>
+<script type="text/javascript" src="/core/Jackalope.js"></script>
+<script type="text/javascript" src="/core/Jackalope/Util.js"></script>
+<script type="text/javascript" src="/core/Jackalope/Schema.js"></script>
+<script type="text/javascript" src="/core/Jackalope/Client.js"></script>
+<script type="text/javascript" src="/core/Jackalope/Client/Binding.js"></script>
+<script type="text/javascript">
+
+$(document).ready(function () {
+
+    var repo = new Jackalope.Schema.Repository ({
+        spec      : new Jackalope.Schema.Spec({ spec_url : "/spec/spec.json" }),
+        validator : new Jackalope.Schema.Validator ()
+    });
+
+    repo.register_schema(
+        {
+            "id"         : 'simple/person',
+            "title"      : 'This is a simple person schema',
+            "type"       : "object",
+            "properties" : {
+                "first_name" : { "type" : 'string' },
+                "last_name"  : { "type" : 'string' },
+                "age"        : { "type" : 'integer', "greater_than" : 0, "less_than" : 100 },
+                "sex"        : { "type" : 'string', "enum" : [ "male", "female" ] },
+                "is_admin"   : { "type" : "boolean" }
+            },
+            "additional_properties" : {
+                "nickname" : { "type" : "string" }
+            }
+        }
+    );
+
+    var resource = new Jackalope.Client.Resource ({
+        "id"   : "stevan",
+        "body" : {
+            "first_name" : "Stevan",
+            "last_name"  : "Little",
+            "age"        : 37,
+            "sex"        : "male",
+            "is_admin"   : true
+        },
+        "version" : "fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2",
+        "links"   : [
+            { "rel" : "create", "href" : "/",  "method" : "POST"   },
+            { "rel" : "delete", "href" : "/1", "method" : "DELETE" },
+            { "rel" : "edit",   "href" : "/1", "method" : "PUT"    },
+            { "rel" : "list",   "href" : "/",  "method" : "GET"    },
+            { "rel" : "read",   "href" : "/1", "method" : "GET"    }
+        ]
+    });
+
+    resource.associate_schema(
+        repo.get_compiled_schema_by_uri("simple/person"),
+        repo
+    );
+
+    var err_handler = function (e) {
+        alert(e.message + " : " + e.reason)
+    };
+
+    var bindings = {
+        first_name : new Jackalope.Client.Binding ({
+            element       : '#first_name',
+            resource      : resource,
+            property      : "first_name",
+            error_handler : err_handler
+        }),
+        last_name : new Jackalope.Client.Binding ({
+            element       : '#last_name',
+            resource      : resource,
+            property      : "last_name",
+            error_handler : err_handler
+        }),
+        age : new Jackalope.Client.Binding ({
+            element       : '#age',
+            resource      : resource,
+            property      : "age",
+            error_handler : err_handler,
+            transformer   : function (age) { return parseInt( age ) }
+        }),
+        sex : new Jackalope.Client.Binding.RadioGroup ({
+            element       : 'input:radio[name="sex"]',
+            resource      : resource,
+            property      : "sex",
+            error_handler : err_handler,
+        }),
+        is_admin : new Jackalope.Client.Binding.Checkbox ({
+            element       : '#is_admin',
+            resource      : resource,
+            property      : "is_admin",
+            error_handler : err_handler,
+        }),
+        label : new Jackalope.Client.Binding.Label({
+            element  : '#user',
+            resource : resource,
+            property : "first_name"
+        })
+    };
+
+    resource.bind('update', function () {
+        $('#debug').val( JSON.stringify( resource._body, null, '   ' ) );
+    });
+
+    resource.trigger('update');
+
+});
+
+</script>
+</head>
+<body>
+<div>
+    <div id="user"></div>
+    <hr/>
+    <div><div class="label">First Name</div><input type="text" id="first_name" /></div>
+    <div><div class="label">Last Name</div><input type="text" id="last_name" /></div>
+    <div><div class="label">Age</div><input type="text" id="age" /></div>
+    <div>
+        <div class="label">Sex</div>
+        <div><input type="radio" name="sex" value="male" />&nbsp;Male&nbsp;&nbsp;<input type="radio" name="sex" value="female" />&nbsp;Female</div>
+    </div>
+    <div><div class="label">Administrator</div><input type="checkbox" id="is_admin" /></div>
+    <hr/>
+    <div>
+        <textarea id="debug" rows="8" cols="40"></textarea>
+    </div>
+</div>
+</body>
+</html>
