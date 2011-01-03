@@ -72,5 +72,36 @@ test(
             equal(r.get('first_name'), "Scott", "... got the right value for updated resource after changing DOM");
         })();
 
+
+        (function () {
+            var r = new Jackalope.Client.Resource ({
+                "id"   : "stevan",
+                "body" : {
+                    "first_name" : "Stevan",
+                    "last_name"  : "Little",
+                    "age"        : 37
+                },
+                "version" : "fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2",
+                "links"   : [
+                    { "rel" : "create", "href" : "/",  "method" : "POST"   },
+                    { "rel" : "delete", "href" : "/1", "method" : "DELETE" },
+                    { "rel" : "edit",   "href" : "/1", "method" : "PUT"    },
+                    { "rel" : "list",   "href" : "/",  "method" : "GET"    },
+                    { "rel" : "read",   "href" : "/1", "method" : "GET"    }
+                ]
+            });
+
+            var binding = new Jackalope.Client.Binding ({
+                element     : "<input type='text'/>",
+                resource    : r,
+                property    : "age",
+                transformer : function ( age ) { return parseInt( age ) }
+            });
+
+            binding.element.val("100");
+            binding.element.trigger('change'); // gotta manually trigger this in the test
+            ok(r.get('age') === 100, "... got the right value for updated resource after changing DOM and applying tranformer");
+        })();
+
     }
 );
