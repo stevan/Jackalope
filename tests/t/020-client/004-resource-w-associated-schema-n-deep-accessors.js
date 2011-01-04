@@ -43,7 +43,8 @@ test(
                                     }
                                 }
                             }
-                        }
+                        },
+                        "computers" : { "type" : "array", "items" : { "type" : "string" } }
                     }
                 }
             );
@@ -62,7 +63,10 @@ test(
                     "middle" : "Calvert",
                     "last"   : "Little"
                 },
-                "height" : { "units" : "inches", "value" : 68 }
+                "height" : { "units" : "inches", "value" : 68 },
+                "computers" : [
+                    "iPad", 'Macbook', 'NeXT Slab'
+                ]
             },
             "version" : "fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2",
             "links"   : [
@@ -119,6 +123,22 @@ test(
             ok(false, "... failed to set the attributes successfully");
         }
         equal(resource.get('foo.bar.baz'), "HELLO!", '... got the updated value for foo.bar.baz');
+
+        try {
+            resource.set({ 'computers.1' : 'MacBook' });
+            ok(true, "... set the array attributes successfully ");
+        } catch (e) {
+            ok(false, "... failed to set the attributes successfully");
+        }
+        equal(resource.get('computers.1'), "MacBook", '... got the updated value for computer.1');
+
+        try {
+            resource.set({ 'computers.3' : 'Android' });
+            ok(true, "... set the array attributes successfully (with auto-vivification)");
+        } catch (e) {
+            ok(false, "... failed to set the attributes successfully");
+        }
+        equal(resource.get('computers.3'), "Android", '... got the updated value for computer.3');
 
     }
 );

@@ -11,7 +11,14 @@ test(
                     "middle" : "Calvert",
                     "last"   : "Little"
                 },
-                "height" : { "units" : "inches", "value" : "68" }
+                "height" : { "units" : "inches", "value" : "68" },
+                "computers" : [
+                    "iPad", 'Macbook', 'NeXT Slab'
+                ],
+                "books" : [
+                    { "title" : "REST in Practice" },
+                    { "title" : "MongoDB" }
+                ]
             },
             "version" : "fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2",
             "links"   : [
@@ -45,6 +52,17 @@ test(
         r.set({ 'age.months' : 5 });
         equal(r.get('age.months'), 5, '... got the value for age.months');
         equal(update_age_months_event, 1, '... our event fired');
+
+        r.set({ 'computers.1' : 'MacBook' });
+        equal(r.get('computers.1'), "MacBook", '... got the updated value for computer.1');
+
+        r.set({ 'computers.3' : 'Android' });
+        equal(r.get('computers.3'), "Android", '... got the updated value for computer.3');
+
+        equal(r.get('books.0.title'), "REST in Practice", '... got the value for books.0.title');
+
+        r.set({ 'books.1.title' : 'MongoDB : The definitive guide' });
+        equal(r.get('books.1.title'), "MongoDB : The definitive guide", '... got the updated value for books.1.title');
 
     }
 );
