@@ -5,14 +5,6 @@
          "title" : "This is a simple read-only REST enabled schema",
          "type" : "object",
          "links" : {
-            "describedby" : {
-               "rel" : "describedby",
-               "target_schema" : {
-                  "$ref" : "schema/types/schema"
-               },
-               "href" : "/schema",
-               "method" : "GET"
-            },
             "read" : {
                "rel" : "read",
                "target_schema" : {
@@ -360,7 +352,7 @@
                      }
                   }
                },
-               "href" : "/create",
+               "href" : "/",
                "method" : "POST"
             },
             "delete" : {
@@ -370,7 +362,7 @@
                      "type" : "string"
                   }
                },
-               "href" : "/:id/delete",
+               "href" : "/:id",
                "method" : "DELETE"
             }
          }
@@ -557,7 +549,7 @@
                      "type" : "string"
                   }
                },
-               "href" : "/:id/edit",
+               "href" : "/:id",
                "method" : "PUT"
             }
          }
