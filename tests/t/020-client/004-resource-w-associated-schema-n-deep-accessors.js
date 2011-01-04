@@ -92,7 +92,7 @@ test(
         } catch (e) {
             ok(true, "... failed to set the attributes correctly");
             equal(e.message, 'The property (name.first) failed to validate', '... got the right error');
-            equal(e.reason, '100 is not a string', '... got the right error');
+            equal(e.reason, 'property first didn\'t pass the schema for string', '... got the right error');
         }
         equal(resource.get('name.first'), "Steve", '... got the updated value for name');
 
@@ -101,7 +101,7 @@ test(
             ok(false, "... should have failed to set the attributes successfully");
         } catch (e) {
             ok(true, "... failed to set the attributes correctly");
-            equal(e.reason, 'The property (height.first) is not a valid property for this resource', '... got the right error');
+            equal(e.reason, '[object Object] did not match all the expected properties', '... got the right error');
         }
 
         try {
