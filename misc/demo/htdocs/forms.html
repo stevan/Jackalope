@@ -29,92 +29,79 @@ $(document).ready(function () {
         {
             "id"         : 'simple/person',
             "title"      : 'This is a simple person schema',
-            "type"       : "object",
+            "extends"    : { '$ref' : 'schema/web/service/crud' },
             "properties" : {
                 "first_name" : { "type" : 'string' },
                 "last_name"  : { "type" : 'string' },
-                "age"        : { "type" : 'integer', "greater_than" : 0, "less_than" : 100 },
-                "sex"        : { "type" : 'string', "enum" : [ "male", "female" ] },
-                "is_admin"   : { "type" : "boolean" }
-            },
-            "additional_properties" : {
-                "nickname" : { "type" : "string" }
+                "age"        : { "type" : 'integer', "greater_than" : 0, "less_than" : 125 },
             }
         }
     );
 
-    var resource = new Jackalope.Client.Resource ({
-        "id"   : "stevan",
-        "body" : {
-            "first_name" : "Stevan",
-            "last_name"  : "Little",
-            "age"        : 37,
-            "sex"        : "male",
-            "is_admin"   : true
-        },
-        "version" : "fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2",
-        "links"   : [
-            { "rel" : "create", "href" : "/",  "method" : "POST"   },
-            { "rel" : "delete", "href" : "/1", "method" : "DELETE" },
-            { "rel" : "edit",   "href" : "/1", "method" : "PUT"    },
-            { "rel" : "list",   "href" : "/",  "method" : "GET"    },
-            { "rel" : "read",   "href" : "/1", "method" : "GET"    }
-        ]
+    var resource_repo = new Jackalope.Client.Resource.Repository({
+        base_url          : '/people',
+        schema            : repo.get_compiled_schema_by_uri("simple/person"),
+        schema_repository : repo
     });
 
-    resource.associate_schema(
-        repo.get_compiled_schema_by_uri("simple/person"),
-        repo
+    var ajax_error = function ( xhr, status, error ) {
+        alert(xhr.status + ' ' + xhr.statusText + ' - ' + xhr.responseText);
+    };
+
+    var current_resource;
+
+    resource_repo.read(
+        1,
+        function ( resource ) {
+            current_resource = resource;
+            var err_handler = function (e) { alert(e.message + " : " + e.reason) };
+            var bindings = {
+                first_name : new Jackalope.Client.Binding ({
+                    element       : '#first_name',
+                    resource      : resource,
+                    property      : "first_name",
+                    error_handler : err_handler
+                }),
+                last_name : new Jackalope.Client.Binding ({
+                    element       : '#last_name',
+                    resource      : resource,
+                    property      : "last_name",
+                    error_handler : err_handler
+                }),
+                age : new Jackalope.Client.Binding ({
+                    element       : '#age',
+                    resource      : resource,
+                    property      : "age",
+                    error_handler : err_handler,
+                    transformer   : function (age) { return parseInt( age ) }
+                }),
+                label : new Jackalope.Client.Binding.Label({
+                    element  : '#user',
+                    resource : resource,
+                    property : "first_name"
+                })
+            };
+
+            resource.bind('update', function () {
+                $('#debug').val( JSON.stringify( resource.body, null, '   ' ) );
+            });
+
+            resource.trigger('update');
+
+        },
+        ajax_error
     );
 
-    var err_handler = function (e) {
-        alert(e.message + " : " + e.reason)
-    };
-
-    var bindings = {
-        first_name : new Jackalope.Client.Binding ({
-            element       : '#first_name',
-            resource      : resource,
-            property      : "first_name",
-            error_handler : err_handler
-        }),
-        last_name : new Jackalope.Client.Binding ({
-            element       : '#last_name',
-            resource      : resource,
-            property      : "last_name",
-            error_handler : err_handler
-        }),
-        age : new Jackalope.Client.Binding ({
-            element       : '#age',
-            resource      : resource,
-            property      : "age",
-            error_handler : err_handler,
-            transformer   : function (age) { return parseInt( age ) }
-        }),
-        sex : new Jackalope.Client.Binding.RadioGroup ({
-            element       : 'input:radio[name="sex"]',
-            resource      : resource,
-            property      : "sex",
-            error_handler : err_handler,
-        }),
-        is_admin : new Jackalope.Client.Binding.Checkbox ({
-            element       : '#is_admin',
-            resource      : resource,
-            property      : "is_admin",
-            error_handler : err_handler,
-        }),
-        label : new Jackalope.Client.Binding.Label({
-            element  : '#user',
-            resource : resource,
-            property : "first_name"
-        })
-    };
-
-    resource.bind('update', function () {
-        $('#debug').val( JSON.stringify( resource._body, null, '   ' ) );
+    $('#save').click(function () {
+        resource_repo.edit(
+            current_resource,
+            function ( resource ) {
+                alert("UPDATED from (" + current_resource.version + ") to (" + resource.version + ")")
+                current_resource = resource;
+            },
+            ajax_error
+        )
     });
-
-    resource.trigger('update');
 
 });
 
@@ -127,11 +114,7 @@ $(document).ready(function () {
     <div><div class="label">First Name</div><input type="text" id="first_name" /></div>
     <div><div class="label">Last Name</div><input type="text" id="last_name" /></div>
     <div><div class="label">Age</div><input type="text" id="age" /></div>
-    <div>
-        <div class="label">Sex</div>
-        <div><input type="radio" name="sex" value="male" />&nbsp;Male&nbsp;&nbsp;<input type="radio" name="sex" value="female" />&nbsp;Female</div>
-    </div>
-    <div><div class="label">Administrator</div><input type="checkbox" id="is_admin" /></div>
+    <div><input type="button" id="save" value="Save"></div>
     <hr/>
     <div>
         <textarea id="debug" rows="8" cols="40"></textarea>
