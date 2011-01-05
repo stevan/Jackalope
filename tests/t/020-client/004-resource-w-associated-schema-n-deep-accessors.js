@@ -113,7 +113,7 @@ test(
             ok(false, "... should have failed to set the attributes successfully");
         } catch (e) {
             ok(true, "... failed to set the attributes correctly");
-            equal(e.reason, 'The property (name.first.something) is not a valid property for this resource', '... got the right error');
+            equal(e.reason, 'The property (name.first.something) is not a valid property', '... got the right error');
         }
 
         try {
