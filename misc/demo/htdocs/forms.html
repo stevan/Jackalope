@@ -16,7 +16,48 @@
 <script type="text/javascript" src="/core/Jackalope/Schema.js"></script>
 <script type="text/javascript" src="/core/Jackalope/Client.js"></script>
 <script type="text/javascript" src="/core/Jackalope/Client/Binding.js"></script>
+<script type="text/javascript" src="/core/Jackalope/Client/Resource.js"></script>
+<script type="text/javascript" src="/core/Jackalope/Client/Controller.js"></script>
 <script type="text/javascript">
+
+function TableView ( opts ) {
+    this.$table = $( opts["table_body"] );
+    this.$row   = this.$table.find( opts["row_selector"] );
+    this.$table.empty();
+
+    var target       = opts["target"];
+    var binding_spec = opts["binding_spec"];
+
+    var collection   = target.get_collection();
+
+    for (var i = 0; i < collection.length(); i++) {
+        var element  = collection.get(i);
+        var $new_row = this.$row.clone(true);
+
+        for ( var selector in binding_spec ) {
+            var property = binding_spec[ selector ];
+
+            $new_row.find( selector ).html( element.get( property ) );
+
+            (function ($r, s) {
+                element.bind(
+                    'update:' + property,
+                    function ( r, v ) { $r.find( s ).html( v ) }
+                );
+            })($new_row, selector);
+        }
+
+        $new_row.click(
+            (function (e) {
+                return function () {
+                    target.set_context( e )
+                }
+            })( element )
+        );
+
+        this.$table.append( $new_row );
+    }
+}
 
 $(document).ready(function () {
 
@@ -44,64 +85,64 @@ $(document).ready(function () {
         schema_repository : repo
     });
 
-    var ajax_error = function ( xhr, status, error ) {
-        alert(xhr.status + ' ' + xhr.statusText + ' - ' + xhr.responseText);
-    };
+    resource_repo.list(
+        {},
+        function ( resources ) {
 
-    var current_resource;
-
-    resource_repo.read(
-        1,
-        function ( resource ) {
-            current_resource = resource;
             var err_handler = function (e) { alert(e.message + " : " + e.reason) };
-            var bindings = {
-                first_name : new Jackalope.Client.Binding ({
-                    element       : '#first_name',
-                    target        : resource,
-                    property      : "first_name",
-                    error_handler : err_handler
-                }),
-                last_name : new Jackalope.Client.Binding ({
-                    element       : '#last_name',
-                    target        : resource,
-                    property      : "last_name",
-                    error_handler : err_handler
-                }),
-                age : new Jackalope.Client.Binding ({
-                    element       : '#age',
-                    target        : resource,
-                    property      : "age",
-                    error_handler : err_handler,
-                    transformer   : function (age) { return parseInt( age ) }
-                }),
-                label : new Jackalope.Client.Binding.Label({
-                    element  : '#user',
-                    target   : resource,
-                    property : "first_name"
-                })
-            };
 
-            resource.bind('update', function () {
-                $('#debug').val( JSON.stringify( resource.body, null, '   ' ) );
+            var array_controller = new Jackalope.Client.ArrayController({
+                collection : resources,
+                bindings   : [
+                    new Jackalope.Client.Binding.Label({ element : '#user', property : "first_name" }),
+                    new Jackalope.Client.Binding ({
+                        element       : '#first_name',
+                        property      : "first_name",
+                        error_handler : err_handler
+                    }),
+                    new Jackalope.Client.Binding ({
+                        element       : '#last_name',
+                        property      : "last_name",
+                        error_handler : err_handler
+                    }),
+                    new Jackalope.Client.Binding ({
+                        element       : '#age',
+                        property      : "age",
+                        error_handler : err_handler,
+                        transformer   : function (age) { return parseInt( age ) }
+                    })
+                ]
             });
 
-            resource.trigger('update');
+            var view = new TableView ({
+                table_body   : '#table_view tbody',
+                row_selector : 'tr',
+                target       : array_controller,
+                binding_spec : {
+                    '.first_name' : 'first_name',
+                    '.last_name'  : 'last_name'
+                }
+            });
+
+            $('#save').click(function () {
+                resource_repo.edit(
+                    array_controller.context,
+                    function ( resource ) {
+                        console.log("UPDATED");
+                        array_controller.context.version = resource.version;
+                        array_controller.context.body = resource.body;
+                    },
+                    function ( xhr, status, error ) {
+                        alert(xhr.status + ' ' + xhr.statusText + ' - ' + xhr.responseText)
+                    }
+                )
+            });
 
         },
-        ajax_error
+        function ( xhr, status, error ) {
+            alert(xhr.status + ' ' + xhr.statusText + ' - ' + xhr.responseText)
+        }
     );
-
-    $('#save').click(function () {
-        resource_repo.edit(
-            current_resource,
-            function ( resource ) {
-                alert("UPDATED from (" + current_resource.version + ") to (" + resource.version + ")")
-                current_resource = resource;
-            },
-            ajax_error
-        )
-    });
 
 });
 
@@ -109,6 +150,15 @@ $(document).ready(function () {
 </head>
 <body>
 <div>
+    <table border="1" width="500" id="table_view">
+        <thead>
+            <tr><td>First Name</td><td>Last Name</td></tr>
+        </thead>
+        <tbody>
+            <tr><td class="first_name"></td><td class="last_name"></td></tr>
+        </tbody>
+    </table>
+    <hr/>
     <div id="user"></div>
     <hr/>
     <div><div class="label">First Name</div><input type="text" id="first_name" /></div>
@@ -116,9 +166,6 @@ $(document).ready(function () {
     <div><div class="label">Age</div><input type="text" id="age" /></div>
     <div><input type="button" id="save" value="Save"></div>
     <hr/>
-    <div>
-        <textarea id="debug" rows="8" cols="40"></textarea>
-    </div>
 </div>
 </body>
 </html>
