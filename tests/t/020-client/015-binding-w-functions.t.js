@@ -6,16 +6,20 @@ test(
         function MyTarget () {
             this.first_name = "Stevan";
         }
-        MyTarget.prototype = new Jackalope.Client.Eventful({});
+
+        MyTarget.prototype = Jackalope.Util.Object.merge(
+            Jackalope.Client.Observable.prototype,
+            Jackalope.Client.Traversable.prototype
+        );
 
         MyTarget.prototype.chain = function () { return this };
 
         MyTarget.prototype.get = function ( name ) {
-            return this._traverse_path_and_get( name, this );
+            return this.traverse_path_and_get( name, this );
         };
 
         MyTarget.prototype.set = function ( name, value ) {
-            this._traverse_path_and_set( name, this, value );
+            this.traverse_path_and_set( name, this, value );
             this.trigger('update:' + name, this, value);
         };
 
