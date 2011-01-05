@@ -58,26 +58,26 @@ $(document).ready(function () {
             var bindings = {
                 first_name : new Jackalope.Client.Binding ({
                     element       : '#first_name',
-                    resource      : resource,
+                    target        : resource,
                     property      : "first_name",
                     error_handler : err_handler
                 }),
                 last_name : new Jackalope.Client.Binding ({
                     element       : '#last_name',
-                    resource      : resource,
+                    target        : resource,
                     property      : "last_name",
                     error_handler : err_handler
                 }),
                 age : new Jackalope.Client.Binding ({
                     element       : '#age',
-                    resource      : resource,
+                    target        : resource,
                     property      : "age",
                     error_handler : err_handler,
                     transformer   : function (age) { return parseInt( age ) }
                 }),
                 label : new Jackalope.Client.Binding.Label({
                     element  : '#user',
-                    resource : resource,
+                    target   : resource,
                     property : "first_name"
                 })
             };

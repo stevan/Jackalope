@@ -29,7 +29,7 @@ test(
 
             var binding = new Jackalope.Client.Binding.CheckboxGroup ({
                 element  : $doc.find('input:checkbox'),
-                resource : r,
+                target   : r,
                 property : "titles"
             });
 

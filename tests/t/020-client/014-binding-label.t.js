@@ -27,13 +27,13 @@ test(
 
             var b1 = new Jackalope.Client.Binding ({
                 element  : $input,
-                resource : r,
+                target   : r,
                 property : "first_name"
             });
 
             var b2 = new Jackalope.Client.Binding.Label ({
                 element  : $label,
-                resource : r,
+                target   : r,
                 property : "first_name"
             });
 

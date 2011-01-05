@@ -25,7 +25,7 @@ test(
 
             var binding = new Jackalope.Client.Binding ({
                 element  : $input,
-                resource : r,
+                target   : r,
                 property : "first_name"
             });
 
@@ -58,7 +58,7 @@ test(
 
             var binding = new Jackalope.Client.Binding ({
                 element  : "<input type='text'/>",
-                resource : r,
+                target   : r,
                 property : "first_name"
             });
 
@@ -93,7 +93,7 @@ test(
 
             var binding = new Jackalope.Client.Binding ({
                 element     : "<input type='text'/>",
-                resource    : r,
+                target      : r,
                 property    : "age",
                 transformer : function ( age ) { return parseInt( age ) }
             });
@@ -124,7 +124,7 @@ test(
 
             var binding = new Jackalope.Client.Binding ({
                 element     : "<input type='text'/>",
-                resource    : r,
+                target      : r,
                 property    : "name.first",
             });
 

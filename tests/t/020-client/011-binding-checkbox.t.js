@@ -23,7 +23,7 @@ test(
 
             var binding = new Jackalope.Client.Binding.Checkbox ({
                 element  : "<input type='checkbox'/>",
-                resource : r,
+                target   : r,
                 property : "is_awesome"
             });
 

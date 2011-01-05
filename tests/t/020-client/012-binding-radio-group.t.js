@@ -25,7 +25,7 @@ test(
 
             var binding = new Jackalope.Client.Binding.RadioGroup ({
                 element  : $doc.find('input:radio'),
-                resource : r,
+                target   : r,
                 property : "sex"
             });
 
