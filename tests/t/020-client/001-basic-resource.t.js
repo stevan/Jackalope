@@ -64,7 +64,7 @@ test(
             update_first_name_second_event++;
         });
 
-        resource.set({ 'first_name' : 'Steve' });
+        resource.set('first_name', 'Steve');
         equal(update_event, 2, '... the update event fired twice');
         equal(update_first_name_event, 2, '... the update:first_name event fired twice');
         equal(update_first_name_second_event, 1, '... the second update:first_name event fired once');
