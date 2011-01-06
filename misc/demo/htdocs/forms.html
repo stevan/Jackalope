@@ -12,6 +12,12 @@
     background : #cccccc;
 }
 
+.error {
+    padding-left : 10px;
+    color        : #880000;
+    display      : none;
+}
+
 </style>
 <script type="text/javascript" src="/static/js/jquery.js"></script>
 <script type="text/javascript" src="/static/js/json2.js"></script>
@@ -55,25 +61,26 @@ $(document).ready(function () {
         {},
         function ( resources ) {
 
-            var err_handler = function (e) { alert(e.message + " : " + e.reason) };
-
             var c = new Jackalope.Client.ArrayController({
                 collection : resources,
                 bindings   : [
                     new Jackalope.Client.Binding ({
                         element       : '#first_name',
                         property      : "first_name",
-                        error_handler : err_handler
+                        error_setter  : function (e) { $('#first_name_error').html( e.reason ).show() },
+                        error_clearer : function (e) { $('#first_name_error').html('').hide() },
                     }),
                     new Jackalope.Client.Binding ({
                         element       : '#last_name',
                         property      : "last_name",
-                        error_handler : err_handler
+                        error_setter  : function (e) { $('#last_name_error').html( e.reason ).show() },
+                        error_clearer : function (e) { $('#last_name_error').html('').hide() }
                     }),
                     new Jackalope.Client.Binding ({
                         element       : '#age',
                         property      : "age",
-                        error_handler : err_handler,
+                        error_setter  : function (e) { $('#age_error').html( e.reason ).show() },
+                        error_clearer : function (e) { $('#age_error').html('').hide() },
                         transformer   : function (age) { return parseInt( age ) }
                     })
                 ]
@@ -102,9 +109,8 @@ $(document).ready(function () {
             $('#cancel').click(function () { c.clear_context() });
 
             $('#save').click(function () {
-                console.log(c);
                 if (c.has_context()) {
-                    console.log('UPDATING')
+                    console.log('UPDATING');
                     resource_repo.edit(
                         c.context,
                         function ( resource ) {
@@ -129,7 +135,7 @@ $(document).ready(function () {
                             console.log("CREATED");
                             c.collection.add( resource );
                             $('#person_form')[0].reset();
-                            v.reload();
+                            v.add_new_row( c.collection.length() - 1 );
                         },
                         function ( xhr, status, error ) {
                             alert(xhr.status + ' ' + xhr.statusText + ' - ' + xhr.responseText)
@@ -163,9 +169,9 @@ $(document).ready(function () {
     </table>
     <hr/>
     <form id="person_form">
-    <div><div class="label">First Name</div><input type="text" id="first_name" /></div>
-    <div><div class="label">Last Name</div><input type="text" id="last_name" /></div>
-    <div><div class="label">Age</div><input type="text" id="age" /></div>
+    <div><div class="label">First Name</div><input type="text" id="first_name" /><span class="error" id="first_name_error"></span></div>
+    <div><div class="label">Last Name</div><input type="text" id="last_name" /><span class="error" id="last_name_error"></span></div>
+    <div><div class="label">Age</div><input type="text" id="age" /><span class="error" id="age_error"></span></div>
     <div><input type="button" id="save" value="Save">&nbsp;<input type="button" id="cancel" value="Cancel"></div>
     </form>
     <hr/>
