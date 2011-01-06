@@ -65,23 +65,17 @@ $(document).ready(function () {
                 collection : resources,
                 bindings   : [
                     new Jackalope.Client.Binding ({
-                        element       : '#first_name',
-                        property      : "first_name",
-                        error_setter  : function (e) { $('#first_name_error').html( e.reason ).show() },
-                        error_clearer : function (e) { $('#first_name_error').html('').hide() },
+                        element  : '#first_name',
+                        property : "first_name"
                     }),
                     new Jackalope.Client.Binding ({
-                        element       : '#last_name',
-                        property      : "last_name",
-                        error_setter  : function (e) { $('#last_name_error').html( e.reason ).show() },
-                        error_clearer : function (e) { $('#last_name_error').html('').hide() }
+                        element  : '#last_name',
+                        property : "last_name",
                     }),
                     new Jackalope.Client.Binding ({
-                        element       : '#age',
-                        property      : "age",
-                        error_setter  : function (e) { $('#age_error').html( e.reason ).show() },
-                        error_clearer : function (e) { $('#age_error').html('').hide() },
-                        transformer   : function (age) { return parseInt( age ) }
+                        element     : '#age',
+                        property    : "age",
+                        transformer : function (age) { return parseInt( age ) }
                     })
                 ]
             });
