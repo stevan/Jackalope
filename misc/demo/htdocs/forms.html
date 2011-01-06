@@ -23,40 +23,42 @@
 function TableView ( opts ) {
     this.$table = $( opts["table_body"] );
     this.$row   = this.$table.find( opts["row_selector"] );
+
+    this.target       = opts["target"];
+    this.binding_spec = opts["binding_spec"];
+
+    this.init();
+}
+
+TableView.prototype.init = function () {
     this.$table.empty();
-
-    var target       = opts["target"];
-    var binding_spec = opts["binding_spec"];
-
-    var collection   = target.get_collection();
-
+    var collection = this.target.get_collection();
     for (var i = 0; i < collection.length(); i++) {
-        var element  = collection.get(i);
-        var $new_row = this.$row.clone(true);
-
-        for ( var selector in binding_spec ) {
-            var property = binding_spec[ selector ];
-
-            $new_row.find( selector ).html( element.get( property ) );
-
-            (function ($r, s) {
-                element.bind(
-                    'update:' + property,
-                    function ( r, v ) { $r.find( s ).html( v ) }
-                );
-            })($new_row, selector);
-        }
-
-        $new_row.click(
-            (function (e) {
-                return function () {
-                    target.set_context( e )
-                }
-            })( element )
-        );
-
-        this.$table.append( $new_row );
+        this.add_new_row( collection, i );
     }
+};
+
+TableView.prototype.add_new_row = function ( collection, index ) {
+    var self     = this;
+    var $new_row = this.$row.clone(true);
+
+    collection.bind(
+        'update:' + index,
+        function ( c, idx, r ) { self.populate_row( $new_row, r ) }
+    );
+
+    self.populate_row( $new_row, collection.get( index ) )
+
+    this.$table.append( $new_row );
+}
+
+TableView.prototype.populate_row = function ( $row, element ) {
+    for ( var selector in this.binding_spec ) {
+        var property = this.binding_spec[ selector ];
+        $row.find( selector ).html( element.get( property ) );
+    }
+    var self = this;
+    $row.click(function () { self.target.set_context( element ) });
 }
 
 $(document).ready(function () {
@@ -129,8 +131,11 @@ $(document).ready(function () {
                     array_controller.context,
                     function ( resource ) {
                         console.log("UPDATED");
-                        array_controller.context.version = resource.version;
-                        array_controller.context.body = resource.body;
+                        array_controller.collection.update(
+                            array_controller.context,
+                            resource
+                        );
+                        array_controller.set_context( resource );
                     },
                     function ( xhr, status, error ) {
                         alert(xhr.status + ' ' + xhr.statusText + ' - ' + xhr.responseText)
