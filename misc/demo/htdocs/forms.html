@@ -8,6 +8,10 @@
     width : 200px;
 }
 
+.selected {
+    background : #cccccc;
+}
+
 </style>
 <script type="text/javascript" src="/static/js/jquery.js"></script>
 <script type="text/javascript" src="/static/js/json2.js"></script>
@@ -18,48 +22,8 @@
 <script type="text/javascript" src="/core/Jackalope/Client/Binding.js"></script>
 <script type="text/javascript" src="/core/Jackalope/Client/Resource.js"></script>
 <script type="text/javascript" src="/core/Jackalope/Client/Controller.js"></script>
+<script type="text/javascript" src="/core/Jackalope/Client/View/TableView.js"></script>
 <script type="text/javascript">
-
-function TableView ( opts ) {
-    this.$table = $( opts["table_body"] );
-    this.$row   = this.$table.find( opts["row_selector"] );
-
-    this.target       = opts["target"];
-    this.binding_spec = opts["binding_spec"];
-
-    this.init();
-}
-
-TableView.prototype.init = function () {
-    this.$table.empty();
-    var collection = this.target.get_collection();
-    for (var i = 0; i < collection.length(); i++) {
-        this.add_new_row( collection, i );
-    }
-};
-
-TableView.prototype.add_new_row = function ( collection, index ) {
-    var self     = this;
-    var $new_row = this.$row.clone(true);
-
-    collection.bind(
-        'update:' + index,
-        function ( c, idx, r ) { self.populate_row( $new_row, r ) }
-    );
-
-    self.populate_row( $new_row, collection.get( index ) )
-
-    this.$table.append( $new_row );
-}
-
-TableView.prototype.populate_row = function ( $row, element ) {
-    for ( var selector in this.binding_spec ) {
-        var property = this.binding_spec[ selector ];
-        $row.find( selector ).html( element.get( property ) );
-    }
-    var self = this;
-    $row.click(function () { self.target.set_context( element ) });
-}
 
 $(document).ready(function () {
 
@@ -93,10 +57,9 @@ $(document).ready(function () {
 
             var err_handler = function (e) { alert(e.message + " : " + e.reason) };
 
-            var array_controller = new Jackalope.Client.ArrayController({
+            var c = new Jackalope.Client.ArrayController({
                 collection : resources,
                 bindings   : [
-                    new Jackalope.Client.Binding.Label({ element : '#user', property : "first_name" }),
                     new Jackalope.Client.Binding ({
                         element       : '#first_name',
                         property      : "first_name",
@@ -116,31 +79,64 @@ $(document).ready(function () {
                 ]
             });
 
-            var view = new TableView ({
+            var v = new Jackalope.Client.View.TableView ({
                 table_body   : '#table_view tbody',
                 row_selector : 'tr',
-                target       : array_controller,
+                data_source  : c.collection,
                 binding_spec : {
                     '.first_name' : 'first_name',
-                    '.last_name'  : 'last_name'
+                    '.last_name'  : 'last_name',
+                    '.age'        : 'age'
                 }
             });
 
+            v.bind('selected', function ( index ) {
+                c.set_context( c.collection.get( index ) )
+            });
+
+            c.bind('clear:context', function () {
+                v.clear_selection()
+            });
+
+            $('#reload').click(function () { v.reload()        });
+            $('#cancel').click(function () { c.clear_context() });
+
             $('#save').click(function () {
-                resource_repo.edit(
-                    array_controller.context,
-                    function ( resource ) {
-                        console.log("UPDATED");
-                        array_controller.collection.update(
-                            array_controller.context,
-                            resource
-                        );
-                        array_controller.set_context( resource );
-                    },
-                    function ( xhr, status, error ) {
-                        alert(xhr.status + ' ' + xhr.statusText + ' - ' + xhr.responseText)
-                    }
-                )
+                console.log(c);
+                if (c.has_context()) {
+                    console.log('UPDATING')
+                    resource_repo.edit(
+                        c.context,
+                        function ( resource ) {
+                            console.log("UPDATED");
+                            c.collection.update( c.get_context(), resource );
+                            c.set_context( resource );
+                        },
+                        function ( xhr, status, error ) {
+                            alert(xhr.status + ' ' + xhr.statusText + ' - ' + xhr.responseText)
+                        }
+                    )
+                }
+                else {
+                    console.log('CREATING');
+                    resource_repo.create(
+                        {
+                            first_name : $('#first_name').val(),
+                            last_name  : $('#last_name').val(),
+                            age        : parseInt( $('#age').val() ),
+                        },
+                        function ( resource ) {
+                            console.log("CREATED");
+                            c.collection.add( resource );
+                            $('#person_form')[0].reset();
+                            v.reload();
+                        },
+                        function ( xhr, status, error ) {
+                            alert(xhr.status + ' ' + xhr.statusText + ' - ' + xhr.responseText)
+                        }
+                    )
+
+                }
             });
 
         },
@@ -155,21 +151,23 @@ $(document).ready(function () {
 </head>
 <body>
 <div>
+    <div><input type="button" id="reload" value="Reload Table" /></div>
+    <hr/>
     <table border="1" width="500" id="table_view">
         <thead>
-            <tr><td>First Name</td><td>Last Name</td></tr>
+            <tr><td>First Name</td><td>Last Name</td><td>Age</td></tr>
         </thead>
         <tbody>
-            <tr><td class="first_name"></td><td class="last_name"></td></tr>
+            <tr><td class="first_name"></td><td class="last_name"></td><td class="age"></td></tr>
         </tbody>
     </table>
     <hr/>
-    <div id="user"></div>
-    <hr/>
+    <form id="person_form">
     <div><div class="label">First Name</div><input type="text" id="first_name" /></div>
     <div><div class="label">Last Name</div><input type="text" id="last_name" /></div>
     <div><div class="label">Age</div><input type="text" id="age" /></div>
-    <div><input type="button" id="save" value="Save"></div>
+    <div><input type="button" id="save" value="Save">&nbsp;<input type="button" id="cancel" value="Cancel"></div>
+    </form>
     <hr/>
 </div>
 </body>
