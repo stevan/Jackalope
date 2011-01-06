@@ -12,12 +12,6 @@
     background : #cccccc;
 }
 
-.error {
-    padding-left : 10px;
-    color        : #880000;
-    display      : none;
-}
-
 </style>
 <script type="text/javascript" src="/static/js/jquery.js"></script>
 <script type="text/javascript" src="/static/js/json2.js"></script>
@@ -91,52 +85,38 @@ $(document).ready(function () {
                 }
             });
 
+            // bind some controller and view events
+
             v.bind('selected', function ( index ) {
-                c.set_context( c.collection.get( index ) )
+                c.set_context( c.collection.get( index ) );
+            });
+
+            c.bind('update:context', function () {
+                $('#person_dialog').show();
             });
 
             c.bind('clear:context', function () {
-                v.clear_selection()
+                v.clear_selection();
+                $('#person_dialog').hide();
             });
+
+            // bind some UI events
 
             $('#reload').click(function () { v.reload()        });
             $('#cancel').click(function () { c.clear_context() });
-
+            $('#add_new').click(function () { c.set_context( new Jackalope.Client.Resource({}) ) });
             $('#save').click(function () {
-                if (c.has_context()) {
-                    console.log('UPDATING');
-                    resource_repo.edit(
-                        c.context,
-                        function ( resource ) {
-                            console.log("UPDATED");
-                            c.collection.update( c.get_context(), resource );
-                            c.set_context( resource );
-                        },
-                        function ( xhr, status, error ) {
-                            alert(xhr.status + ' ' + xhr.statusText + ' - ' + xhr.responseText)
-                        }
-                    )
-                }
-                else {
-                    console.log('CREATING');
-                    resource_repo.create(
-                        {
-                            first_name : $('#first_name').val(),
-                            last_name  : $('#last_name').val(),
-                            age        : parseInt( $('#age').val() ),
-                        },
-                        function ( resource ) {
-                            console.log("CREATED");
-                            c.collection.add( resource );
-                            $('#person_form')[0].reset();
-                            v.add_new_row( c.collection.length() - 1 );
-                        },
-                        function ( xhr, status, error ) {
-                            alert(xhr.status + ' ' + xhr.statusText + ' - ' + xhr.responseText)
-                        }
-                    )
-
-                }
+                resource_repo.create_or_edit(
+                    c.get_context(),
+                    function ( resource ) {
+                        console.log("UPDATED");
+                        c.collection.add_or_update( resource );
+                        c.clear_context();
+                    },
+                    function ( xhr, status, error ) {
+                        alert(xhr.status + ' ' + xhr.statusText + ' - ' + xhr.responseText)
+                    }
+                )
             });
 
         },
@@ -151,7 +131,7 @@ $(document).ready(function () {
 </head>
 <body>
 <div>
-    <div><input type="button" id="reload" value="Reload Table" /></div>
+    <div><input type="button" id="add_new" value="Add New" /><input type="button" id="reload" value="Reload Table" /></div>
     <hr/>
     <table border="1" width="500" id="table_view">
         <thead>
@@ -162,12 +142,14 @@ $(document).ready(function () {
         </tbody>
     </table>
     <hr/>
-    <form id="person_form">
-    <div><div class="label">First Name</div><input type="text" id="first_name" /><span class="error" id="first_name_error"></span></div>
-    <div><div class="label">Last Name</div><input type="text" id="last_name" /><span class="error" id="last_name_error"></span></div>
-    <div><div class="label">Age</div><input type="text" id="age" /><span class="error" id="age_error"></span></div>
-    <div><input type="button" id="save" value="Save">&nbsp;<input type="button" id="cancel" value="Cancel"></div>
-    </form>
+    <div id="person_dialog" style="display:none">
+        <form id="person_form">
+        <div><div class="label">First Name</div><input type="text" id="first_name" /></div>
+        <div><div class="label">Last Name</div><input type="text" id="last_name" /></div>
+        <div><div class="label">Age</div><input type="text" id="age" /></div>
+        <div><input type="button" id="save" value="Save">&nbsp;<input type="button" id="cancel" value="Cancel"></div>
+        </form>
+    </div>
     <hr/>
 </div>
 </body>
