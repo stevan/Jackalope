@@ -27,11 +27,13 @@
 
 $(document).ready(function () {
 
+    // load up our schema repository ...
     var repo = new Jackalope.Schema.Repository ({
         spec      : new Jackalope.Schema.Spec({ spec_url : "/spec/spec.json" }),
         validator : new Jackalope.Schema.Validator ()
     });
 
+    // register our schema (we should actually be getting this from the server)
     repo.register_schema(
         {
             "id"         : 'simple/person',
@@ -45,18 +47,26 @@ $(document).ready(function () {
         }
     );
 
+    // now connect to the resource repository
+    // which is what communicates with the server
     var resource_repo = new Jackalope.Client.Resource.Repository({
         base_url          : '/people',
         schema            : repo.get_compiled_schema_by_uri("simple/person"),
         schema_repository : repo
     });
 
+    // fetch the list of resources
     resource_repo.list(
         {},
         function ( resources ) {
 
+            // the array controller basically manages
+            // a collection of some kind
             var c = new Jackalope.Client.ArrayController({
+                // the resource set
                 collection : resources,
+                // additional bindings to be applied
+                // on the current selected context
                 bindings   : [
                     new Jackalope.Client.Binding ({
                         element  : '#first_name',
@@ -69,15 +79,24 @@ $(document).ready(function () {
                     new Jackalope.Client.Binding ({
                         element     : '#age',
                         property    : "age",
+                        // transform this value
+                        // into a proper number
                         transformer : function (age) { return parseInt( age ) }
                     })
                 ]
             });
 
+            // this is the table view,
             var v = new Jackalope.Client.View.TableView ({
-                table_body   : '#table_view tbody',
-                row_selector : 'tr',
+                // it binds to the controller's
+                // collection as the data source
                 data_source  : c.collection,
+                // the table element
+                table_body   : '#table_view tbody',
+                // the select for the row template
+                row_selector : 'tr',
+                // this binds a row to the elements
+                // in the collection
                 binding_spec : {
                     '.first_name' : 'first_name',
                     '.last_name'  : 'last_name',
@@ -85,32 +104,66 @@ $(document).ready(function () {
                 }
             });
 
-            // bind some controller and view events
+            // ... bind some controller and view events
 
+            // when an element in the table view is
+            // clicked, it fires the selected event
             v.bind('selected', function ( index ) {
+                // and here we tell it to set the
+                // context in the controller
                 c.set_context( c.collection.get( index ) );
             });
 
+            // when the controller context is
+            // set it fires this event
             c.bind('update:context', function () {
+                // here we show the dialog with the
+                // person form in it whenever the
+                // controller context is set
                 $('#person_dialog').show();
             });
 
+            // when the controller context is
+            // cleared it fires this event
             c.bind('clear:context', function () {
+                // this clears the selection in
+                // the table view
                 v.clear_selection();
+                // and hides the dialog
                 $('#person_dialog').hide();
             });
 
-            // bind some UI events
+            // ... bind some UI events
 
-            $('#reload').click(function () { v.reload()        });
-            $('#cancel').click(function () { c.clear_context() });
+            // reload the table view
+            $('#reload').click(function () { v.reload() });
+
+            // this creates a new resource in
+            // the controller context for adding
+            // a new element and binding to the form
             $('#add_new').click(function () { c.set_context( new Jackalope.Client.Resource({}) ) });
+
+            // cancel in the person form
+            // clears the controller context
+            // which itself fires events
+            $('#cancel').click(function () { c.clear_context() });
+
+            // when save is clicked it
+            // will attempt to either
+            // create or edit the current
+            // context in the controller
             $('#save').click(function () {
                 resource_repo.create_or_edit(
                     c.get_context(),
                     function ( resource ) {
                         console.log("UPDATED");
+                        // if it succeeds, it will
+                        // add or update it in the
+                        // collection, which will
+                        // fire events that the table
+                        // view is watching
                         c.collection.add_or_update( resource );
+                        // now we clear the form
                         c.clear_context();
                     },
                     function ( xhr, status, error ) {
