@@ -136,7 +136,10 @@ $(document).ready(function () {
             // ... bind some UI events
 
             // reload the table view
-            $('#reload').click(function () { v.reload() });
+            $('#reload').click(function () {
+                v.reload();
+                c.clear_context();
+            });
 
             // this creates a new resource in
             // the controller context for adding
