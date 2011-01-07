@@ -101,13 +101,9 @@ var r_repo = new Jackalope.Client.Resource.Repository({
 
 // ------------------------------------------------------------------------
 
-$(document).ready(function () {
-
-    // this is basically the nib in Cocoa terms ...
-
-    var controller = new ResourceController({ resource_repo : r_repo });
-
-    var table_view = new Jackalope.Client.View.TableView ({
+var App = {
+    controller : new ResourceController({ resource_repo : r_repo }),
+    table_view : new Jackalope.Client.View.TableView ({
         table_body   : '#table_view tbody',
         row_selector : 'tr',
         binding_spec : {
@@ -115,9 +111,8 @@ $(document).ready(function () {
             '.last_name'  : 'last_name',
             '.age'        : 'age'
         }
-    });
-
-    var panel_view = new Jackalope.Client.View.Panel({
+    }),
+    panel_view : new Jackalope.Client.View.Panel({
         element  : '#person_dialog',
         bindings : [
             new Jackalope.Client.Binding.Outlet ({
@@ -134,59 +129,63 @@ $(document).ready(function () {
                 transformer : function (age) { return parseInt( age ) }
             })
         ]
-    })
-
-    var reload_button = new Jackalope.Client.Binding.Action({
+    }),
+    reload_button : new Jackalope.Client.Binding.Action({
         element       : '#reload',
         event_type    : 'click',
         target_action : 'reload',
-        target        : table_view
-    });
-
-    var add_new_button = new Jackalope.Client.Binding.Action({
+    }),
+    add_new_button : new Jackalope.Client.Binding.Action({
         element       : '#add_new',
         event_type    : 'click',
         target_action : 'add_new_resource_to_context',
-        target        : controller
-    });
-
-    var cancel_button = new Jackalope.Client.Binding.Action({
+    }),
+    cancel_button : new Jackalope.Client.Binding.Action({
         element       : '#cancel',
         event_type    : 'click',
         target_action : 'clear_context',
-        target        : controller
-    });
-
-    var save_button = new Jackalope.Client.Binding.Action({
+    }),
+    save_button : new Jackalope.Client.Binding.Action({
         element       : '#save',
         event_type    : 'click',
-        target_action : 'save_current_context',
-        target        : controller
-    });
+        target_action : 'save_current_context'
+    }),
+    awaken : function () {
+        var self = this;
 
-    // set up some observations ...
+        self.reload_button.set_target( self.table_view );
+        self.add_new_button.set_target( self.controller );
+        self.cancel_button.set_target( self.controller );
+        self.save_button.set_target( self.controller );
 
-    controller.bind('update:data_source', function (c, data_source) {
-        table_view.set_data_source( data_source );
-    });
+        self.controller.bind('update:data_source', function (c, data_source) {
+            self.table_view.set_data_source( data_source );
+        });
 
-    table_view.bind('reloaded', function () { controller.clear_context() });
-    table_view.bind('selected', function ( index ) {
-        controller.set_context( controller.data_source.get( index ) );
-    });
+        self.table_view.bind('reloaded', function () { self.controller.clear_context() });
+        self.table_view.bind('selected', function ( index ) {
+            self.controller.set_context( self.controller.data_source.get( index ) );
+        });
 
-    panel_view.bind('update:data_source', function ( p ) { p.show() });
-    panel_view.bind('clear:data_source',  function ( p ) { p.hide() });
+        self.panel_view.bind('update:data_source', function ( p ) { p.show() });
+        self.panel_view.bind('clear:data_source',  function ( p ) { p.hide() });
 
-    controller.bind('update:context', function (c, context) {
-        panel_view.set_data_source( context );
-    });
-    controller.bind('clear:context', function () {
-        table_view.clear_selection();
-        panel_view.clear_data_source();
-    });
+        self.controller.bind('update:context', function (c, context) {
+            self.panel_view.set_data_source( context );
+        });
+        self.controller.bind('clear:context', function () {
+            self.table_view.clear_selection();
+            self.panel_view.clear_data_source();
+        });
 
-    controller.fetch_data_source();
+        self.controller.fetch_data_source();
+
+        return self;
+    }
+};
+
+$(document).ready(function () {
+    App.awaken();
 });
 
 </script>
