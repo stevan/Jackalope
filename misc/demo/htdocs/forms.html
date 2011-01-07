@@ -25,162 +25,193 @@
 <script type="text/javascript" src="/core/Jackalope/Client/View/TableView.js"></script>
 <script type="text/javascript">
 
-$(document).ready(function () {
+Jackalope.Client.Binding.Action = function (opts) {
+    this.target  = opts["target"];
+    this.action  = opts["action"];
+    this.element = opts["element"];
+    if (this.target) {
+        this.init();
+    }
+}
 
-    // load up our schema repository ...
-    var repo = new Jackalope.Schema.Repository ({
-        spec      : new Jackalope.Schema.Spec({ spec_url : "/spec/spec.json" }),
-        validator : new Jackalope.Schema.Validator ()
+Jackalope.Client.Binding.Action.prototype.init = function () {
+    var self = this;
+    $( this.element ).click(function () {
+        self.target[self.action]()
     });
+}
 
-    // register our schema (we should actually be getting this from the server)
-    repo.register_schema(
-        {
-            "id"         : 'simple/person',
-            "title"      : 'This is a simple person schema',
-            "extends"    : { '$ref' : 'schema/web/service/crud' },
-            "properties" : {
-                "first_name" : { "type" : 'string' },
-                "last_name"  : { "type" : 'string' },
-                "age"        : { "type" : 'integer', "greater_than" : 0, "less_than" : 125 },
-            }
+Jackalope.Client.Binding.Action.prototype.set_target = function (target) {
+    this.target = target;
+    this.init();
+}
+
+// -----------------------------------------------------------
+
+function ResourceController ( opts ) {
+    this.data_source   = opts["data_source"];
+    this.resource_repo = opts["resource_repo"];
+    this.actions       = opts['actions'];
+    this.views         = opts['views'];
+    this.outlets       = opts['outlets'];
+}
+
+ResourceController.prototype = new Jackalope.Client.Controller ();
+
+ResourceController.prototype.set_data_source = function ( data_source ) {
+    this.data_source = data_source;
+};
+
+ResourceController.prototype.setup = function () {
+    var self = this;
+
+    with (this.views) {
+        table.set_data_source( this.data_source );
+        table.bind('selected', function ( index ) {
+            self.set_context( self.data_source.get( index ) );
+        });
+    }
+
+    for (var name in this.actions) {
+        this.actions[name].set_target( this );
+    }
+
+    this.bind('update:context', function () {
+        $('#person_dialog').show();
+        for (var name in self.outlets) {
+            self.outlets[name].set_target( self.get_context() );
         }
-    );
-
-    // now connect to the resource repository
-    // which is what communicates with the server
-    var resource_repo = new Jackalope.Client.Resource.Repository({
-        base_url          : '/people',
-        schema            : repo.get_compiled_schema_by_uri("simple/person"),
-        schema_repository : repo
     });
 
-    // fetch the list of resources
-    resource_repo.list(
+    this.bind('clear:context', function () {
+        self.views.table.clear_selection();
+        $('#person_dialog').hide();
+        for (var name in self.outlets) {
+            self.outlets[name].clear_target();
+        }
+    });
+};
+
+ResourceController.prototype.add_new_resource_to_context = function () {
+    this.views.table.clear_selection();
+    this.set_context( new Jackalope.Client.Resource({}) )
+};
+
+ResourceController.prototype.reload_table = function () {
+    this.views.table.reload();
+    this.clear_context();
+};
+
+ResourceController.prototype.save_current_context = function () {
+    var self = this;
+    this.resource_repo.create_or_edit(
+        this.get_context(),
+        function ( resource ) {
+            console.log("UPDATED");
+            self.data_source.add_or_update( resource );
+            self.clear_context();
+        },
+        function ( xhr, status, error ) {
+            alert(xhr.status + ' ' + xhr.statusText + ' - ' + xhr.responseText)
+        }
+    )
+};
+
+ResourceController.prototype.fetch_data_source = function () {
+    var self = this;
+    this.resource_repo.list(
         {},
         function ( resources ) {
+            self.set_data_source( resources );
+            self.setup();
+        },
+        function ( xhr, status, error ) {
+            alert(xhr.status + ' ' + xhr.statusText + ' - ' + xhr.responseText)
+        }
+    )
+};
 
-            // the array controller basically manages
-            // a collection of some kind
-            var c = new Jackalope.Client.ArrayController({
-                // the resource set
-                collection : resources,
-                // additional bindings to be applied
-                // on the current selected context
-                bindings   : [
-                    new Jackalope.Client.Binding ({
-                        element  : '#first_name',
-                        property : "first_name"
-                    }),
-                    new Jackalope.Client.Binding ({
-                        element  : '#last_name',
-                        property : "last_name",
-                    }),
-                    new Jackalope.Client.Binding ({
-                        element     : '#age',
-                        property    : "age",
-                        // transform this value
-                        // into a proper number
-                        transformer : function (age) { return parseInt( age ) }
-                    })
-                ]
-            });
+// --------------------------------------------------------------------------
 
-            // this is the table view,
-            var v = new Jackalope.Client.View.TableView ({
-                // it binds to the controller's
-                // collection as the data source
-                data_source  : c.collection,
-                // the table element
+// load up our schema repository ...
+var repo = new Jackalope.Schema.Repository ({
+    spec      : new Jackalope.Schema.Spec({ spec_url : "/spec/spec.json" }),
+    validator : new Jackalope.Schema.Validator ()
+});
+
+// register our schema (we should actually be getting this from the server)
+repo.register_schema(
+    {
+        "id"         : 'simple/person',
+        "title"      : 'This is a simple person schema',
+        "extends"    : { '$ref' : 'schema/web/service/crud' },
+        "properties" : {
+            "first_name" : { "type" : 'string' },
+            "last_name"  : { "type" : 'string' },
+            "age"        : { "type" : 'integer', "greater_than" : 0, "less_than" : 125 },
+        }
+    }
+);
+
+var r_repo = new Jackalope.Client.Resource.Repository({
+    base_url          : '/people',
+    schema            : repo.get_compiled_schema_by_uri("simple/person"),
+    schema_repository : repo
+});
+
+// ------------------------------------------------------------------------
+
+$(document).ready(function () {
+
+    var c = new ResourceController({
+        resource_repo : r_repo,
+        views : {
+            table : new Jackalope.Client.View.TableView ({
                 table_body   : '#table_view tbody',
-                // the select for the row template
                 row_selector : 'tr',
-                // this binds a row to the elements
-                // in the collection
                 binding_spec : {
                     '.first_name' : 'first_name',
                     '.last_name'  : 'last_name',
                     '.age'        : 'age'
                 }
-            });
-
-            // ... bind some controller and view events
-
-            // when an element in the table view is
-            // clicked, it fires the selected event
-            v.bind('selected', function ( index ) {
-                // and here we tell it to set the
-                // context in the controller
-                c.set_context( c.collection.get( index ) );
-            });
-
-            // when the controller context is
-            // set it fires this event
-            c.bind('update:context', function () {
-                // here we show the dialog with the
-                // person form in it whenever the
-                // controller context is set
-                $('#person_dialog').show();
-            });
-
-            // when the controller context is
-            // cleared it fires this event
-            c.bind('clear:context', function () {
-                // this clears the selection in
-                // the table view
-                v.clear_selection();
-                // and hides the dialog
-                $('#person_dialog').hide();
-            });
-
-            // ... bind some UI events
-
-            // reload the table view
-            $('#reload').click(function () {
-                v.reload();
-                c.clear_context();
-            });
-
-            // this creates a new resource in
-            // the controller context for adding
-            // a new element and binding to the form
-            $('#add_new').click(function () { c.set_context( new Jackalope.Client.Resource({}) ) });
-
-            // cancel in the person form
-            // clears the controller context
-            // which itself fires events
-            $('#cancel').click(function () { c.clear_context() });
-
-            // when save is clicked it
-            // will attempt to either
-            // create or edit the current
-            // context in the controller
-            $('#save').click(function () {
-                resource_repo.create_or_edit(
-                    c.get_context(),
-                    function ( resource ) {
-                        console.log("UPDATED");
-                        // if it succeeds, it will
-                        // add or update it in the
-                        // collection, which will
-                        // fire events that the table
-                        // view is watching
-                        c.collection.add_or_update( resource );
-                        // now we clear the form
-                        c.clear_context();
-                    },
-                    function ( xhr, status, error ) {
-                        alert(xhr.status + ' ' + xhr.statusText + ' - ' + xhr.responseText)
-                    }
-                )
-            });
-
+            })
         },
-        function ( xhr, status, error ) {
-            alert(xhr.status + ' ' + xhr.statusText + ' - ' + xhr.responseText)
+        outlets : {
+            first_name : new Jackalope.Client.Binding ({
+                element  : '#first_name',
+                property : "first_name"
+            }),
+            last_name : new Jackalope.Client.Binding ({
+                element  : '#last_name',
+                property : "last_name",
+            }),
+            age : new Jackalope.Client.Binding ({
+                element     : '#age',
+                property    : "age",
+                transformer : function (age) { return parseInt( age ) }
+            })
+        },
+        actions : {
+            reload_table : new Jackalope.Client.Binding.Action ({
+                action  : 'reload_table',
+                element : '#reload'
+            }),
+            add_new : new Jackalope.Client.Binding.Action({
+                action  : 'add_new_resource_to_context',
+                element : '#add_new'
+            }),
+            cancel : new Jackalope.Client.Binding.Action({
+                action  : 'clear_context',
+                element : '#cancel'
+            }),
+            save : new Jackalope.Client.Binding.Action({
+                action  : 'save_current_context',
+                element : '#save'
+            })
         }
-    );
+    });
 
+    c.fetch_data_source();
 });
 
 </script>
