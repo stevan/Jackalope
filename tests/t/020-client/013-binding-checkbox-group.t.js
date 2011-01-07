@@ -27,7 +27,7 @@ test(
                        + "<input type='checkbox' name='title' value='sysadmin' />"
                        + "</div>");
 
-            var binding = new Jackalope.Client.Binding.CheckboxGroup ({
+            var binding = new Jackalope.Client.Binding.Outlet.CheckboxGroup ({
                 element  : $doc.find('input:checkbox'),
                 target   : r,
                 property : "titles"

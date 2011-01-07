@@ -25,13 +25,13 @@ test(
             var $input = $doc.find('input');
             var $label = $doc.find('.name');
 
-            var b1 = new Jackalope.Client.Binding ({
+            var b1 = new Jackalope.Client.Binding.Outlet ({
                 element  : $input,
                 target   : r,
                 property : "first_name"
             });
 
-            var b2 = new Jackalope.Client.Binding.Label ({
+            var b2 = new Jackalope.Client.Binding.Outlet.Label ({
                 element  : $label,
                 target   : r,
                 property : "first_name"

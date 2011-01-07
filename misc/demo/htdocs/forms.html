@@ -25,28 +25,6 @@
 <script type="text/javascript" src="/core/Jackalope/Client/View/TableView.js"></script>
 <script type="text/javascript">
 
-Jackalope.Client.Binding.Action = function (opts) {
-    this.target  = opts["target"];
-    this.action  = opts["action"];
-    this.element = opts["element"];
-    if (this.target) {
-        this.init();
-    }
-}
-
-Jackalope.Client.Binding.Action.prototype.init = function () {
-    var self = this;
-    $( this.element ).click(function () {
-        self.target[self.action]()
-    });
-}
-
-Jackalope.Client.Binding.Action.prototype.set_target = function (target) {
-    this.target = target;
-    this.init();
-}
-
-// -----------------------------------------------------------
 
 function ResourceController ( opts ) {
     this.data_source   = opts["data_source"];

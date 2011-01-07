@@ -23,7 +23,7 @@ test(
 
             var $input = $("<input type='text'/>");
 
-            var binding = new Jackalope.Client.Binding ({
+            var binding = new Jackalope.Client.Binding.Outlet ({
                 element  : $input,
                 target   : r,
                 property : "first_name"
@@ -56,7 +56,7 @@ test(
                 ]
             });
 
-            var binding = new Jackalope.Client.Binding ({
+            var binding = new Jackalope.Client.Binding.Outlet ({
                 element  : "<input type='text'/>",
                 target   : r,
                 property : "first_name"
@@ -89,7 +89,7 @@ test(
                 ]
             });
 
-            var binding = new Jackalope.Client.Binding ({
+            var binding = new Jackalope.Client.Binding.Outlet ({
                 element  : "<input type='text'/>",
                 property : "first_name"
             });
@@ -133,7 +133,7 @@ test(
                 ]
             });
 
-            var binding = new Jackalope.Client.Binding ({
+            var binding = new Jackalope.Client.Binding.Outlet ({
                 element     : "<input type='text'/>",
                 target      : r,
                 property    : "age",
@@ -164,7 +164,7 @@ test(
                 ]
             });
 
-            var binding = new Jackalope.Client.Binding ({
+            var binding = new Jackalope.Client.Binding.Outlet ({
                 element     : "<input type='text'/>",
                 target      : r,
                 property    : "name.first",
