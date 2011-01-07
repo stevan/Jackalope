@@ -23,7 +23,7 @@ test(
 
             var $doc = $("<div><input type='radio' name='sex' value='male' /><input type='radio' name='sex' value='female' /></div>");
 
-            var binding = new Jackalope.Client.Binding.RadioGroup ({
+            var binding = new Jackalope.Client.Binding.Outlet.RadioGroup ({
                 element  : $doc.find('input:radio'),
                 target   : r,
                 property : "sex"

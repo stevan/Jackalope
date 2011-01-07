@@ -18,7 +18,7 @@ test(
         var c = new Jackalope.Client.Controller ({
             context  : resource,
             bindings : [
-                new Jackalope.Client.Binding ({
+                new Jackalope.Client.Binding.Outlet ({
                     element  : $input,
                     property : "first_name"
                 })

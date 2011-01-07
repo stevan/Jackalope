@@ -68,15 +68,15 @@ $(document).ready(function () {
                 // additional bindings to be applied
                 // on the current selected context
                 bindings   : [
-                    new Jackalope.Client.Binding ({
+                    new Jackalope.Client.Binding.Outlet ({
                         element  : '#first_name',
                         property : "first_name"
                     }),
-                    new Jackalope.Client.Binding ({
+                    new Jackalope.Client.Binding.Outlet ({
                         element  : '#last_name',
                         property : "last_name",
                     }),
-                    new Jackalope.Client.Binding ({
+                    new Jackalope.Client.Binding.Outlet ({
                         element     : '#age',
                         property    : "age",
                         // transform this value

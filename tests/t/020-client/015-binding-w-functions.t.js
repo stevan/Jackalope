@@ -28,7 +28,7 @@ test(
 
             var $input = $("<input type='text'/>");
 
-            var binding = new Jackalope.Client.Binding ({
+            var binding = new Jackalope.Client.Binding.Outlet ({
                 element  : $input,
                 target   : c,
                 property : "first_name"
@@ -50,7 +50,7 @@ test(
 
             var $input = $("<input type='text'/>");
 
-            var binding = new Jackalope.Client.Binding ({
+            var binding = new Jackalope.Client.Binding.Outlet ({
                 element  : $input,
                 target   : c,
                 property : "chain.first_name"
@@ -72,7 +72,7 @@ test(
 
             var $input = $("<input type='text'/>");
 
-            var binding = new Jackalope.Client.Binding ({
+            var binding = new Jackalope.Client.Binding.Outlet ({
                 element  : $input,
                 target   : c,
                 property : "chain.chain.chain.chain.first_name"
