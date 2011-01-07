@@ -23,61 +23,24 @@
 <script type="text/javascript" src="/core/Jackalope/Client/Resource.js"></script>
 <script type="text/javascript" src="/core/Jackalope/Client/Controller.js"></script>
 <script type="text/javascript" src="/core/Jackalope/Client/View/TableView.js"></script>
+<script type="text/javascript" src="/core/Jackalope/Client/View/Panel.js"></script>
 <script type="text/javascript">
-
 
 function ResourceController ( opts ) {
     this.data_source   = opts["data_source"];
     this.resource_repo = opts["resource_repo"];
-    this.actions       = opts['actions'];
-    this.views         = opts['views'];
-    this.outlets       = opts['outlets'];
 }
 
 ResourceController.prototype = new Jackalope.Client.Controller ();
 
 ResourceController.prototype.set_data_source = function ( data_source ) {
     this.data_source = data_source;
-};
-
-ResourceController.prototype.setup = function () {
-    var self = this;
-
-    with (this.views) {
-        table.set_data_source( this.data_source );
-        table.bind('selected', function ( index ) {
-            self.set_context( self.data_source.get( index ) );
-        });
-    }
-
-    for (var name in this.actions) {
-        this.actions[name].set_target( this );
-    }
-
-    this.bind('update:context', function () {
-        $('#person_dialog').show();
-        for (var name in self.outlets) {
-            self.outlets[name].set_target( self.get_context() );
-        }
-    });
-
-    this.bind('clear:context', function () {
-        self.views.table.clear_selection();
-        $('#person_dialog').hide();
-        for (var name in self.outlets) {
-            self.outlets[name].clear_target();
-        }
-    });
+    this.trigger('update:data_source', this, data_source);
 };
 
 ResourceController.prototype.add_new_resource_to_context = function () {
-    this.views.table.clear_selection();
-    this.set_context( new Jackalope.Client.Resource({}) )
-};
-
-ResourceController.prototype.reload_table = function () {
-    this.views.table.reload();
     this.clear_context();
+    this.set_context( new Jackalope.Client.Resource({}) )
 };
 
 ResourceController.prototype.save_current_context = function () {
@@ -101,7 +64,6 @@ ResourceController.prototype.fetch_data_source = function () {
         {},
         function ( resources ) {
             self.set_data_source( resources );
-            self.setup();
         },
         function ( xhr, status, error ) {
             alert(xhr.status + ' ' + xhr.statusText + ' - ' + xhr.responseText)
@@ -141,55 +103,90 @@ var r_repo = new Jackalope.Client.Resource.Repository({
 
 $(document).ready(function () {
 
-    var c = new ResourceController({
-        resource_repo : r_repo,
-        views : {
-            table : new Jackalope.Client.View.TableView ({
-                table_body   : '#table_view tbody',
-                row_selector : 'tr',
-                binding_spec : {
-                    '.first_name' : 'first_name',
-                    '.last_name'  : 'last_name',
-                    '.age'        : 'age'
-                }
-            })
-        },
-        outlets : {
-            first_name : new Jackalope.Client.Binding ({
+    // this is basically the nib in Cocoa terms ...
+
+    var controller = new ResourceController({ resource_repo : r_repo });
+
+    var table_view = new Jackalope.Client.View.TableView ({
+        table_body   : '#table_view tbody',
+        row_selector : 'tr',
+        binding_spec : {
+            '.first_name' : 'first_name',
+            '.last_name'  : 'last_name',
+            '.age'        : 'age'
+        }
+    });
+
+    var panel_view = new Jackalope.Client.View.Panel({
+        element  : '#person_dialog',
+        bindings : [
+            new Jackalope.Client.Binding.Outlet ({
                 element  : '#first_name',
                 property : "first_name"
             }),
-            last_name : new Jackalope.Client.Binding ({
+            new Jackalope.Client.Binding.Outlet ({
                 element  : '#last_name',
                 property : "last_name",
             }),
-            age : new Jackalope.Client.Binding ({
+            new Jackalope.Client.Binding.Outlet ({
                 element     : '#age',
                 property    : "age",
                 transformer : function (age) { return parseInt( age ) }
             })
-        },
-        actions : {
-            reload_table : new Jackalope.Client.Binding.Action ({
-                action  : 'reload_table',
-                element : '#reload'
-            }),
-            add_new : new Jackalope.Client.Binding.Action({
-                action  : 'add_new_resource_to_context',
-                element : '#add_new'
-            }),
-            cancel : new Jackalope.Client.Binding.Action({
-                action  : 'clear_context',
-                element : '#cancel'
-            }),
-            save : new Jackalope.Client.Binding.Action({
-                action  : 'save_current_context',
-                element : '#save'
-            })
-        }
+        ]
+    })
+
+    var reload_button = new Jackalope.Client.Binding.Action({
+        element       : '#reload',
+        event_type    : 'click',
+        target_action : 'reload',
+        target        : table_view
     });
 
-    c.fetch_data_source();
+    var add_new_button = new Jackalope.Client.Binding.Action({
+        element       : '#add_new',
+        event_type    : 'click',
+        target_action : 'add_new_resource_to_context',
+        target        : controller
+    });
+
+    var cancel_button = new Jackalope.Client.Binding.Action({
+        element       : '#cancel',
+        event_type    : 'click',
+        target_action : 'clear_context',
+        target        : controller
+    });
+
+    var save_button = new Jackalope.Client.Binding.Action({
+        element       : '#save',
+        event_type    : 'click',
+        target_action : 'save_current_context',
+        target        : controller
+    });
+
+    // set up some observations ...
+
+    controller.bind('update:data_source', function (c, data_source) {
+        table_view.set_data_source( data_source );
+    });
+
+    table_view.bind('reloaded', function () { controller.clear_context() });
+    table_view.bind('selected', function ( index ) {
+        controller.set_context( controller.data_source.get( index ) );
+    });
+
+    panel_view.bind('update:data_source', function ( p ) { p.show() });
+    panel_view.bind('clear:data_source',  function ( p ) { p.hide() });
+
+    controller.bind('update:context', function (c, context) {
+        panel_view.set_data_source( context );
+    });
+    controller.bind('clear:context', function () {
+        table_view.clear_selection();
+        panel_view.clear_data_source();
+    });
+
+    controller.fetch_data_source();
 });
 
 </script>
