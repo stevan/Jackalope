@@ -19,6 +19,7 @@
 <script type="text/javascript" src="/core/Jackalope/Util.js"></script>
 <script type="text/javascript" src="/core/Jackalope/Schema.js"></script>
 <script type="text/javascript" src="/core/Jackalope/Client.js"></script>
+<script type="text/javascript" src="/core/Jackalope/Client/Application.js"></script>
 <script type="text/javascript" src="/core/Jackalope/Client/Binding.js"></script>
 <script type="text/javascript" src="/core/Jackalope/Client/Resource.js"></script>
 <script type="text/javascript" src="/core/Jackalope/Client/Controller.js"></script>
@@ -32,6 +33,10 @@ function ResourceController ( opts ) {
 }
 
 ResourceController.prototype = new Jackalope.Client.Controller ();
+
+ResourceController.prototype.main = function () {
+    this.fetch_data_source();
+}
 
 ResourceController.prototype.set_data_source = function ( data_source ) {
     this.data_source = data_source;
@@ -101,56 +106,59 @@ var r_repo = new Jackalope.Client.Resource.Repository({
 
 // ------------------------------------------------------------------------
 
-var App = {
-    controller : new ResourceController({ resource_repo : r_repo }),
-    table_view : new Jackalope.Client.View.TableView ({
-        table_body   : '#table_view tbody',
-        row_selector : 'tr',
-        binding_spec : {
-            '.first_name' : 'first_name',
-            '.last_name'  : 'last_name',
-            '.age'        : 'age'
-        }
-    }),
-    panel_view : new Jackalope.Client.View.Panel({
-        element  : '#person_dialog',
-        bindings : [
-            new Jackalope.Client.Binding.Outlet ({
-                element  : '#first_name',
-                property : "first_name"
-            }),
-            new Jackalope.Client.Binding.Outlet ({
-                element  : '#last_name',
-                property : "last_name",
-            }),
-            new Jackalope.Client.Binding.Outlet ({
-                element     : '#age',
-                property    : "age",
-                transformer : function (age) { return parseInt( age ) }
-            })
-        ]
-    }),
-    reload_button : new Jackalope.Client.Binding.Action({
-        element       : '#reload',
-        event_type    : 'click',
-        target_action : 'reload',
-    }),
-    add_new_button : new Jackalope.Client.Binding.Action({
-        element       : '#add_new',
-        event_type    : 'click',
-        target_action : 'add_new_resource_to_context',
-    }),
-    cancel_button : new Jackalope.Client.Binding.Action({
-        element       : '#cancel',
-        event_type    : 'click',
-        target_action : 'clear_context',
-    }),
-    save_button : new Jackalope.Client.Binding.Action({
-        element       : '#save',
-        event_type    : 'click',
-        target_action : 'save_current_context'
-    }),
-    awaken : function () {
+var app = new Jackalope.Client.Application({
+    nib : {
+        controller : new ResourceController({ resource_repo : r_repo }),
+        table_view : new Jackalope.Client.View.TableView ({
+            table_body   : '#table_view tbody',
+            row_selector : 'tr',
+            binding_spec : {
+                '.first_name' : 'first_name',
+                '.last_name'  : 'last_name',
+                '.age'        : 'age'
+            }
+        }),
+        panel_view : new Jackalope.Client.View.Panel({
+            element  : '#person_dialog',
+            bindings : [
+                new Jackalope.Client.Binding.Outlet ({
+                    element  : '#first_name',
+                    property : "first_name"
+                }),
+                new Jackalope.Client.Binding.Outlet ({
+                    element  : '#last_name',
+                    property : "last_name",
+                }),
+                new Jackalope.Client.Binding.Outlet ({
+                    element     : '#age',
+                    property    : "age",
+                    transformer : function (age) { return parseInt( age ) }
+                })
+            ]
+        }),
+        reload_button : new Jackalope.Client.Binding.Action({
+            element       : '#reload',
+            event_type    : 'click',
+            target_action : 'reload',
+        }),
+        add_new_button : new Jackalope.Client.Binding.Action({
+            element       : '#add_new',
+            event_type    : 'click',
+            target_action : 'add_new_resource_to_context',
+        }),
+        cancel_button : new Jackalope.Client.Binding.Action({
+            element       : '#cancel',
+            event_type    : 'click',
+            target_action : 'clear_context',
+        }),
+        save_button : new Jackalope.Client.Binding.Action({
+            element       : '#save',
+            event_type    : 'click',
+            target_action : 'save_current_context'
+        }),
+    },
+    first_responder : 'controller',
+    awake_from_nib : function () {
         var self = this;
 
         self.reload_button.set_target( self.table_view );
@@ -177,15 +185,11 @@ var App = {
             self.table_view.clear_selection();
             self.panel_view.clear_data_source();
         });
-
-        self.controller.fetch_data_source();
-
-        return self;
     }
-};
+});
 
 $(document).ready(function () {
-    App.awaken();
+    app.main();
 });
 
 </script>
