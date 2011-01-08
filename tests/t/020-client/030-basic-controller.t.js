@@ -3,37 +3,27 @@ test(
     "Basic Controller test",
     function() {
 
-        var $input = $("<input type='text'/>");
+        var controller = new Jackalope.Client.Controller ({});
+        ok(controller instanceof Jackalope.Client.Controller, "... we are an instance of Jackalope.Client.Controller");
 
-        var resource = new Jackalope.Client.Resource ({
-            "id"   : "stevan",
-            "body" : {
-                "first_name" : "Stevan",
-                "last_name"  : "Little"
-            },
-            "version" : "fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2",
-            "links"   : []
+        ok(!controller.has_context(), '... no context for this controller');
+
+        var context = {};
+        controller.bind('update:context', function (c, ctx) {
+            ok(c === controller, '... got passed the controller instance');
+            ok(ctx === context, '... got passed the context we set');
+        });
+        controller.bind('clear:context', function (c) {
+            ok(c === controller, '... got passed the controller instance');
         });
 
-        var c = new Jackalope.Client.Controller ({
-            context  : resource,
-            bindings : [
-                new Jackalope.Client.Binding.Outlet ({
-                    element  : $input,
-                    property : "first_name"
-                })
-            ]
-        });
-        ok(c instanceof Jackalope.Client.Controller, "... we are an instance of Jackalope.Client.Controller");
+        controller.set_context( context );
+        ok(controller.has_context(), '... we now have context for this controller');
 
-        equal($input.val(), "Stevan", "... got the right value for the DOM after initial binding");
+        ok(controller.get_context() === context, '... got have the context we set');
 
-        c.context.set("first_name", "Steve");
-        equal(c.context.get('first_name'), "Steve", "... got the right value for updated resource");
-        equal($input.val(), "Steve", "... got the right value for the DOM after changing resource");
+        controller.clear_context();
+        ok(!controller.has_context(), '... no context for this controller anymore');
 
-        $input.val("Scott");
-        $input.trigger('change'); // gotta manually trigger this in the test
-        equal(c.context.get('first_name'), "Scott", "... got the right value for updated resource after changing DOM");
     }
 );
