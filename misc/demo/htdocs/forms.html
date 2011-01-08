@@ -159,31 +159,31 @@ var app = new Jackalope.Client.Application({
     },
     first_responder : 'controller',
     awake_from_nib : function () {
-        var self = this;
+        var nib = this;
 
-        self.reload_button.set_target( self.table_view );
-        self.add_new_button.set_target( self.controller );
-        self.cancel_button.set_target( self.controller );
-        self.save_button.set_target( self.controller );
+        nib.reload_button.set_target( nib.table_view );
+        nib.add_new_button.set_target( nib.controller );
+        nib.cancel_button.set_target( nib.controller );
+        nib.save_button.set_target( nib.controller );
 
-        self.controller.bind('update:data_source', function (c, data_source) {
-            self.table_view.set_data_source( data_source );
+        nib.controller.bind('update:data_source', function (c, data_source) {
+            nib.table_view.set_data_source( data_source );
         });
 
-        self.table_view.bind('reloaded', function () { self.controller.clear_context() });
-        self.table_view.bind('selected', function ( index ) {
-            self.controller.set_context( self.controller.data_source.get( index ) );
+        nib.table_view.bind('reloaded', function () { nib.controller.clear_context() });
+        nib.table_view.bind('selected', function ( index ) {
+            nib.controller.set_context( nib.controller.data_source.get( index ) );
         });
 
-        self.panel_view.bind('update:data_source', function ( p ) { p.show() });
-        self.panel_view.bind('clear:data_source',  function ( p ) { p.hide() });
+        nib.panel_view.bind('update:data_source', function ( p ) { p.show() });
+        nib.panel_view.bind('clear:data_source',  function ( p ) { p.hide() });
 
-        self.controller.bind('update:context', function (c, context) {
-            self.panel_view.set_data_source( context );
+        nib.controller.bind('update:context', function (c, context) {
+            nib.panel_view.set_data_source( context );
         });
-        self.controller.bind('clear:context', function () {
-            self.table_view.clear_selection();
-            self.panel_view.clear_data_source();
+        nib.controller.bind('clear:context', function () {
+            nib.table_view.clear_selection();
+            nib.panel_view.clear_data_source();
         });
     }
 });
