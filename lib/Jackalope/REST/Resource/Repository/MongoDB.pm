@@ -12,18 +12,18 @@ has 'collection' => (
     required => 1,
 );
 
+has 'use_custom_ids' => (
+    is      => 'ro',
+    isa     => 'Bool',
+    default => 0
+);
+
 before 'wrap_data' => sub {
     my ($self, $id, $data) = @_;
     # we will keep track of our
     # own IDs thank you very much
     delete $data->{_id} if exists $data->{_id};
 };
-
-# NOTE:
-# I am going to need to turn these into
-# safe operations, we are not really
-# okay with doing unsafe stuff.
-# - SL
 
 sub list {
     my ($self, $query, $attrs) = @_;
@@ -41,19 +41,21 @@ sub list {
 sub create {
     my ($self, $data) = @_;
     my $id = $self->collection->insert( $data, { safe => 1 } );
-    return ( $id->value, $data );
+    return ( ( $self->use_custom_ids ? $id : $id->value ), $data );
 }
 
 sub get {
     my ($self, $id) = @_;
-    return $self->collection->find_one( { _id => MongoDB::OID->new(value => $id) } );
+    return $self->collection->find_one(
+        { _id => $self->_create_id( $id ) }
+    );
 }
 
 sub update {
     my ($self, $id, $updated_data) = @_;
 
     $self->collection->update(
-        { _id => MongoDB::OID->new(value => $id) },
+        { _id => $self->_create_id( $id ) },
         $updated_data,
         { safe => 1 }
     );
@@ -64,13 +66,18 @@ sub update {
 sub delete {
     my ($self, $id) = @_;
 
-    my $query = { _id => MongoDB::OID->new(value => $id) };
+    my $query = { _id => $self->_create_id( $id ) };
 
     if ( $self->collection->find_one( $query, {} ) ) {
         return $self->collection->remove( $query, { safe => 1 } );
     }
 
     return;
+}
+
+sub _create_id {
+    my ($self, $id) = @_;
+    $self->use_custom_ids ? $id : MongoDB::OID->new(value => $id)
 }
 
 __PACKAGE__->meta->make_immutable;
