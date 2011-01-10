@@ -57,7 +57,14 @@ BEGIN {
 }
 
 my $repo = Simple::DataRepo->new;
-ResourceRepoTest::run_all_tests( $repo );
+ResourceRepoTest->new(
+    fixtures => [
+        { id => 1, body => { foo => 'bar'   } },
+        { id => 2, body => { bar => 'baz'   } },
+        { id => 3, body => { baz => 'gorch' } },
+        { id => 4, body => { gorch => 'foo' } },
+    ]
+)->run_all_tests( $repo );
 
 done_testing;
 
