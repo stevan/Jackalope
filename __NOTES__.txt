@@ -28,6 +28,13 @@
 
 = TODOS =
 
+- Jackalope Auth Middleware
+    - if we want to restrict people based on a given
+      criteria, we can do that by having some kind of
+      middleware prune both the schema instance and
+      the resources, so that only the correct
+      links are present.
+
 - we should be doing content-length stuff everywhere too
 - perhaps centralize all the content-type handling too
 - perhaps put all this plack fiddling into Jackalope::Util (or Jackalope::REST::Util)
