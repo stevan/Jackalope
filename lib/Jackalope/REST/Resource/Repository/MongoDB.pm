@@ -27,33 +27,50 @@ before 'wrap_data' => sub {
 
 sub list {
     my ($self, $query, $attrs) = @_;
+
+    $query ||= {}; # query all
+    $attrs ||= { sort_by => { _id => 1 } }; # sort by id
+
     return [
         map {
             [ $_->{_id}->value, $_ ]
-        } $self->collection->find( $query, $attrs )->all
+        } $self->collection->query( $query, $attrs )->all
     ]
 }
 
 sub create {
     my ($self, $data) = @_;
-    my $id = $self->collection->insert( $data );
-    return ( $id, $data );
+    my $id = $self->collection->insert( $data, { safe => 1 } );
+    return ( $id->value, $data );
 }
 
 sub get {
     my ($self, $id) = @_;
-    return $self->collection->find_one( { _id => $id } );
+    return $self->collection->find_one( { _id => MongoDB::OID->new(value => $id) } );
 }
 
 sub update {
     my ($self, $id, $updated_data) = @_;
-    $self->collection->update( { _id => $id }, $updated_data );
+
+    $self->collection->update(
+        { _id => MongoDB::OID->new(value => $id) },
+        $updated_data,
+        { safe => 1 }
+    );
+
+    return $updated_data;
 }
 
 sub delete {
     my ($self, $id) = @_;
-    $self->collection->remove( { _id => $id } );
-    # make sure this returns an undef if not found
+
+    my $query = { _id => MongoDB::OID->new(value => $id) };
+
+    if ( $self->collection->find_one( $query, {} ) ) {
+        return $self->collection->remove( $query, { safe => 1 } );
+    }
+
+    return;
 }
 
 __PACKAGE__->meta->make_immutable;
