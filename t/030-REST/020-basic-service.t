@@ -3,8 +3,6 @@
 use strict;
 use warnings;
 
-use lib '/Users/stevan/Projects/CPAN/current/Bread-Board/lib';
-
 use Test::More;
 use Test::Fatal;
 use Test::Moose;

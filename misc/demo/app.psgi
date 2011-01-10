@@ -3,8 +3,6 @@
 use strict;
 use warnings;
 
-use lib '/Users/stevan/Projects/CPAN/current/Bread-Board/lib';
-
 use Bread::Board;
 use Jackalope::REST;
 use Jackalope::REST::Resource::Repository::Simple;
