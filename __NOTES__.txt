@@ -1,4 +1,31 @@
 
+= TOP PRIORITY =
+
+- Jackalope::REST::Resource::Repository::MongoDB
+    - need to make all the operations safe, because
+      we really need reliable return values in most
+      cases
+        - well at least in the delete we do, might
+          be able to get away with it for update
+          and insert
+        - actually safety should be an option for
+          update and insert, so make a Moose attr
+    - we need tests for this
+        - take the current resource repo test and
+          make it into a library, we should run
+          this test suite on all resource repos
+        - actually we should have fixtures similar
+          to how KiokuDB does it
+
+- Some kind of Schema server
+    - should be a default component that is
+      easily available for all
+    - should server up schemas that are compiled
+      for transport
+
+- JS Schema Repo
+    - need to load schemas compiled for transport
+
 = TODOS =
 
 - we should be doing content-length stuff everywhere too
