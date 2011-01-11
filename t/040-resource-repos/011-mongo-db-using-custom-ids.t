@@ -9,8 +9,8 @@ use Test::More;
 use Test::Fatal;
 use Test::Moose;
 
+use Try::Tiny;
 use MongoDB;
-
 use ResourceRepoTest;
 
 BEGIN {
@@ -18,7 +18,13 @@ BEGIN {
     use_ok('Jackalope::REST::Resource::Repository::MongoDB');
 }
 
-my $mongo = MongoDB::Connection->new( host => 'localhost', port => 27017 );
+my $mongo = try {
+    MongoDB::Connection->new( host => 'localhost', port => 27017 );
+} catch {
+    diag('... no MongoDB instance to connect too');
+    done_testing();
+    exit();
+};
 
 # get rid of any old DBs
 $mongo->get_database('jackalope-test')->drop;
