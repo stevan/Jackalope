@@ -70,8 +70,10 @@ sub _build_spec {
     my $schema_map = {};
 
     foreach my $type ( $self->_all_spec_builder_methods ) {
-        my $schema = $self->$type();
-        $schema_map->{ $schema->{'id'} } = $schema;
+        my @schemas = ($self->$type());
+        foreach my $schema ( @schemas ) {
+            $schema_map->{ $schema->{'id'} } = $schema;
+        }
     }
 
     return +{
