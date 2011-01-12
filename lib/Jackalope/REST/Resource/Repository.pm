@@ -47,8 +47,8 @@ sub detect_conflict {
 # using an instance of the repository
 
 sub list_resources {
-    my ($self) = @_;
-    return [  map { $self->wrap_data( @$_ ) } @{ $self->list } ];
+    my ($self, $params) = @_;
+    return [  map { $self->wrap_data( @$_ ) } @{ $self->list( $params ) } ];
 }
 
 sub create_resource {
