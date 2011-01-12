@@ -8,6 +8,7 @@ use Jackalope::REST::Error::BadRequest;
 use Jackalope::REST::Error::BadRequest::ValidationError;
 
 use Plack::Request;
+use CGI::Expand 'expand_hash';
 
 has 'service' => (
     is       => 'ro',
@@ -97,7 +98,7 @@ sub check_data_schema {
     if ( exists $self->link->{'data_schema'} ) {
         # should this default to GET?
         if ( $self->link->{'method'} eq 'GET' ) {
-            $params = $r->query_parameters->as_hashref_mixed;
+            $params = expand_hash( $r->query_parameters->as_hashref_mixed );
         }
         elsif ( $self->link->{'method'} eq 'POST' || $self->link->{'method'} eq 'PUT' ) {
             $params = $self->serializer->deserialize( $r->content );
