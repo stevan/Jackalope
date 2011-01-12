@@ -57,6 +57,15 @@ sub BUILD {
     $self->_compiled_schemas( $self->_compile_core_schemas );
 }
 
+## Useful Predicates
+
+sub is_a_schema_ref {
+    my ($self, $ref) = @_;
+    (defined $ref && ref $ref eq 'HASH')
+        || confess "Ref must be defined and a HashRef";
+    $self->_is_ref( $ref );
+}
+
 ## Schema Accessors
 
 sub get_compiled_schema_by_uri {
