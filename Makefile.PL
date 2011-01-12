@@ -13,6 +13,7 @@ requires 'MooseX::Params::Validate'   => 0;
 requires 'Bread::Board'               => 0;
 requires 'Throwable::Error'           => 0;
 requires 'Plack'                      => 0;
+requires 'CGI::Expand'                => 0;
 requires 'JSON::XS'                   => 0;
 requires 'Try::Tiny'                  => 0;
 requires 'Class::Load'                => 0;
