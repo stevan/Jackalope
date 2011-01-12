@@ -36,12 +36,17 @@ before 'wrap_data' => sub {
 sub list {
     my ($self, $params) = @_;
 
-    $params->{'query'} ||= {}; # query all
-    $params->{'attrs'} ||= {};
+    $params->{'query'}  ||= {};
+    $params->{'attrs'}  ||= {};
 
     unless ( exists $params->{'attrs'}->{'sort_by'} ) {
         $params->{'attrs'}->{'sort_by'} = { _id => 1 }; # sort by id
     }
+
+    my $cursor = $self->collection->query(
+        $params->{'query'},
+        $params->{'attrs'},
+    );
 
     return [
         map {
@@ -53,10 +58,7 @@ sub list {
                     : $_->{_id}->value ),
                 $data
             ]
-        } $self->collection->query(
-            $params->{'query'},
-            $params->{'attrs'},
-          )->all
+        } $cursor->all
     ]
 }
 
