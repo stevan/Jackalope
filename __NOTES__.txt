@@ -1,6 +1,9 @@
 
 = TOP PRIORITY =
 
+- need to write a test for the CGI::Expand behavior in
+  Jackalope::REST::Service::Target::get_data_schema
+
 - Some kind of Schema server
     - should be a default component that is
       easily available for all
