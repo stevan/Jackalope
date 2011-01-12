@@ -12,8 +12,15 @@ has 'compiled_schema' => (
     is      => 'ro',
     lazy    => 1,
     default => sub {
-        my $self = shift;
-        $self->schema_repository->register_schema( $self->schema )
+        my $self   = shift;
+        my $repo   = $self->schema_repository;
+        my $schema = $self->schema;
+        if ( $repo->is_a_schema_ref( $schema ) ) {
+            $repo->get_compiled_schema_by_ref( $schema )
+        }
+        else {
+            $repo->register_schema( $schema )
+        }
     }
 );
 
