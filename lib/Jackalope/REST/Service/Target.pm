@@ -8,7 +8,7 @@ use Jackalope::REST::Error::BadRequest;
 use Jackalope::REST::Error::BadRequest::ValidationError;
 
 use Plack::Request;
-use CGI::Expand 'expand_hash';
+use Jackalope::REST::Util::HashExpander 'expand_hash';
 
 has 'service' => (
     is       => 'ro',
