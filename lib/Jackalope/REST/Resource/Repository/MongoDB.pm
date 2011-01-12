@@ -4,6 +4,14 @@ use Moose;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use Data::Visitor::Callback;
+use boolean ();
+use MongoDB;
+BEGIN {
+    $MongoDB::BSON::use_boolean  = 1;
+    $MongoDB::BSON::utf8_flag_on = 1;
+}
+
 with 'Jackalope::REST::Resource::Repository';
 
 has 'collection' => (
@@ -26,39 +34,73 @@ before 'wrap_data' => sub {
 };
 
 sub list {
-    my ($self, $query, $attrs) = @_;
+    my ($self, $params) = @_;
 
-    $query ||= {}; # query all
-    $attrs ||= { sort_by => { _id => 1 } }; # sort by id
+    $params->{'query'} ||= {}; # query all
+    $params->{'attrs'} ||= {};
+
+    unless ( exists $params->{'attrs'}->{'sort_by'} ) {
+        $params->{'attrs'}->{'sort_by'} = { _id => 1 }; # sort by id
+    }
 
     return [
         map {
-            [ $_->{_id}->value, $_ ]
-        } $self->collection->query( $query, $attrs )->all
+            my $data = $_;
+            $self->_convert_from_booleans( $data );
+            [
+                ( $self->use_custom_ids
+                    ? $_->{_id}
+                    : $_->{_id}->value ),
+                $data
+            ]
+        } $self->collection->query(
+            $params->{'query'},
+            $params->{'attrs'},
+          )->all
     ]
 }
 
 sub create {
     my ($self, $data) = @_;
+
+    $self->_convert_to_booleans( $data );
+
     my $id = $self->collection->insert( $data, { safe => 1 } );
-    return ( ( $self->use_custom_ids ? $id : $id->value ), $data );
+    $data  = $self->collection->find_one( { _id => $id } );
+
+    $self->_convert_from_booleans( $data );
+
+    return (
+        ( $self->use_custom_ids ? $id : $id->value ),
+        $data
+    );
 }
 
 sub get {
     my ($self, $id) = @_;
-    return $self->collection->find_one(
+    my $data = $self->collection->find_one(
         { _id => $self->_create_id( $id ) }
     );
+    $self->_convert_from_booleans( $data );
+    $data;
 }
 
 sub update {
     my ($self, $id, $updated_data) = @_;
 
+    $self->_convert_to_booleans( $updated_data );
+
+    $id = $self->_create_id( $id );
+
     $self->collection->update(
-        { _id => $self->_create_id( $id ) },
+        { _id => $id },
         $updated_data,
         { safe => 1 }
     );
+
+    $updated_data = $self->collection->find_one( { _id => $id } );
+
+    $self->_convert_from_booleans( $updated_data );
 
     return $updated_data;
 }
@@ -78,6 +120,32 @@ sub delete {
 sub _create_id {
     my ($self, $id) = @_;
     $self->use_custom_ids ? $id : MongoDB::OID->new(value => $id)
+}
+
+sub _convert_to_booleans {
+    my ($self, $data) = @_;
+    Data::Visitor::Callback->new(
+        ignore_return_values => 1,
+        'JSON::XS::Boolean'  => sub {
+            my ($v, $obj) = @_;
+            $_ = $obj == JSON::XS::true ? boolean::true() : boolean::false();
+        }
+
+    )->visit( $data );
+    return;
+}
+
+sub _convert_from_booleans {
+    my ($self, $data) = @_;
+    Data::Visitor::Callback->new(
+        ignore_return_values => 1,
+        'boolean' => sub {
+            my ($v, $obj) = @_;
+            $_ = boolean::isTrue( $obj ) ? JSON::XS::true() : JSON::XS::false();
+        }
+
+    )->visit( $data );
+    return;
 }
 
 __PACKAGE__->meta->make_immutable;

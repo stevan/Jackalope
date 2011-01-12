@@ -10,7 +10,6 @@ use Test::Fatal;
 use Test::Moose;
 
 use Try::Tiny;
-use MongoDB;
 use ResourceRepoTest;
 
 BEGIN {
@@ -40,6 +39,10 @@ my $repo = Jackalope::REST::Resource::Repository::MongoDB->new(
 my $new = $repo->create_resource( { _id => "<custom-id>", foo => "bar" } );
 isa_ok($new, 'Jackalope::REST::Resource');
 is($new->id, '<custom-id>', '... got the right ID');
+
+my $resources = $repo->list_resources();
+isa_ok($resources->[0], 'Jackalope::REST::Resource');
+is($resources->[0]->id, '<custom-id>', '... got the right ID');
 
 my $gotten = $repo->get_resource( "<custom-id>" );
 isa_ok($gotten, 'Jackalope::REST::Resource');

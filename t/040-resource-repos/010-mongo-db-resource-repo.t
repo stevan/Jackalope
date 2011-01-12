@@ -10,7 +10,6 @@ use Test::Fatal;
 use Test::Moose;
 
 use Try::Tiny;
-use MongoDB;
 use ResourceRepoTest;
 
 BEGIN {
