@@ -5,6 +5,7 @@ our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use Data::Visitor::Callback;
+use Scalar::Util;
 use boolean ();
 use MongoDB;
 BEGIN {
@@ -42,6 +43,8 @@ sub list {
     unless ( exists $params->{'attrs'}->{'sort_by'} ) {
         $params->{'attrs'}->{'sort_by'} = { _id => 1 }; # sort by id
     }
+
+    $self->_convert_query_params( $params->{'query'} );
 
     my $cursor = $self->collection->query(
         $params->{'query'},
@@ -147,6 +150,26 @@ sub _convert_from_booleans {
         }
 
     )->visit( $data );
+    return;
+}
+
+sub _convert_query_params {
+    my ($self, $query) = @_;
+    Data::Visitor::Callback->new(
+        ignore_return_values => 1,
+        'value' => sub {
+            my ( undef, $val ) = @_;
+            if ( $val eq 'true' ) {
+                $_ = boolean::true();
+            }
+            elsif ( $val eq 'false' ) {
+                $_ = boolean::false();
+            }
+            elsif ( Scalar::Util::looks_like_number( $val ) ) {
+                $_ = $val + 0;
+            }
+        }
+    )->visit( $query );
     return;
 }
 
