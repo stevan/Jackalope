@@ -83,6 +83,9 @@ sub verify_and_prepare_output {
     elsif ( blessed $result && $result->isa('Jackalope::REST::Resource') ) {
         $self->check_target_schema( $result->pack );
     }
+    else {
+        $self->check_target_schema( $result );
+    }
 
     $result;
 }
