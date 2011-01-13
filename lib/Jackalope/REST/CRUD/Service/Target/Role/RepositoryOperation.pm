@@ -44,6 +44,7 @@ sub process_operation {
     my $params = $self->sanitize_and_prepare_input( $r );
     my $result = $self->resource_repository->$operation( @$args, $params );
     $self->verify_and_prepare_output( $result );
+    $self->generate_links_for_output( $result );
     return $self->process_psgi_output( $self->operation_callback( $result ) );
 }
 
@@ -59,11 +60,11 @@ around 'process_psgi_output' => sub {
     # version that we find
     # - SL
 
-    if (ref $psgi->[2]->[0] eq 'ARRAY') {
+    if ( $self->_is_resource_collection( $psgi->[2]->[0] ) ) {
         # an array of resources
         $psgi->[2]->[0] = [ map { $_->pack } @{ $psgi->[2]->[0] } ];
     }
-    elsif (blessed $psgi->[2]->[0]) {
+    elsif ( blessed $psgi->[2]->[0] && $psgi->[2]->[0]->isa('Jackalope::REST::Resource')) {
         # a resource
         $psgi->[2]->[0] = $psgi->[2]->[0]->pack;
     }
@@ -76,18 +77,34 @@ around 'process_psgi_output' => sub {
 sub verify_and_prepare_output {
     my ($self, $result) = @_;
 
-    if (ref $result eq 'ARRAY') {
-        foreach my $resource ( @$result) {
-            $self->service->generate_links_for_resource( $resource );
-        }
+    if ( $self->_is_resource_collection( $result ) ) {
         $self->check_target_schema( [ map { $_->pack } @$result ] );
     }
-    elsif (blessed $result) {
-        $self->service->generate_links_for_resource( $result );
+    elsif ( blessed $result && $result->isa('Jackalope::REST::Resource') ) {
         $self->check_target_schema( $result->pack );
     }
 
     $result;
+}
+
+sub generate_links_for_output {
+    my ($self, $result) = @_;
+
+    if ( $self->_is_resource_collection( $result ) ) {
+        foreach my $resource ( @$result) {
+            $self->service->generate_links_for_resource( $resource )
+        }
+    }
+    elsif ( blessed $result && $result->isa('Jackalope::REST::Resource') ) {
+        $self->service->generate_links_for_resource( $result );
+    }
+
+    $result;
+}
+
+sub _is_resource_collection {
+    my ($self, $result) = @_;
+    (ref $result eq 'ARRAY' && (scalar grep { blessed $_ && $_->isa('Jackalope::REST::Resource') } @$result) != 0) ? 1 : 0
 }
 
 no Moose::Role; 1;
