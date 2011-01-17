@@ -42,6 +42,35 @@ has 'links' => (
 # of the version
 sub BUILD { (shift)->version }
 
+sub get {
+    my ($self, $path) = @_;
+
+    return $self->id if $path eq 'id';
+
+    my @path = split /\./ => $path;
+    my $curr = $self->body;
+
+    my @seen;
+    while ( @path ) {
+        my $next = shift @path;
+
+        if ( ref $curr eq 'HASH' ) {
+            $curr = $curr->{ $next };
+        }
+        elsif ( ref $curr eq 'ARRAY' ) {
+            $curr = $curr->[ $next ];
+        }
+        else {
+            die "Cannot traverse $curr";
+        }
+
+        push @seen => $next;
+    }
+
+    return $curr;
+}
+
+
 sub generate_version {
     my $self = shift;
     if ( blessed( $self->body ) && $self->body->can('generate_version') ) {
