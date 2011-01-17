@@ -36,6 +36,9 @@
     - start with
         - Jackalope::REST::CRUD::Service
             - generate_links_for_resource
+                - the way handles the uri-schema is
+                  not good enough, we need to make it
+                  better
         - Jackalope::REST::CRUD::Service::Target::
             - add the OPTIONS one
 
