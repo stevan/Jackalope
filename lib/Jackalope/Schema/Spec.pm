@@ -168,9 +168,9 @@ sub ref {
 }
 
 ## ------------------------------------------------------------------
-## Hyperlink Schema
+## Linkrel Schema
 ## ------------------------------------------------------------------
-## The Hyperlink schema is an additional schema which provides a way
+## The Linkrel schema is an additional schema which provides a way
 ## to talk about and describe links for resources.
 ## ------------------------------------------------------------------
 
@@ -178,10 +178,10 @@ sub linkrel {
     my $self = shift;
     return +{
         id          => "schema/core/linkrel",
-        title       => "The 'HyperLink' schema",
+        title       => "The 'Linkrel' schema",
         description => q[
             This is the 'link' type for the hyper schema
-            which represents links for resources.
+            which represents concept of links for resources.
         ],
         type        => "object",
         properties  => {
@@ -261,8 +261,8 @@ sub linkrel {
                     to assure the URL being called is valid.
                 ]
             },
-            title        => { type => "string", description => "The human readable title of a given link" },
-            description  => { type => "string", description => "A short human readable description of the link" },
+            title        => { type => "string", description => "The human readable title of a given linkrel" },
+            description  => { type => "string", description => "A short human readable description of the linkrel" },
             metadata     => {
                 type        => "object",
                 description => q[
@@ -276,9 +276,9 @@ sub linkrel {
 }
 
 ## ------------------------------------------------------------------
-## Xlink Schema
+## Hyperlink Schema
 ## ------------------------------------------------------------------
-## The Xlink schema is an additional schema which provides a way
+## The Hyperlink schema is an additional schema which provides a way
 ## to represent concrete links that are described with the linkrel
 ## schema above.
 ## ------------------------------------------------------------------
@@ -287,11 +287,11 @@ sub hyperlink {
     my $self = shift;
     return +{
         id          => "schema/core/hyperlink",
-        title       => "The 'XLink' schema",
+        title       => "The 'Hyperlink' schema",
         description => q[
-            This is the 'link' type for the hyper schema
-            which represents the concrete links that are
-            described with the linkrel schema.
+            This is the 'hyperlink' type for the hyper
+            schema which represents the concrete links
+            that are described with the linkrel schema.
         ],
         type        => "object",
         properties  => {
