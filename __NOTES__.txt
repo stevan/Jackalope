@@ -4,14 +4,41 @@
 - need to write a test for the CGI::Expand behavior in
   Jackalope::REST::Service::Target::get_data_schema
 
-- Some kind of Schema server
-    - should be a default component that is
-      easily available for all
-    - should server up schemas that are compiled
-      for transport
+- REST flow
+    - given a schema, we analyze the links available
+      and find the endpoints
+        - the endpoints are converted into hyperlinks
+          and a call to / with OPTIONS will tell you
+          the available endpoints of the service
+        - the media type is a contract that tells you
+          what the various HTTP methods expect
+            - OPTIONS on service root gives you the schema info
+                - return value is the schema (sans links) wrapped
+                  in a resource, with only the endpoint links
+            - GET on service root gives you a collection
+                - return value is an array of resources
+            - POST on service root creates a resource
+                - only the resource body is expected
+                - return value is the new resource
+            - GET on resource uri gives you the resource
+                - return value is the resource
+            - PUT on resource uri updates the resource
+                - the full resource is expected
+                - return value is the updated resource
+            - DELETE on the resource uri removes the resource
+                - no return value
+        - the client is expected to implement code
+          to handle the media type's expected behaviors
+            - it can choose to use the schema to validate
+              everything prior to sending things back
+            - the client should be able to understand
+              the hyperlinks and use those assumptions
+    - start with
+        - Jackalope::REST::CRUD::Service
+            - generate_links_for_resource
+        - Jackalope::REST::CRUD::Service::Target::
+            - add the OPTIONS one
 
-- JS Schema Repo
-    - need to load schemas compiled for transport
 
 = TODOS =
 
