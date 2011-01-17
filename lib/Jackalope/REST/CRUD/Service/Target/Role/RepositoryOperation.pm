@@ -95,14 +95,24 @@ sub generate_links_for_output {
 
     if ( $self->_is_resource_collection( $result ) ) {
         foreach my $resource ( @$result) {
-            $self->service->generate_links_for_resource( $resource )
+            $self->service->generate_links_for_resource(
+                $resource,
+                $self->get_links_for_resource
+            )
         }
     }
     elsif ( blessed $result && $result->isa('Jackalope::REST::Resource') ) {
-        $self->service->generate_links_for_resource( $result );
+        $self->service->generate_links_for_resource(
+            $result,
+            $self->get_links_for_resource
+        );
     }
 
     $result;
+}
+
+sub get_links_for_resource {
+    (shift)->service->get_all_links_from_schema
 }
 
 sub _is_resource_collection {

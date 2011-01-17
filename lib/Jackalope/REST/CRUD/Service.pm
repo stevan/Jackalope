@@ -58,7 +58,7 @@ sub generate_read_link_for_resource {
 }
 
 sub generate_links_for_resource {
-    my ($self, $resource) = @_;
+    my ($self, $resource, $links) = @_;
     $resource->add_links(
         map {
             $self->router->uri_for(
@@ -67,10 +67,17 @@ sub generate_links_for_resource {
                     ? { id => $resource->id }
                     : {} )
             )
-        } sort {
+        } @$links
+    );
+}
+
+sub get_all_links_from_schema {
+    my $self = shift;
+    [
+        sort {
             $a->{rel} cmp $b->{rel}
         } values %{ $self->compiled_schema->{'links'} }
-    );
+    ]
 }
 
 __PACKAGE__->meta->make_immutable;

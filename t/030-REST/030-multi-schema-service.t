@@ -73,13 +73,19 @@ use Jackalope::REST::Resource::Repository::Simple;
         my ($self, $cart) = @_;
 
         my $user = $self->user_service->resource_repository->get_resource( $cart->{'user'}->{'$id'} );
-        $self->user_service->generate_links_for_resource( $user );
+        $self->user_service->generate_links_for_resource(
+            $user,
+            $self->user_service->get_all_links_from_schema
+        );
         $cart->{'user'} = $user->pack;
 
         $cart->{'items'} = [
             map {
                 my $product = $self->product_service->resource_repository->get_resource( $_->{'$id'} );
-                $self->product_service->generate_links_for_resource( $product );
+                $self->product_service->generate_links_for_resource(
+                    $product,
+                    $self->product_service->get_all_links_from_schema
+                );
                 $product->pack;
             } @{ $cart->{'items'} }
         ];
