@@ -75,6 +75,29 @@ my $serializer = $c->resolve(
 test_psgi( app => $app, client => sub {
     my $cb = shift;
 
+    {
+        my $req = HTTP::Request->new("OPTIONS" => "http://localhost/");
+        my $res = $cb->($req);
+        is($res->code, 200, '... got the right status for list ');
+        my $resource = $serializer->deserialize( $res->content );
+        is( $resource->{id}, 'simple/person', '... got the right id');
+        is( $resource->{version}, '8cf425fde53b4bc2e9081e392f4762bddad6056a934d8044e6ecb28f514228b6', '... got the right version');
+        is_deeply(
+            $resource->{links},
+            [
+                { rel => 'create',      href => '/',       method => 'POST'    },
+                { rel => 'describedby', href => '/',       method => 'OPTIONS' },
+                { rel => 'list',        href => '/',       method => 'GET'     },
+            ],
+            '... got the right list of links'
+        );
+        is_deeply(
+            [ keys %{ $resource->{body} } ],
+            [qw[ simple/person schema/core/hyperlink ]],
+            '... got the right schemas in here'
+        );
+    }
+
     #diag("Listing resources (expecting empty set)");
     {
         my $req = GET("http://localhost/");
@@ -106,10 +129,8 @@ test_psgi( app => $app, client => sub {
                 },
                 version => 'fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2',
                 links => [
-                    { rel => "create",      href => "/",       method => "POST"   },
                     { rel => "delete",      href => "/1",      method => "DELETE" },
                     { rel => "edit",        href => "/1",      method => "PUT"    },
-                    { rel => "list",        href => "/",       method => "GET"    },
                     { rel => "read",        href => "/1",      method => "GET"    }
                 ]
             },
@@ -158,10 +179,8 @@ test_psgi( app => $app, client => sub {
                     },
                     version => 'fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2',
                     links => [
-                        { rel => "create",      href => "/",       method => "POST"   },
                         { rel => "delete",      href => "/1",      method => "DELETE" },
                         { rel => "edit",        href => "/1",      method => "PUT"    },
-                        { rel => "list",        href => "/",       method => "GET"    },
                         { rel => "read",        href => "/1",      method => "GET"    }
                     ]
                 },
@@ -186,10 +205,8 @@ test_psgi( app => $app, client => sub {
                 },
                 version => 'fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2',
                 links => [
-                    { rel => "create",      href => "/",       method => "POST"   },
                     { rel => "delete",      href => "/1",      method => "DELETE" },
                     { rel => "edit",        href => "/1",      method => "PUT"    },
-                    { rel => "list",        href => "/",       method => "GET"    },
                     { rel => "read",        href => "/1",      method => "GET"    }
                 ]
             },
@@ -231,10 +248,8 @@ test_psgi( app => $app, client => sub {
                 },
                 version => '9d4a75302bb634edf050d6b838b050b978bea1460d5879618e8e3ae8c291247f',
                 links => [
-                    { rel => "create",      href => "/",       method => "POST"   },
                     { rel => "delete",      href => "/1",      method => "DELETE" },
                     { rel => "edit",        href => "/1",      method => "PUT"    },
-                    { rel => "list",        href => "/",       method => "GET"    },
                     { rel => "read",        href => "/1",      method => "GET"    }
                 ]
             },
@@ -331,10 +346,8 @@ test_psgi( app => $app, client => sub {
                 },
                 version => '9d4a75302bb634edf050d6b838b050b978bea1460d5879618e8e3ae8c291247f',
                 links => [
-                    { rel => "create",      href => "/",       method => "POST"   },
                     { rel => "delete",      href => "/1",      method => "DELETE" },
                     { rel => "edit",        href => "/1",      method => "PUT"    },
-                    { rel => "list",        href => "/",       method => "GET"    },
                     { rel => "read",        href => "/1",      method => "GET"    }
                 ]
             },
@@ -401,10 +414,8 @@ test_psgi( app => $app, client => sub {
                 },
                 version => 'fe982ce14ce2b2a1c097629adecdeb1522a1e0a2ca390673446c930ca5fd11d2',
                 links => [
-                    { rel => "create",      href => "/",       method => "POST"   },
                     { rel => "delete",      href => "/2",      method => "DELETE" },
                     { rel => "edit",        href => "/2",      method => "PUT"    },
-                    { rel => "list",        href => "/",       method => "GET"    },
                     { rel => "read",        href => "/2",      method => "GET"    }
                 ]
             },
@@ -436,14 +447,14 @@ test_psgi( app => $app, client => sub {
         my $req = PUT("http://localhost/");
         my $res = $cb->($req);
         is($res->code, 405, '... got the right status for bad method');
-        is($res->header('Allow'), 'GET,POST', '... got the right Allow header');
+        is($res->header('Allow'), 'GET,OPTIONS,POST', '... got the right Allow header');
         is_deeply(
             $serializer->deserialize( $res->content ),
             {
                 code            => 405,
                 desc            => 'Method Not Allowed',
                 message         => 'Method Not Allowed',
-                allowed_methods => [ 'GET', 'POST' ]
+                allowed_methods => [ 'GET', 'OPTIONS', 'POST' ]
             },
             '... got the error we expected'
         );
