@@ -12,6 +12,7 @@ override '_all_spec_builder_methods' => sub {
         resource
         resource_ref
 
+        service_discoverable
         service_readonly
         service_non_editable
         service
@@ -155,13 +156,39 @@ sub resource_ref {
 ## that would be performed on a REST resource collection.
 ## ------------------------------------------------------------------
 
+sub service_discoverable {
+    my $self = shift;
+    return +{
+        id    => 'schema/web/service/discoverable',
+        title => 'This is a base discoverable REST enabled schema',
+        type  => 'object',
+        links => {
+            describedby => {
+                rel           => 'describedby',
+                href          => '/',
+                method        => 'OPTIONS',
+                target_schema => {
+                    type       => 'object',
+                    extends    => { '$ref' => 'schema/web/resource' },
+                    properties => {
+                        body => {
+                            type  => 'object',
+                            items => { type => 'schema' },
+                        },
+                    }
+                },
+            }
+        }
+    };
+}
+
 sub service_readonly {
     my $self = shift;
     return +{
-        id    => 'schema/web/service/read-only',
-        title => 'This is a simple read-only REST enabled schema',
-        type  => 'object',
-        links => {
+        id      => 'schema/web/service/read-only',
+        title   => 'This is a simple read-only REST enabled schema',
+        extends => { '$ref' => 'schema/web/service/discoverable' },
+        links   => {
             list => {
                 rel           => 'list',
                 href          => '/',
