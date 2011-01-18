@@ -39,7 +39,7 @@ sub get_all_linkrels { (shift)->compiled_schema->{'links'} }
         list        => 'Jackalope::REST::CRUD::Service::Target::List',
         read        => 'Jackalope::REST::CRUD::Service::Target::Read',
         delete      => 'Jackalope::REST::CRUD::Service::Target::Delete',
-        describedby => 'Jackalope::REST::Service::Target::DescribedBy',
+        describedby => 'Jackalope::REST::CRUD::Service::Target::DescribedBy',
     );
 
     around 'get_linkrels_to_target_map' => sub {
@@ -76,6 +76,28 @@ sub get_all_links_from_schema {
     [
         sort {
             $a->{rel} cmp $b->{rel}
+        } values %{ $self->compiled_schema->{'links'} }
+    ]
+}
+
+sub get_all_enpoint_links_from_schema {
+    my $self = shift;
+    [
+        sort {
+            $a->{rel} cmp $b->{rel}
+        } grep {
+            $_->{href} !~ /\:/
+        } values %{ $self->compiled_schema->{'links'} }
+    ]
+}
+
+sub get_all_non_enpoint_links_from_schema {
+    my $self = shift;
+    [
+        sort {
+            $a->{rel} cmp $b->{rel}
+        } grep {
+            $_->{href} =~ /\:/
         } values %{ $self->compiled_schema->{'links'} }
     ]
 }
