@@ -56,11 +56,9 @@ sub get {
 
         if ( ref $curr eq 'HASH' ) {
             $curr = $curr->{ $next };
-        }
-        elsif ( ref $curr eq 'ARRAY' ) {
+        } elsif ( ref $curr eq 'ARRAY' ) {
             $curr = $curr->[ $next ];
-        }
-        else {
+        } else {
             die "Cannot traverse $curr";
         }
 
