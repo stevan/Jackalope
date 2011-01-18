@@ -182,6 +182,7 @@ sub _compile_schema_for_tranport {
     $schema = $self->_prepare_schema_for_transport( $schema );
     $self->_flatten_extends( 'for_transport', $schema, $self->_compiled_schemas );
     $self->_resolve_embedded_extends( 'for_transport', $schema, $self->_compiled_schemas );
+    $self->_prune_schema_for_transport( $schema->{'for_transport'} );
     $schema;
 }
 
@@ -280,6 +281,22 @@ sub _generate_schema_map {
         %{ $self->_compiled_schemas },
         (map { $_->{'compiled'}->{'id'} => $_ } @schemas)
     }
+}
+
+sub _prune_schema_for_transport {
+    my ($self, $transport_schema) = @_;
+    Data::Visitor::Callback->new(
+        ignore_return_values => 1,
+        hash => sub {
+            my ($v, $data) = @_;
+            if (exists $data->{'description'} && not ref $data->{'description'}) {
+                delete $data->{'description'};
+            }
+            if (exists $data->{'title'} && not ref $data->{'title'}) {
+                delete $data->{'title'};
+            }
+        }
+    )->visit( $transport_schema );
 }
 
 sub _create_transport_schema_map {

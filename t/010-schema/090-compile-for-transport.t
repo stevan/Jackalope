@@ -72,7 +72,6 @@ is_deeply(
     {
         'simple/employee' => {
             id         => 'simple/employee',
-            title      => 'This is a simple employee schema',
             type       => 'object',
             properties => {
                 id         => { type => 'integer' },
