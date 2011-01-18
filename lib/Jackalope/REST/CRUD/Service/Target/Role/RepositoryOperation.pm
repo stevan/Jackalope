@@ -4,29 +4,10 @@ use Moose::Role;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use Try::Tiny;
-
-with 'Jackalope::REST::Service::Target';
+with 'Jackalope::REST::CRUD::Service::Target::Role::ForResources';
 
 requires 'repository_operation';
 requires 'operation_callback';
-
-# NOTE:
-# This is not ideal, I would rather do a
-# +service in the attribute, but that is
-# not allowed since this is a role. While
-# we could switch this to a class, we would
-# then load the 'requires' above. The other
-# option is to make Jackalope::REST::Service::Target
-# a parameterized role which can take a service
-# type, however, that seems perhaps like
-# overkill. Either way, this works for now.
-# - SL
-sub BUILD {}
-after BUILD => sub {
-    ((shift)->service->isa('Jackalope::REST::CRUD::Service'))
-        || confess "The service must be a 'Jackalope::REST::CRUD::Service'";
-};
 
 sub resource_repository { (shift)->service->resource_repository }
 
@@ -48,76 +29,8 @@ sub process_operation {
     return $self->process_psgi_output( $self->operation_callback( $result ) );
 }
 
-around 'process_psgi_output' => sub {
-    my $next = shift;
-    my ($self, $psgi) = @_;
-
-    return $psgi unless scalar @{ $psgi->[2] };
-
-    # TODO:
-    # need to make this also support ETags
-    # in the headers based on the resource
-    # version that we find
-    # - SL
-
-    if ( $self->_is_resource_collection( $psgi->[2]->[0] ) ) {
-        # an array of resources
-        $psgi->[2]->[0] = [ map { $_->pack } @{ $psgi->[2]->[0] } ];
-    }
-    elsif ( blessed $psgi->[2]->[0] && $psgi->[2]->[0]->isa('Jackalope::REST::Resource')) {
-        # a resource
-        $psgi->[2]->[0] = $psgi->[2]->[0]->pack;
-    }
-
-    $self->$next( $psgi );
-};
-
-# input and output processing
-
-sub verify_and_prepare_output {
-    my ($self, $result) = @_;
-
-    if ( $self->_is_resource_collection( $result ) ) {
-        $self->check_target_schema( [ map { $_->pack } @$result ] );
-    }
-    elsif ( blessed $result && $result->isa('Jackalope::REST::Resource') ) {
-        $self->check_target_schema( $result->pack );
-    }
-    else {
-        $self->check_target_schema( $result );
-    }
-
-    $result;
-}
-
-sub generate_links_for_output {
-    my ($self, $result) = @_;
-
-    if ( $self->_is_resource_collection( $result ) ) {
-        foreach my $resource ( @$result) {
-            $self->service->generate_links_for_resource(
-                $resource,
-                $self->get_links_for_resource
-            )
-        }
-    }
-    elsif ( blessed $result && $result->isa('Jackalope::REST::Resource') ) {
-        $self->service->generate_links_for_resource(
-            $result,
-            $self->get_links_for_resource
-        );
-    }
-
-    $result;
-}
-
 sub get_links_for_resource {
-    (shift)->service->get_all_links_from_schema
-}
-
-sub _is_resource_collection {
-    my ($self, $result) = @_;
-    (ref $result eq 'ARRAY' && (scalar grep { blessed $_ && $_->isa('Jackalope::REST::Resource') } @$result) != 0) ? 1 : 0
+    (shift)->service->get_all_non_enpoint_links_from_schema
 }
 
 no Moose::Role; 1;
