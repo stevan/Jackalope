@@ -120,6 +120,24 @@ Jackalope::REST::CRUD::Service - A Moosey solution to this problem
 
 =head1 DESCRIPTION
 
+
+   - OPTIONS on service root gives you the schema info
+       - return value is the schema wrapped
+         in a resource, with only the endpoint links
+   - GET on service root gives you a collection
+       - return value is an array of resources
+   - POST on service root creates a resource
+       - only the resource body is expected
+       - return value is the new resource
+   - GET on resource uri gives you the resource
+       - return value is the resource
+   - PUT on resource uri updates the resource
+       - the full resource is expected
+       - return value is the updated resource
+   - DELETE on the resource uri removes the resource
+       - no return value
+
+
 =head1 METHODS
 
 =over 4
