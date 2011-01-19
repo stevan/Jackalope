@@ -14,6 +14,7 @@ BEGIN {
     use_ok('Jackalope::REST');
 }
 
+use Jackalope::REST::Service::Directory;
 use Jackalope::REST::Resource::Repository::Simple;
 
 {
@@ -320,7 +321,6 @@ my $product_service = $c->resolve( service => 'ProductService',      parameters 
 my $user_service    = $c->resolve( service => 'UserService',         parameters => { uri_base => '/user'    });
 my $cart_service    = $c->resolve( service => 'ShoppingCartService', parameters => { uri_base => '/cart'    });
 
-use Jackalope::REST::Service::Directory;
 my $app = Jackalope::REST::Service::Directory->new(
     services => [
         $product_service,
