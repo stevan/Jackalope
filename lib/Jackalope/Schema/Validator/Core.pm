@@ -250,6 +250,10 @@ sub _check_properties {
 
         return { error => "property '$k' didn't exist" } if not exists $data->{ $k };
 
+        return {
+            error => "could not find validator for property '$k' because it has no type"
+        } if not exists $schema->{type};
+
         my $validator = $self->can( $schema->{type} );
         return {
             error => "could not find validator for '" . $schema->{type} . "' for property '$k'"
@@ -277,6 +281,10 @@ sub _check_additional_properties {
             delete $all_props->{ $k };
             next;
         }
+
+        return {
+            error => "could not find validator for additonal-property '$k' because it has no type"
+        } if not exists $schema->{type};
 
         my $validator = $self->can( $schema->{type} );
         return {

@@ -26,15 +26,15 @@ has 'typemap' => (
     isa     => 'HashRef',
     default => sub {
         +{
-            any             => 'schema/types/any',
-                null        => 'schema/types/null',
-                boolean     => 'schema/types/boolean',
-                number      => 'schema/types/number',
-                    integer => 'schema/types/integer',
-                string      => 'schema/types/string',
-                array       => 'schema/types/array',
-                object      => 'schema/types/object',
-                    schema  => 'schema/types/schema',
+            any             => 'jackalope/core/types/any',
+                null        => 'jackalope/core/types/null',
+                boolean     => 'jackalope/core/types/boolean',
+                number      => 'jackalope/core/types/number',
+                    integer => 'jackalope/core/types/integer',
+                string      => 'jackalope/core/types/string',
+                array       => 'jackalope/core/types/array',
+                object      => 'jackalope/core/types/object',
+                    schema  => 'jackalope/core/types/schema',
         }
     },
     handles => {
@@ -100,7 +100,7 @@ sub _all_spec_builder_methods {
 
 sub spec {
     return +{
-        id          => "schema/core/spec",
+        id          => "jackalope/core/spec",
         title       => "The spec schema",
         description => "This is a schema to describe the full spec",
         type        => "object",
@@ -143,7 +143,7 @@ sub spec {
 
 sub ref {
     return +{
-        id          => "schema/core/ref",
+        id          => "jackalope/core/ref",
         title       => "The reference schema",
         description => q[
             This is an object to represent a 'reference'
@@ -177,7 +177,7 @@ sub ref {
 sub linkrel {
     my $self = shift;
     return +{
-        id          => "schema/core/linkrel",
+        id          => "jackalope/core/linkrel",
         title       => "The 'Linkrel' schema",
         description => q[
             This is the 'link' type for the hyper schema
@@ -286,7 +286,7 @@ sub linkrel {
 sub hyperlink {
     my $self = shift;
     return +{
-        id          => "schema/core/hyperlink",
+        id          => "jackalope/core/hyperlink",
         title       => "The 'Hyperlink' schema",
         description => q[
             This is the 'hyperlink' type for the hyper
@@ -301,7 +301,7 @@ sub hyperlink {
                     This string describes the relation of the link
                     to the actual resource it points to. For more
                     details see the docs for the 'rel' element
-                    in the schema/core/linkrel schema.
+                    in the jackalope/core/linkrel schema.
                 ]
             },
             href => {
@@ -343,7 +343,7 @@ sub hyperlink {
 
 sub any {
     return +{
-        id          => "schema/types/any",
+        id          => "jackalope/core/types/any",
         title       => "The 'Any' type schema",
         description => q[
             This is a schema for the 'any' type, it is the
@@ -370,7 +370,7 @@ sub any {
             },
             links => {
                 type        => "object",
-                items       => { '$ref' => "schema/core/linkrel" },
+                items       => { '$ref' => "jackalope/core/linkrel" },
                 description => q[
                     This is an object of 'linkrel' objects, the purpose
                     of which is to provide a way to map services
@@ -385,7 +385,7 @@ sub any {
 
 sub null {
     return +{
-        id          => "schema/types/null",
+        id          => "jackalope/core/types/null",
         title       => "The 'Null' type schema",
         description => q[
             This is a schema for the 'null' type, it is not
@@ -393,7 +393,7 @@ sub null {
             explicity represents no value.
         ],
         type        => "schema",
-        extends     => { '$ref' => "schema/types/any" },
+        extends     => { '$ref' => "jackalope/core/types/any" },
         properties  => {
             type => { type => "string", literal => "null" }
         }
@@ -402,7 +402,7 @@ sub null {
 
 sub boolean {
     return +{
-        id          => "schema/types/boolean",
+        id          => "jackalope/core/types/boolean",
         title       => "The 'Boolean' type schema",
         description => q[
             This is a schema for the 'boolean' type, a simple
@@ -416,7 +416,7 @@ sub boolean {
             so as to remove those language specific quirks.
         ],
         type        => "schema",
-        extends     => { '$ref' => "schema/types/any" },
+        extends     => { '$ref' => "jackalope/core/types/any" },
         properties  => {
             type => { type => "string", literal => "boolean" }
         }
@@ -425,7 +425,7 @@ sub boolean {
 
 sub number {
     return +{
-        id          => "schema/types/number",
+        id          => "jackalope/core/types/number",
         title       => "The 'Number' type schema",
         description => q[
             This is a schema for the 'number' type, which is
@@ -438,7 +438,7 @@ sub number {
             to help improve interoperability.
         ],
         type        => "schema",
-        extends     => { '$ref' => "schema/types/any" },
+        extends     => { '$ref' => "jackalope/core/types/any" },
         properties  => {
             type => { type => "string", literal => "number" },
         },
@@ -459,7 +459,7 @@ sub number {
 
 sub integer {
     return +{
-        id          => "schema/types/integer",
+        id          => "jackalope/core/types/integer",
         title       => "The 'Integer' type schema",
         description => q[
             This is a schema for the 'integer' type, which is
@@ -470,7 +470,7 @@ sub integer {
             values.
         ],
         type        => "schema",
-        extends     => { '$ref' => "schema/types/number" },
+        extends     => { '$ref' => "jackalope/core/types/number" },
         properties  => {
             type => { type => "string", literal => "integer" },
         },
@@ -492,7 +492,7 @@ sub integer {
 sub string {
     my $self = shift;
     return +{
-        id          => "schema/types/string",
+        id          => "jackalope/core/types/string",
         title       => "The 'String' type schema",
         description => q[
             This is a schema for the 'string' type, which is
@@ -506,7 +506,7 @@ sub string {
             for better interoperability.
         ],
         type        => "schema",
-        extends     => { '$ref' => "schema/types/any" },
+        extends     => { '$ref' => "jackalope/core/types/any" },
         properties  => {
             type => { type => "string", literal => "string" },
         },
@@ -532,7 +532,7 @@ sub string {
 
 sub array {
     return +{
-        id          => "schema/types/array",
+        id          => "jackalope/core/types/array",
         title       => "The 'Array' type schema",
         description => q[
             This is a schema for the 'array' type, which is
@@ -542,7 +542,7 @@ sub array {
             constrain the list to be more homogenous.
         ],
         type        => "schema",
-        extends     => { '$ref' => "schema/types/any" },
+        extends     => { '$ref' => "jackalope/core/types/any" },
         properties  => {
             type => { type => "string", literal => "array" },
         },
@@ -564,7 +564,7 @@ sub array {
 
 sub object {
     return +{
-        id          => "schema/types/object",
+        id          => "jackalope/core/types/object",
         title       => "The 'Object' type schema",
         description => q[
             This is a schema for the 'object' type, which is
@@ -575,7 +575,7 @@ sub object {
             all of which are essentially the same thing.
         ],
         type        => "schema",
-        extends     => { '$ref' => "schema/types/any" },
+        extends     => { '$ref' => "jackalope/core/types/any" },
         properties  => {
             type => { type => "string", literal => "object" },
         },
@@ -622,14 +622,14 @@ sub object {
 
 sub schema {
     return +{
-        id          => "schema/types/schema",
+        id          => "jackalope/core/types/schema",
         title       => "The 'Schema' type schema",
         description => q[
             This is a schema for the 'schema' type, it is
             composed entirely of turtles all the way down.
         ],
         type        => "schema",
-        extends     => { '$ref' => "schema/types/object" },
+        extends     => { '$ref' => "jackalope/core/types/object" },
         properties  => {
             type => { type => "string", literal => "schema" },
         },

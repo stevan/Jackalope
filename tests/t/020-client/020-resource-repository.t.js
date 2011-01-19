@@ -13,7 +13,7 @@ test(
                 {
                     "id"         : 'simple/person',
                     "title"      : 'This is a simple person schema',
-                    "extends"    : { '$ref' : 'schema/web/service/crud' },
+                    "extends"    : { '$ref' : 'jackalope/rest/service/crud' },
                     "properties" : {
                         "first_name" : { "type" : 'string' },
                         "last_name"  : { "type" : 'string' },

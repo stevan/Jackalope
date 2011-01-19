@@ -1,6 +1,6 @@
 [
     {
-        "schema" : { "$ref" : "schema/web/service/crud" },
+        "schema" : { "$ref" : "jackalope/rest/service/crud" },
         "pass" : [
             { "foo" : "bar" }
         ],

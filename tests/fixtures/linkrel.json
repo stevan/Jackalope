@@ -1,6 +1,6 @@
 [
     {
-        "schema" : { "$ref" : "schema/core/linkrel" },
+        "schema" : { "$ref" : "jackalope/core/linkrel" },
         "pass" : [
             {
                 "rel"    : "self",

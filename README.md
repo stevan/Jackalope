@@ -76,8 +76,8 @@ Jackalope.
 
 We extend the base Jackalope spec for this part, adding to it a 'web/resource' and
 'web/resource/ref' schemas to help you manage your resources. And the
-'schema/web/service/read-only', 'schema/web/service/non-editable' and
-'schema/web/service/crud' schemas, which can be extended to add a reasonable
+'jackalope/rest/service/read-only', 'jackalope/rest/service/non-editable' and
+'jackalope/rest/service/crud' schemas, which can be extended to add a reasonable
 set of default 'linkrels' for a schema. These can all be seen in the
 Jackalope::REST::Schema::Spec module.
 
@@ -134,7 +134,7 @@ building blocks to make development even easier.
 
 Currently Jackalope does offer a built-in CRUD service for managing a collection of
 resources in a uniform way. The services take a schema, typically one that extends the
-'schema/web/service/crud' schema, and a resource repository and creates a web service
+'jackalope/rest/service/crud' schema, and a resource repository and creates a web service
 with the following features.
 
 - listing

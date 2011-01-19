@@ -30,7 +30,7 @@ override '_all_spec_builder_methods' => sub {
 sub resource {
     my $self = shift;
     return +{
-        id          => "schema/web/resource",
+        id          => "jackalope/rest/resource",
         title       => "The 'Resource' schema",
         description => q[
             The is a 'wrapper' of sorts for resources
@@ -74,7 +74,7 @@ sub resource {
         additional_properties => {
             links   => {
                 type        => "array",
-                items       => { '$ref' => "schema/core/hyperlink" },
+                items       => { '$ref' => "jackalope/core/hyperlink" },
                 description => q[
                     This is a list of links which represent the
                     capabilities of given resource, the consumer of
@@ -97,7 +97,7 @@ sub resource {
 sub resource_ref {
     my $self = shift;
     return +{
-        id          => "schema/web/resource/ref",
+        id          => "jackalope/rest/resource/ref",
         title       => "The 'Resource Ref' schema",
         description => q[
             This is meant to be a way to represent
@@ -125,7 +125,7 @@ sub resource_ref {
         },
         additional_properties => {
             link    => {
-                extends               => { '$ref' => 'schema/core/hyperlink' },
+                extends               => { '$ref' => 'jackalope/core/hyperlink' },
                 properties            => { rel    => { type => 'string', literal => 'read' } },
                 additional_properties => { method => { type => 'string', literal => 'GET'  } },
                 description           => q[
@@ -159,7 +159,7 @@ sub resource_ref {
 sub service_discoverable {
     my $self = shift;
     return +{
-        id    => 'schema/web/service/discoverable',
+        id    => 'jackalope/rest/service/discoverable',
         title => 'This is a base discoverable REST enabled schema',
         type  => 'object',
         links => {
@@ -169,7 +169,7 @@ sub service_discoverable {
                 method        => 'OPTIONS',
                 target_schema => {
                     type       => 'object',
-                    extends    => { '$ref' => 'schema/web/resource' },
+                    extends    => { '$ref' => 'jackalope/rest/resource' },
                     properties => {
                         body => {
                             type  => 'object',
@@ -185,9 +185,9 @@ sub service_discoverable {
 sub service_readonly {
     my $self = shift;
     return +{
-        id      => 'schema/web/service/read-only',
+        id      => 'jackalope/rest/service/read-only',
         title   => 'This is a simple read-only REST enabled schema',
-        extends => { '$ref' => 'schema/web/service/discoverable' },
+        extends => { '$ref' => 'jackalope/rest/service/discoverable' },
         links   => {
             list => {
                 rel           => 'list',
@@ -204,7 +204,7 @@ sub service_readonly {
                     type  => "array",
                     items => {
                         type       => 'object',
-                        extends    => { '$ref' => 'schema/web/resource' },
+                        extends    => { '$ref' => 'jackalope/rest/resource' },
                         properties => {
                             body => { '$ref' => '#' },
                         }
@@ -217,7 +217,7 @@ sub service_readonly {
                 method        => 'GET',
                 target_schema => {
                     type       => 'object',
-                    extends    => { '$ref' => 'schema/web/resource' },
+                    extends    => { '$ref' => 'jackalope/rest/resource' },
                     properties => {
                         body => { '$ref' => '#' },
                     }
@@ -233,9 +233,9 @@ sub service_readonly {
 sub service_non_editable {
     my $self = shift;
     return +{
-        id      => 'schema/web/service/non-editable',
+        id      => 'jackalope/rest/service/non-editable',
         title   => 'This is a simple REST enabled schema',
-        extends => { '$ref' => 'schema/web/service/read-only' },
+        extends => { '$ref' => 'jackalope/rest/service/read-only' },
         links   => {
             create => {
                 rel           => 'create',
@@ -244,7 +244,7 @@ sub service_non_editable {
                 data_schema   => { '$ref' => '#' },
                 target_schema => {
                     type       => 'object',
-                    extends    => { '$ref' => 'schema/web/resource' },
+                    extends    => { '$ref' => 'jackalope/rest/resource' },
                     properties => {
                         body => { '$ref' => '#' },
                     }
@@ -265,9 +265,9 @@ sub service_non_editable {
 sub service {
     my $self = shift;
     return +{
-        id      => 'schema/web/service/crud',
+        id      => 'jackalope/rest/service/crud',
         title   => 'This is a simple REST enabled schema',
-        extends => { '$ref' => 'schema/web/service/non-editable' },
+        extends => { '$ref' => 'jackalope/rest/service/non-editable' },
         links   => {
             edit => {
                 rel           => 'edit',
@@ -275,14 +275,14 @@ sub service {
                 method        => 'PUT',
                 data_schema   => {
                     type       => 'object',
-                    extends    => { '$ref' => 'schema/web/resource' },
+                    extends    => { '$ref' => 'jackalope/rest/resource' },
                     properties => {
                         body => { '$ref' => '#' },
                     }
                 },
                 target_schema => {
                     type       => 'object',
-                    extends    => { '$ref' => 'schema/web/resource' },
+                    extends    => { '$ref' => 'jackalope/rest/resource' },
                     properties => {
                         body => { '$ref' => '#' },
                     }

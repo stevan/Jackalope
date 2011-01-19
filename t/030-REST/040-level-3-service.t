@@ -344,7 +344,7 @@ my $c = container $j => as {
                     target_schema => {
                         type  => 'array',
                         items => {
-                            extends    => { '$ref' => 'schema/web/resource' },
+                            extends    => { '$ref' => 'jackalope/rest/resource' },
                             properties => {
                                 body => { '$ref' => '/schemas/slot' }
                             }
@@ -374,7 +374,7 @@ my $c = container $j => as {
                     data_schema   => { '$ref' => '/schemas/patient' },
                     # OUTPUT : appointment object (wrapped as resource)
                     target_schema => {
-                        extends    => { '$ref' => 'schema/web/resource' },
+                        extends    => { '$ref' => 'jackalope/rest/resource' },
                         properties => {
                             body => { '$ref' => '/schemas/appointment' }
                         }
@@ -399,7 +399,7 @@ my $c = container $j => as {
                     uri_schema    => { id => { type => 'string' } },
                     # OUTPUT : appointment object (wrapped as resource)
                     target_schema => {
-                        extends    => { '$ref' => 'schema/web/resource' },
+                        extends    => { '$ref' => 'jackalope/rest/resource' },
                         properties => {
                             body => { '$ref' => '#' }
                         }

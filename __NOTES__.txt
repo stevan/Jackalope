@@ -23,7 +23,7 @@
     - &list should optionally take some parameters
         - search term(s)
         - start/end for paging of results
-        - add this to the corresponding schema/web/service as well
+        - add this to the corresponding jackalope/rest/service as well
 
 - Jackalope Auth Middleware
     - if we want to restrict people based on a given

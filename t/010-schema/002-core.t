@@ -22,10 +22,10 @@ my $fixtures = Test::Jackalope::Fixtures->new(
 );
 
 foreach my $type ( qw[ ref linkrel hyperlink ] ) {
-    my $schema = $repo->get_compiled_schema_by_uri('schema/core/' . $type);
+    my $schema = $repo->get_compiled_schema_by_uri('jackalope/core/' . $type);
     validation_pass(
         $repo->validate(
-            { '$ref' => 'schema/types/object' },
+            { '$ref' => 'jackalope/core/types/object' },
             $schema,
         ),
         '... validate the compiled ' . $type . ' type with the schema type'
@@ -35,7 +35,7 @@ foreach my $type ( qw[ ref linkrel hyperlink ] ) {
 
 validation_pass(
     $repo->validate(
-        { '$ref' => 'schema/core/spec' },
+        { '$ref' => 'jackalope/core/spec' },
         $repo->spec->get_spec,
     ),
     '... validate the spec with the spec schema'

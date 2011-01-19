@@ -24,10 +24,10 @@ my $fixtures = Test::Jackalope::Fixtures->new(
 );
 
 foreach my $type ( qw[ resource resource/ref service/crud ] ) {
-    my $schema = $repo->get_compiled_schema_by_uri('schema/web/' . $type);
+    my $schema = $repo->get_compiled_schema_by_uri('jackalope/rest/' . $type);
     validation_pass(
         $repo->validate(
-            { '$ref' => 'schema/types/object' },
+            { '$ref' => 'jackalope/core/types/object' },
             $schema,
         ),
         '... validate the compiled ' . $type . ' type with the schema type'

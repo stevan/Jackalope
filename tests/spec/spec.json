@@ -1,7 +1,7 @@
 {
    "schema_map" : {
-      "schema/web/service/read-only" : {
-         "id" : "schema/web/service/read-only",
+      "jackalope/rest/service/read-only" : {
+         "id" : "jackalope/rest/service/read-only",
          "title" : "This is a simple read-only REST enabled schema",
          "type" : "object",
          "links" : {
@@ -10,7 +10,7 @@
                "target_schema" : {
                   "type" : "object",
                   "extends" : {
-                     "$ref" : "schema/web/resource"
+                     "$ref" : "jackalope/rest/resource"
                   },
                   "properties" : {
                      "body" : {
@@ -33,7 +33,7 @@
                   "items" : {
                      "type" : "object",
                      "extends" : {
-                        "$ref" : "schema/web/resource"
+                        "$ref" : "jackalope/rest/resource"
                      },
                      "properties" : {
                         "body" : {
@@ -47,13 +47,13 @@
             }
          }
       },
-      "schema/types/boolean" : {
-         "id" : "schema/types/boolean",
+      "jackalope/core/types/boolean" : {
+         "id" : "jackalope/core/types/boolean",
          "title" : "The 'Boolean' type schema",
          "type" : "schema",
          "description" : "This is a schema for the 'boolean' type, a simple\ntrue/false value. However the details of what is\nconsidered true and what is considered false\nare different for different languages and this\nschema should take that into account based on the\nlanguage it is validating. It is important to note\nthat a transport format (JSON, XML, etc.) should\nprovide a canonical representation of true/false\nso as to remove those language specific quirks.\n",
          "extends" : {
-            "$ref" : "schema/types/any"
+            "$ref" : "jackalope/core/types/any"
          },
          "properties" : {
             "type" : {
@@ -62,13 +62,13 @@
             }
          }
       },
-      "schema/types/null" : {
-         "id" : "schema/types/null",
+      "jackalope/core/types/null" : {
+         "id" : "jackalope/core/types/null",
          "title" : "The 'Null' type schema",
          "type" : "schema",
          "description" : "This is a schema for the 'null' type, it is not\nso much the absence of a value, but a value that\nexplicity represents no value.\n",
          "extends" : {
-            "$ref" : "schema/types/any"
+            "$ref" : "jackalope/core/types/any"
          },
          "properties" : {
             "type" : {
@@ -77,13 +77,13 @@
             }
          }
       },
-      "schema/types/schema" : {
-         "id" : "schema/types/schema",
+      "jackalope/core/types/schema" : {
+         "id" : "jackalope/core/types/schema",
          "title" : "The 'Schema' type schema",
          "type" : "schema",
          "description" : "This is a schema for the 'schema' type, it is\ncomposed entirely of turtles all the way down.\n",
          "extends" : {
-            "$ref" : "schema/types/object"
+            "$ref" : "jackalope/core/types/object"
          },
          "properties" : {
             "type" : {
@@ -92,8 +92,8 @@
             }
          }
       },
-      "schema/core/ref" : {
-         "id" : "schema/core/ref",
+      "jackalope/core/ref" : {
+         "id" : "jackalope/core/ref",
          "title" : "The reference schema",
          "type" : "object",
          "description" : "This is an object to represent a 'reference'\nto another object. By convention, the value\nstored in $ref is the 'id' of another object.\nAdditionally the value of '#' is also\nacceptable to indicate a reference to\nthe containing schema.\nWhen a reference is encountered, it should\nbe resolved and replaced by the value it\nreferences. There are no explict dereferencing\noperations. The exact details of when a\nreference is resolved and how are an implemention\ndetail and out of the scope of this spec.\n",
@@ -104,7 +104,7 @@
             }
          }
       },
-      "schema/types/string" : {
+      "jackalope/core/types/string" : {
          "additional_properties" : {
             "literal" : {
                "type" : "string",
@@ -143,12 +143,12 @@
                "description" : "The maximum length of the string given"
             }
          },
-         "id" : "schema/types/string",
+         "id" : "jackalope/core/types/string",
          "title" : "The 'String' type schema",
          "type" : "schema",
          "description" : "This is a schema for the 'string' type, which is\nany value that is explcitly cast as a string. This\nmeans that it can be an entirely numeric string,\nas long it is cast as a string based on the details\nof the implementation language. As with 'boolean'\nvalues, any transport format (JSON, XML, etc.) is\nexpected to provide some kind of way to explicitly\ncast a given value as a given type so as to make\nfor better interoperability.\n",
          "extends" : {
-            "$ref" : "schema/types/any"
+            "$ref" : "jackalope/core/types/any"
          },
          "properties" : {
             "type" : {
@@ -157,7 +157,7 @@
             }
          }
       },
-      "schema/types/any" : {
+      "jackalope/core/types/any" : {
          "additional_properties" : {
             "id" : {
                "format" : "uri",
@@ -180,11 +180,11 @@
                "type" : "object",
                "description" : "This is an object of 'linkrel' objects, the purpose\nof which is to provide a way to map services\nto the objects described in a schema. In OOP terms,\nyou can think of them as methods, while the schema\ndescribes the instance structure.\n",
                "items" : {
-                  "$ref" : "schema/core/linkrel"
+                  "$ref" : "jackalope/core/linkrel"
                }
             }
          },
-         "id" : "schema/types/any",
+         "id" : "jackalope/core/types/any",
          "title" : "The 'Any' type schema",
          "type" : "schema",
          "description" : "This is a schema for the 'any' type, it is the\nbase schema type, all other schema types extend\nthis one. Therefore this schema defines the\nbase elements that are in all schemas, both\nrequired and optional.\n",
@@ -195,14 +195,14 @@
             }
          }
       },
-      "schema/core/spec" : {
+      "jackalope/core/spec" : {
          "additional_properties" : {
             "metadata" : {
                "type" : "object",
                "description" : "This is a free-form metadata object where extra\ninformation can be stored. None of the information\nthat is contained in here should be relied on, if\nand when we need to rely on it, we can promote it\nto a real property.\n"
             }
          },
-         "id" : "schema/core/spec",
+         "id" : "jackalope/core/spec",
          "title" : "The spec schema",
          "type" : "object",
          "description" : "This is a schema to describe the full spec",
@@ -230,7 +230,7 @@
             }
          }
       },
-      "schema/types/integer" : {
+      "jackalope/core/types/integer" : {
          "additional_properties" : {
             "greater_than" : {
                "type" : "integer",
@@ -257,12 +257,12 @@
                "description" : "A integer must be less than this value"
             }
          },
-         "id" : "schema/types/integer",
+         "id" : "jackalope/core/types/integer",
          "title" : "The 'Integer' type schema",
          "type" : "schema",
          "description" : "This is a schema for the 'integer' type, which is\nan extension of the 'number' type to not include\nfloating point numbers. It handles all the same\nadditional properties, but overrides them here\nsuch that they will only operate on valid integer\nvalues.\n",
          "extends" : {
-            "$ref" : "schema/types/number"
+            "$ref" : "jackalope/core/types/number"
          },
          "properties" : {
             "type" : {
@@ -271,7 +271,7 @@
             }
          }
       },
-      "schema/core/linkrel" : {
+      "jackalope/core/linkrel" : {
          "additional_properties" : {
             "target_schema" : {
                "type" : "schema",
@@ -301,7 +301,7 @@
                "description" : "A short human readable description of the link"
             }
          },
-         "id" : "schema/core/linkrel",
+         "id" : "jackalope/core/linkrel",
          "title" : "The 'HyperLink' schema",
          "type" : "object",
          "description" : "This is the 'link' type for the hyper schema\nwhich represents links for resources.\n",
@@ -329,11 +329,11 @@
             }
          }
       },
-      "schema/web/service/non-editable" : {
-         "id" : "schema/web/service/non-editable",
+      "jackalope/rest/service/non-editable" : {
+         "id" : "jackalope/rest/service/non-editable",
          "title" : "This is a simple REST enabled schema",
          "extends" : {
-            "$ref" : "schema/web/service/read-only"
+            "$ref" : "jackalope/rest/service/read-only"
          },
          "links" : {
             "create" : {
@@ -344,7 +344,7 @@
                "target_schema" : {
                   "type" : "object",
                   "extends" : {
-                     "$ref" : "schema/web/resource"
+                     "$ref" : "jackalope/rest/resource"
                   },
                   "properties" : {
                      "body" : {
@@ -367,7 +367,7 @@
             }
          }
       },
-      "schema/web/resource/ref" : {
+      "jackalope/rest/resource/ref" : {
          "additional_properties" : {
             "link" : {
                "additional_properties" : {
@@ -377,7 +377,7 @@
                   }
                },
                "extends" : {
-                  "$ref" : "schema/core/hyperlink"
+                  "$ref" : "jackalope/core/hyperlink"
                },
                "description" : "This is an optional hyperlink to read the resource\ndescribed, it should only ever be GET since it\nis only for reading.\n",
                "properties" : {
@@ -393,7 +393,7 @@
                "description" : "This is a digest string (SHA-256) representing the current\nversion of the resource being pointed to. This can be used\nto check to make sure that the resource has not changed\nsince it was last referred too.\n"
             }
          },
-         "id" : "schema/web/resource/ref",
+         "id" : "jackalope/rest/resource/ref",
          "title" : "The 'Resource Ref' schema",
          "type" : "object",
          "description" : "This is meant to be a way to represent\nreferences to resources, it can be a convient\nway to refer to a resource only by it's ID\nand therefore save bandwidth.\n",
@@ -409,7 +409,7 @@
             }
          }
       },
-      "schema/types/number" : {
+      "jackalope/core/types/number" : {
          "additional_properties" : {
             "greater_than" : {
                "type" : "number",
@@ -436,12 +436,12 @@
                "description" : "A number must be less than this value"
             }
          },
-         "id" : "schema/types/number",
+         "id" : "jackalope/core/types/number",
          "title" : "The 'Number' type schema",
          "type" : "schema",
          "description" : "This is a schema for the 'number' type, which is\na numeric value that includes floating point\nnumbers as well as whole numbers. The level of\nfloating point precision and the possible size\nof a number are platform and implementation\nspecific. However the spec reserves the right\nto possibly put a cap on this at a later date\nto help improve interoperability.\n",
          "extends" : {
-            "$ref" : "schema/types/any"
+            "$ref" : "jackalope/core/types/any"
          },
          "properties" : {
             "type" : {
@@ -450,17 +450,17 @@
             }
          }
       },
-      "schema/web/resource" : {
+      "jackalope/rest/resource" : {
          "additional_properties" : {
             "links" : {
                "type" : "array",
                "description" : "This is a list of links which represent the\ncapabilities of given resource, the consumer of\nthe resource can use these links to perform\ndifferent actions.\n",
                "items" : {
-                  "$ref" : "schema/core/hyperlink"
+                  "$ref" : "jackalope/core/hyperlink"
                }
             }
          },
-         "id" : "schema/web/resource",
+         "id" : "jackalope/rest/resource",
          "title" : "The 'Resource' schema",
          "type" : "object",
          "description" : "The is a 'wrapper' of sorts for resources\nas viewed from the concept of the web and\nREST. It is mostly intended to be extended\nwhere the 'body' property is overriden with\nthe schema of our choice.\n",
@@ -480,7 +480,7 @@
             }
          }
       },
-      "schema/types/array" : {
+      "jackalope/core/types/array" : {
          "additional_properties" : {
             "max_items" : {
                "type" : "integer",
@@ -499,12 +499,12 @@
                "description" : "This is a schema (or a reference to a schema)\nrepresented as an 'object' instance, which will\nbe used to validate all the elements in a list.\n"
             }
          },
-         "id" : "schema/types/array",
+         "id" : "jackalope/core/types/array",
          "title" : "The 'Array' type schema",
          "type" : "schema",
          "description" : "This is a schema for the 'array' type, which is\nbasically just a list of other values. The list\nby default are heterogenous, but using the\noptional 'items' property it is possible to\nconstrain the list to be more homogenous.\n",
          "extends" : {
-            "$ref" : "schema/types/any"
+            "$ref" : "jackalope/core/types/any"
          },
          "properties" : {
             "type" : {
@@ -513,11 +513,11 @@
             }
          }
       },
-      "schema/web/service/crud" : {
-         "id" : "schema/web/service/crud",
+      "jackalope/rest/service/crud" : {
+         "id" : "jackalope/rest/service/crud",
          "title" : "This is a simple REST enabled schema",
          "extends" : {
-            "$ref" : "schema/web/service/non-editable"
+            "$ref" : "jackalope/rest/service/non-editable"
          },
          "links" : {
             "edit" : {
@@ -525,7 +525,7 @@
                "data_schema" : {
                   "type" : "object",
                   "extends" : {
-                     "$ref" : "schema/web/resource"
+                     "$ref" : "jackalope/rest/resource"
                   },
                   "properties" : {
                      "body" : {
@@ -536,7 +536,7 @@
                "target_schema" : {
                   "type" : "object",
                   "extends" : {
-                     "$ref" : "schema/web/resource"
+                     "$ref" : "jackalope/rest/resource"
                   },
                   "properties" : {
                      "body" : {
@@ -554,7 +554,7 @@
             }
          }
       },
-      "schema/types/object" : {
+      "jackalope/core/types/object" : {
          "additional_properties" : {
             "additional_properties" : {
                "type" : "object",
@@ -575,12 +575,12 @@
                }
             }
          },
-         "id" : "schema/types/object",
+         "id" : "jackalope/core/types/object",
          "title" : "The 'Object' type schema",
          "type" : "schema",
          "description" : "This is a schema for the 'object' type, which is\na set of key/value pairs. The term 'object' is\nderived from Javascript, but this is the same as\na hash in Perl, a dictionary in Python, an\nassociative array in PHP, a Hashtable, a Map,\nall of which are essentially the same thing.\n",
          "extends" : {
-            "$ref" : "schema/types/any"
+            "$ref" : "jackalope/core/types/any"
          },
          "properties" : {
             "type" : {
@@ -589,15 +589,15 @@
             }
          }
       },
-      "schema/core/hyperlink" : {
-         "id" : "schema/core/hyperlink",
+      "jackalope/core/hyperlink" : {
+         "id" : "jackalope/core/hyperlink",
          "title" : "The 'XLink' schema",
          "type" : "object",
          "description" : "This is the 'link' type for the hyper schema\nwhich represents the concrete links that are\ndescribed with the linkrel schema.\n",
          "properties" : {
             "rel" : {
                "type" : "string",
-               "description" : "This string describes the relation of the link\nto the actual resource it points to. For more\ndetails see the docs for the 'rel' element\nin the schema/core/linkrel schema.\n"
+               "description" : "This string describes the relation of the link\nto the actual resource it points to. For more\ndetails see the docs for the 'rel' element\nin the jackalope/core/linkrel schema.\n"
             },
             "href" : {
                "format" : "uri",
@@ -620,15 +620,15 @@
       }
    },
    "typemap" : {
-      "boolean" : "schema/types/boolean",
-      "array" : "schema/types/array",
-      "object" : "schema/types/object",
-      "number" : "schema/types/number",
-      "integer" : "schema/types/integer",
-      "any" : "schema/types/any",
-      "string" : "schema/types/string",
-      "schema" : "schema/types/schema",
-      "null" : "schema/types/null"
+      "boolean" : "jackalope/core/types/boolean",
+      "array" : "jackalope/core/types/array",
+      "object" : "jackalope/core/types/object",
+      "number" : "jackalope/core/types/number",
+      "integer" : "jackalope/core/types/integer",
+      "any" : "jackalope/core/types/any",
+      "string" : "jackalope/core/types/string",
+      "schema" : "jackalope/core/types/schema",
+      "null" : "jackalope/core/types/null"
    },
    "version" : 0.01,
    "metadata" : {

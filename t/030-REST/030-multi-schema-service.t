@@ -127,7 +127,7 @@ my $c = container $j => as {
 
     service 'ProductSchema' => {
         id         => "test/product",
-        extends    => { '$ref' => 'schema/web/service/crud' },
+        extends    => { '$ref' => 'jackalope/rest/service/crud' },
         properties => {
             sku  => { type => "string" },
             desc => { type => "string" }
@@ -152,7 +152,7 @@ my $c = container $j => as {
 
     service 'UserSchema' => {
         id         => "test/user",
-        extends    => { '$ref' => 'schema/web/service/crud' },
+        extends    => { '$ref' => 'jackalope/rest/service/crud' },
         properties => {
             username => { type => "string" }
         }
@@ -179,13 +179,13 @@ my $c = container $j => as {
         type       => "object",
         properties => {
             user => {
-                extends    => { '$ref' => "schema/web/resource" },
+                extends    => { '$ref' => "jackalope/rest/resource" },
                 properties => { body => { '$ref' => "test/user" } }
             },
             items  => {
                 type  => "array",
                 items => {
-                    extends    => { '$ref' => "schema/web/resource" },
+                    extends    => { '$ref' => "jackalope/rest/resource" },
                     properties => { body => { '$ref' => "test/product" } }
                 }
             }
@@ -200,13 +200,13 @@ my $c = container $j => as {
                     type       => 'object',
                     properties => {
                         user  => {
-                            extends    => { '$ref' => 'schema/web/resource/ref' },
+                            extends    => { '$ref' => 'jackalope/rest/resource/ref' },
                             properties => { type_of => { type => "string", literal => "test/user" } }
                         },
                         items => {
                             type  => 'array',
                             items => {
-                                extends    => { '$ref' => 'schema/web/resource/ref' },
+                                extends    => { '$ref' => 'jackalope/rest/resource/ref' },
                                 properties => { type_of => { type => "string", literal => "test/product" } }
                             }
                         },
@@ -214,7 +214,7 @@ my $c = container $j => as {
                 },
                 target_schema => {
                     type       => 'object',
-                    extends    => { '$ref' => 'schema/web/resource' },
+                    extends    => { '$ref' => 'jackalope/rest/resource' },
                     properties => {
                         body => { '$ref' => '#' },
                     }
@@ -226,7 +226,7 @@ my $c = container $j => as {
                 method        => 'GET',
                 target_schema => {
                     type       => 'object',
-                    extends    => { '$ref' => 'schema/web/resource' },
+                    extends    => { '$ref' => 'jackalope/rest/resource' },
                     properties => {
                         body => { '$ref' => '#' },
                     }
@@ -240,12 +240,12 @@ my $c = container $j => as {
                 href          => '/:id/add_item',
                 method        => 'PUT',
                 data_schema   => {
-                    extends    => { '$ref' => 'schema/web/resource/ref' },
+                    extends    => { '$ref' => 'jackalope/rest/resource/ref' },
                     properties => { type_of => { type => "string", literal => "test/product" } }
                 },
                 target_schema => {
                     type       => 'object',
-                    extends    => { '$ref' => 'schema/web/resource' },
+                    extends    => { '$ref' => 'jackalope/rest/resource' },
                     properties => {
                         body => { '$ref' => '#' },
                     }
@@ -259,12 +259,12 @@ my $c = container $j => as {
                 href          => '/:id/remove_item',
                 method        => 'PUT',
                 data_schema   => {
-                    extends    => { '$ref' => 'schema/web/resource/ref' },
+                    extends    => { '$ref' => 'jackalope/rest/resource/ref' },
                     properties => { type_of => { type => "string", literal => "test/product" } }
                 },
                 target_schema => {
                     type       => 'object',
-                    extends    => { '$ref' => 'schema/web/resource' },
+                    extends    => { '$ref' => 'jackalope/rest/resource' },
                     properties => {
                         body => { '$ref' => '#' },
                     }

@@ -1,6 +1,6 @@
 [
     {
-        "schema" : { "$ref" : "schema/web/resource/ref" },
+        "schema" : { "$ref" : "jackalope/rest/resource/ref" },
         "pass" : [
             { "$id" : "1", "type_of" : "some/simple/schema" },
             { "$id" : "1", "type_of" : "some/simple/schema", "version" : "2i29219jkjklewioewjklewk" },
@@ -42,7 +42,7 @@
     },
     {
         "schema" : {
-            "extends" : { "$ref" : "schema/web/resource/ref" },
+            "extends" : { "$ref" : "jackalope/rest/resource/ref" },
             "properties" : {
                 "type_of" : { "type" : "string", "literal" : "some/simple/schema" }
             }
