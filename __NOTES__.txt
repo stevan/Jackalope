@@ -1,112 +1,17 @@
 
-= TOP PRIORITY =
-
-- need to write a test for the CGI::Expand behavior in
-  Jackalope::REST::Service::Target::get_data_schema
-
-- REST flow
-    - given a schema, we analyze the links available
-      and find the endpoints
-        - the endpoints are converted into hyperlinks
-          and a call to / with OPTIONS will tell you
-          the available endpoints of the service
-        - the media type is a contract that tells you
-          what the various HTTP methods expect
-            - OPTIONS on service root gives you the schema info
-                - return value is the schema (sans links) wrapped
-                  in a resource, with only the endpoint links
-            - GET on service root gives you a collection
-                - return value is an array of resources
-            - POST on service root creates a resource
-                - only the resource body is expected
-                - return value is the new resource
-            - GET on resource uri gives you the resource
-                - return value is the resource
-            - PUT on resource uri updates the resource
-                - the full resource is expected
-                - return value is the updated resource
-            - DELETE on the resource uri removes the resource
-                - no return value
-        - the client is expected to implement code
-          to handle the media type's expected behaviors
-            - it can choose to use the schema to validate
-              everything prior to sending things back
-            - the client should be able to understand
-              the hyperlinks and use those assumptions
-
-
 = TODOS =
 
-- Jackalope Auth Middleware
-    - if we want to restrict people based on a given
-      criteria, we can do that by having some kind of
-      middleware prune both the schema instance and
-      the resources, so that only the correct
-      links are present.
-
-- we should be doing content-length stuff everywhere too
-- perhaps centralize all the content-type handling too
-- perhaps put all this plack fiddling into Jackalope::Util (or Jackalope::REST::Util)
+- Low Hanging Fruit
+    - need to write a test for the CGI::Expand behavior in
+      Jackalope::REST::Service::Target::get_data_schema
+    - we should be doing content-length stuff everywhere too
+    - perhaps centralize all the content-type handling too
+    - perhaps put all this plack fiddling into Jackalope::Util (or Jackalope::REST::Util)
 
 - Jackalope::REST::Service
     - this should check the result in to_app to
-      look for errors and wrap them up in our
-      exception objects accordingly
-
-- Jackalope::REST::Service::Directory
-    - this could also encapsulate a media-type of some kind
-      because it would have multiple schemas in it
-    - this should collect services and key them by schema->id
-      and then the services should have access to them, this
-      should simplify some of the 030-multi-schema-service.t stuff
-      by allowing the resource/ref stuff to find the correct
-      resource-repository for us
-    - this perhaps should also handle described-by (see below)
-
-- Jackalope::REST::Service::Target::
-    - consider stuffing the describedby schema URL into the "Link" header (ex: `Link: </schema>; rel="describedby";`)
-        - perhaps we do this with OPTIONS request?
-    - Jackalope::REST::Service::Target::DescribedBy
-        - this has been removed it should be made part of a Schema::Directory
-          object so that it serves schemas as well as the services, but only
-          optionally.
-            - the described-by relation should probably return a more
-              complete (compiled) schema, and any referenced schemas
-              should have their complete URIs, not just the reference,
-              something like:
-                {
-                    id   => 'some/schema/foo',
-                    type => "object",
-                    properties => {
-                        name => { type => 'string' },
-                        thing => { rel => 'describedby', href => 'bar/schema', method => 'GET' },
-                        ....
-                    }
-                }
-              this way you can get a schema, which itself might refer
-              to other schemas, and you can follow those hyperlinks to
-              get to those other schemas if you want/need.
-              Ideally though, this is like the compiled schema, only
-              with the ref replacement step hijacked.
-
-- Jackalope::REST::Client
-    - write it
-    - set of actions
-        - download schema
-            - download any links schemas
-        - analyze schema for possible steps/entry points
-            - construct URLs for those
-        - then we just tell the object to
-          perform some actions
-            - send message, validate message
-            - get response, validate result
-            - etc.
-    - should be possible to script one of these
-      objects, a Jackalope::REST::Client::Harness
-      of sorts, it could take a JSON state machine
-      as input.
-
-- Jackalope::REST::Service
+      look for errors that are not ours and wrap
+      them up in our exception objects accordingly
     - look into Plack::Middleware::MethodOverride
     - might want to return 412 Precondition Failed when delete If-Matches fails
     - Caching options
@@ -115,26 +20,31 @@
         - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#media-link-entries
 
 - Jackalope::REST::Resource::Repository
-    - not sure I really like having to return NotImplmented in the
-      repo subclass in 030-multi-schema-service.t, it would be nice
-      if we could compose this more such that I don't have to have
-      it if I don't want it.
     - &list should optionally take some parameters
         - search term(s)
         - start/end for paging of results
         - add this to the corresponding schema/web/service as well
-    - Resource wrapper notes
-        - the version string is a SHA1 of the content, so that we can
-          take advantage of ETags
-            - read up on http://en.wikipedia.org/wiki/HTTP_ETag
 
-- ponder spliting things up
-    - Jackalope
-    - Jackalope::Web::REST
-    - Jackalope::JS
-        - the reasoning being that some parts are
-          more opinionated then others and it would
-          be nice to give people flexibility
+- Jackalope Auth Middleware
+    - if we want to restrict people based on a given
+      criteria, we can do that by having some kind of
+      middleware prune both the schema instance and
+      the resources, so that only the correct
+      links are present.
+
+- Jackalope::REST::Service::Directory
+    - this should collect services and key them by schema->id
+      and then the services should have access to them, this
+      should simplify some of the 030-multi-schema-service.t stuff
+      by allowing the resource/ref stuff to find the correct
+      resource-repository for us
+
+- Jackalope::REST::Client
+    - write it
+    - should be possible to script one of these
+      objects, a Jackalope::REST::Client::Harness
+      of sorts, it could take a JSON state machine
+      as input.
 
 == KNOWN ISSUES ==
 
@@ -186,15 +96,6 @@
 - Jackalope::Serializer
     - Jackalope::Serializer::XML (TODO - perigrin)
     - Jackalope::Serializer::YAML (why??)
-
-== PERHAPS ==
-
-- Jackalope::API::*
-    - create a set of roles that can be used
-      in the Bread::Board config to typemap
-      to concrete classes
-    - NOTE: I tried this, it didn't feel right
-      but should keep the idea around just in case
 
 == LINKS ==
 
