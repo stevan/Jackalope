@@ -193,6 +193,13 @@ sub service_readonly {
                 rel           => 'list',
                 href          => '/',
                 method        => 'GET',
+                data_schema   => {
+                    type => 'object',
+                    additional_properties => {
+                        query  => { type => 'object' }, # the query structure key=term
+                        attrs  => { type => 'object' }, # things like limit, skip, etc.
+                    }
+                },
                 target_schema => {
                     type  => "array",
                     items => {
