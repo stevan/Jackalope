@@ -168,6 +168,10 @@ sub _convert_query_params {
             elsif ( Scalar::Util::looks_like_number( $val ) ) {
                 $_ = $val + 0;
             }
+            elsif ( $val =~ /^\/(.*)\/$/ ) {
+                my $regexp = $1;
+                $_ = qr/$regexp/;
+            }
         }
     )->visit( $query );
     return;
