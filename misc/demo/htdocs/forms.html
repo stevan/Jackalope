@@ -110,6 +110,7 @@ var app = new Jackalope.Client.Application({
     nib : {
         controller : new ResourceController({ resource_repo : r_repo }),
         table_view : new Jackalope.Client.View.TableView ({
+            keyboard_nav : true,
             table_body   : '#table_view tbody',
             row_selector : 'tr',
             binding_spec : {
