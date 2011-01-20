@@ -1,9 +1,319 @@
 {
    "schema_map" : {
+      "jackalope/core/spec" : {
+         "additional_properties" : {
+            "metadata" : {
+               "type" : "object",
+               "description" : "This is a free-form metadata object where extra\ninformation can be stored. None of the information\nthat is contained in here should be relied on, if\nand when we need to rely on it, we can promote it\nto a real property.\n"
+            }
+         },
+         "id" : "jackalope/core/spec",
+         "title" : "The spec schema",
+         "type" : "object",
+         "description" : "This is a schema to describe the full spec",
+         "properties" : {
+            "schema_map" : {
+               "type" : "object",
+               "description" : "This is the mapping of schema ID to schema, it is used for schema lookup",
+               "items" : {
+                  "type" : "schema"
+               }
+            },
+            "typemap" : {
+               "type" : "object",
+               "description" : "This is a mapping of the core type names to thier schema IDs.",
+               "items" : {
+                  "format" : "uri",
+                  "type" : "string"
+               }
+            },
+            "version" : {
+               "type" : "number"
+            },
+            "authority" : {
+               "type" : "string"
+            }
+         }
+      },
+      "jackalope/core/linkrel" : {
+         "additional_properties" : {
+            "target_schema" : {
+               "type" : "schema",
+               "description" : "This is a schema (or a reference to a schema),\nof the resource being linked to. Typically this\nwill be just { '$ref' => '#' } to indicate that\nit refers to the schema it is contained within.\n"
+            },
+            "data_schema" : {
+               "type" : "schema",
+               "description" : "This is a schema (or a reference to a schema)\nof the submission data that will be accepted\nby this link. In the case of a POST or PUT\nmethod, the data is expected in the given\ntransport format. In the case of GET, this\nshould be an 'object' type schema and the\nquery string parameters should be checked\nagainst it.\n"
+            },
+            "uri_schema" : {
+               "type" : "object",
+               "description" : "This is a schema (or a reference to a schema)\nof the results of the mapping of the URI-template\nin the 'href' property. On the server side it\ncan be used to validate the value that we get,\nand on the client side it can be used to check\nto assure the URL being called is valid.\n",
+               "items" : {
+                  "type" : "schema"
+               }
+            },
+            "title" : {
+               "type" : "string",
+               "description" : "The human readable title of a given linkrel"
+            },
+            "metadata" : {
+               "type" : "object",
+               "description" : "This is just a place for random additional metadata\nthat might be useful for your given implementation.\nThis is totally free form and can be anything you want.\n"
+            },
+            "description" : {
+               "type" : "string",
+               "description" : "A short human readable description of the linkrel"
+            }
+         },
+         "id" : "jackalope/core/linkrel",
+         "title" : "The 'Linkrel' schema",
+         "type" : "object",
+         "description" : "This is the 'link' type for the hyper schema\nwhich represents concept of links for resources.\n",
+         "properties" : {
+            "rel" : {
+               "type" : "string",
+               "description" : "This string should in some way describe the relation\nof the link to the object instance. The validity of\nthe values is determined by the consumer of the\nlink data. By convention it should either be one\nof well-know link relations, which can be found here\nhttp://www.iana.org/assignments/link-relations/link-relations.xhtml,\nor a URI specific to the consumer of this link data.\n"
+            },
+            "href" : {
+               "format" : "uri_template",
+               "type" : "string",
+               "description" : "This is a URI for the resource, it may also\nbe a URI template containing variables (using the\nRoR style colon prefix). In the case of these\ntemplates the variables should be resolved in\nthe context of the object instance. This means\nthat a template like so:\n/product/:id/view\nshould be resolved to be this:\n/product/1234/view\ngiven an object with an 'id' property of 1234.\n"
+            },
+            "method" : {
+               "enum" : [
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "DELETE",
+                  "HEAD",
+                  "OPTIONS"
+               ],
+               "type" : "string",
+               "description" : "The HTTP method expected by this link, if\nthis isn't included then GET is assumed.\n"
+            }
+         }
+      },
+      "jackalope/core/hyperlink" : {
+         "id" : "jackalope/core/hyperlink",
+         "title" : "The 'Hyperlink' schema",
+         "type" : "object",
+         "description" : "This is the 'hyperlink' type for the hyper\nschema which represents the concrete links\nthat are described with the linkrel schema.\n",
+         "properties" : {
+            "rel" : {
+               "type" : "string",
+               "description" : "This string describes the relation of the link\nto the actual resource it points to. For more\ndetails see the docs for the 'rel' element\nin the jackalope/core/linkrel schema.\n"
+            },
+            "href" : {
+               "format" : "uri",
+               "type" : "string",
+               "description" : "This is a URI of the resource the link is pointing to.\n"
+            },
+            "method" : {
+               "enum" : [
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "DELETE",
+                  "HEAD",
+                  "OPTIONS"
+               ],
+               "type" : "string",
+               "description" : "The HTTP method expected by this link, if\nthis isn't included then GET is assumed.\n"
+            }
+         }
+      },
+      "jackalope/rest/service/non-editable" : {
+         "id" : "jackalope/rest/service/non-editable",
+         "title" : "This is a simple REST enabled schema",
+         "extends" : {
+            "$ref" : "jackalope/rest/service/read-only"
+         },
+         "links" : {
+            "create" : {
+               "rel" : "create",
+               "data_schema" : {
+                  "$ref" : "#"
+               },
+               "target_schema" : {
+                  "type" : "object",
+                  "extends" : {
+                     "$ref" : "jackalope/rest/resource"
+                  },
+                  "properties" : {
+                     "body" : {
+                        "$ref" : "#"
+                     }
+                  }
+               },
+               "href" : "/",
+               "method" : "POST"
+            },
+            "delete" : {
+               "rel" : "delete",
+               "uri_schema" : {
+                  "id" : {
+                     "type" : "string"
+                  }
+               },
+               "href" : "/:id",
+               "method" : "DELETE"
+            }
+         }
+      },
+      "jackalope/core/types/boolean" : {
+         "id" : "jackalope/core/types/boolean",
+         "title" : "The 'Boolean' type schema",
+         "type" : "schema",
+         "description" : "This is a schema for the 'boolean' type, a simple\ntrue/false value. However the details of what is\nconsidered true and what is considered false\nare different for different languages and this\nschema should take that into account based on the\nlanguage it is validating. It is important to note\nthat a transport format (JSON, XML, etc.) should\nprovide a canonical representation of true/false\nso as to remove those language specific quirks.\n",
+         "extends" : {
+            "$ref" : "jackalope/core/types/any"
+         },
+         "properties" : {
+            "type" : {
+               "literal" : "boolean",
+               "type" : "string"
+            }
+         }
+      },
+      "jackalope/core/types/schema" : {
+         "id" : "jackalope/core/types/schema",
+         "title" : "The 'Schema' type schema",
+         "type" : "schema",
+         "description" : "This is a schema for the 'schema' type, it is\ncomposed entirely of turtles all the way down.\n",
+         "extends" : {
+            "$ref" : "jackalope/core/types/object"
+         },
+         "properties" : {
+            "type" : {
+               "literal" : "schema",
+               "type" : "string"
+            }
+         }
+      },
+      "jackalope/rest/service/crud" : {
+         "id" : "jackalope/rest/service/crud",
+         "title" : "This is a simple REST enabled schema",
+         "extends" : {
+            "$ref" : "jackalope/rest/service/non-editable"
+         },
+         "links" : {
+            "edit" : {
+               "rel" : "edit",
+               "data_schema" : {
+                  "type" : "object",
+                  "extends" : {
+                     "$ref" : "jackalope/rest/resource"
+                  },
+                  "properties" : {
+                     "body" : {
+                        "$ref" : "#"
+                     }
+                  }
+               },
+               "target_schema" : {
+                  "type" : "object",
+                  "extends" : {
+                     "$ref" : "jackalope/rest/resource"
+                  },
+                  "properties" : {
+                     "body" : {
+                        "$ref" : "#"
+                     }
+                  }
+               },
+               "uri_schema" : {
+                  "id" : {
+                     "type" : "string"
+                  }
+               },
+               "href" : "/:id",
+               "method" : "PUT"
+            }
+         }
+      },
+      "jackalope/rest/resource/ref" : {
+         "additional_properties" : {
+            "link" : {
+               "additional_properties" : {
+                  "method" : {
+                     "literal" : "GET",
+                     "type" : "string"
+                  }
+               },
+               "extends" : {
+                  "$ref" : "jackalope/core/hyperlink"
+               },
+               "description" : "This is an optional hyperlink to read the resource\ndescribed, it should only ever be GET since it\nis only for reading.\n",
+               "properties" : {
+                  "rel" : {
+                     "literal" : "read",
+                     "type" : "string"
+                  }
+               }
+            },
+            "version" : {
+               "format" : "digest",
+               "type" : "string",
+               "description" : "This is a digest string (SHA-256) representing the current\nversion of the resource being pointed to. This can be used\nto check to make sure that the resource has not changed\nsince it was last referred too.\n"
+            }
+         },
+         "id" : "jackalope/rest/resource/ref",
+         "title" : "The 'Resource Ref' schema",
+         "type" : "object",
+         "description" : "This is meant to be a way to represent\nreferences to resources, it can be a convient\nway to refer to a resource only by it's ID\nand therefore save bandwidth.\n",
+         "properties" : {
+            "type_of" : {
+               "format" : "uri",
+               "type" : "string",
+               "description" : "This is the schema URI for the type of\nresource that this refers too.\n"
+            },
+            "$id" : {
+               "type" : "string",
+               "description" : "This is the lookup ID which can be\nused to locate the resource.\n"
+            }
+         }
+      },
+      "jackalope/core/types/object" : {
+         "additional_properties" : {
+            "additional_properties" : {
+               "type" : "object",
+               "description" : "This is a set of key/value pairs where the\nkey is a property name and the value is\na schema (or a reference to a schema)\nrepresented as an 'object' instance. These\nproperties however are optional and do not\nneed to exist in order to pass validation.\n",
+               "items" : {
+                  "type" : "schema"
+               }
+            },
+            "items" : {
+               "type" : "schema",
+               "description" : "This is a schema (or a reference to a schema)\nrepresented as an 'object' instance, which will\nbe used to validate all the values in the object.\n"
+            },
+            "properties" : {
+               "type" : "object",
+               "description" : "This is a set of key/value pairs where the\nkey is a property name and the value is\na schema (or a reference to a schema)\nrepresented as an 'object' instance. All\nthese properties are required and must be\npresent in order to pass validation.\n",
+               "items" : {
+                  "type" : "schema"
+               }
+            }
+         },
+         "id" : "jackalope/core/types/object",
+         "title" : "The 'Object' type schema",
+         "type" : "schema",
+         "description" : "This is a schema for the 'object' type, which is\na set of key/value pairs. The term 'object' is\nderived from Javascript, but this is the same as\na hash in Perl, a dictionary in Python, an\nassociative array in PHP, a Hashtable, a Map,\nall of which are essentially the same thing.\n",
+         "extends" : {
+            "$ref" : "jackalope/core/types/any"
+         },
+         "properties" : {
+            "type" : {
+               "literal" : "object",
+               "type" : "string"
+            }
+         }
+      },
       "jackalope/rest/service/read-only" : {
          "id" : "jackalope/rest/service/read-only",
          "title" : "This is a simple read-only REST enabled schema",
-         "type" : "object",
+         "extends" : {
+            "$ref" : "jackalope/rest/service/discoverable"
+         },
          "links" : {
             "read" : {
                "rel" : "read",
@@ -28,6 +338,17 @@
             },
             "list" : {
                "rel" : "list",
+               "data_schema" : {
+                  "additional_properties" : {
+                     "attrs" : {
+                        "type" : "object"
+                     },
+                     "query" : {
+                        "type" : "object"
+                     }
+                  },
+                  "type" : "object"
+               },
                "target_schema" : {
                   "type" : "array",
                   "items" : {
@@ -47,59 +368,35 @@
             }
          }
       },
-      "jackalope/core/types/boolean" : {
-         "id" : "jackalope/core/types/boolean",
-         "title" : "The 'Boolean' type schema",
+      "jackalope/core/types/array" : {
+         "additional_properties" : {
+            "max_items" : {
+               "type" : "integer",
+               "description" : "The maximum number of items in the array"
+            },
+            "is_unique" : {
+               "type" : "boolean",
+               "description" : "A boolean to indicate of the list should contain no duplicates"
+            },
+            "min_items" : {
+               "type" : "integer",
+               "description" : "The minimum number of items in the array"
+            },
+            "items" : {
+               "type" : "schema",
+               "description" : "This is a schema (or a reference to a schema)\nrepresented as an 'object' instance, which will\nbe used to validate all the elements in a list.\n"
+            }
+         },
+         "id" : "jackalope/core/types/array",
+         "title" : "The 'Array' type schema",
          "type" : "schema",
-         "description" : "This is a schema for the 'boolean' type, a simple\ntrue/false value. However the details of what is\nconsidered true and what is considered false\nare different for different languages and this\nschema should take that into account based on the\nlanguage it is validating. It is important to note\nthat a transport format (JSON, XML, etc.) should\nprovide a canonical representation of true/false\nso as to remove those language specific quirks.\n",
+         "description" : "This is a schema for the 'array' type, which is\nbasically just a list of other values. The list\nby default are heterogenous, but using the\noptional 'items' property it is possible to\nconstrain the list to be more homogenous.\n",
          "extends" : {
             "$ref" : "jackalope/core/types/any"
          },
          "properties" : {
             "type" : {
-               "literal" : "boolean",
-               "type" : "string"
-            }
-         }
-      },
-      "jackalope/core/types/null" : {
-         "id" : "jackalope/core/types/null",
-         "title" : "The 'Null' type schema",
-         "type" : "schema",
-         "description" : "This is a schema for the 'null' type, it is not\nso much the absence of a value, but a value that\nexplicity represents no value.\n",
-         "extends" : {
-            "$ref" : "jackalope/core/types/any"
-         },
-         "properties" : {
-            "type" : {
-               "literal" : "null",
-               "type" : "string"
-            }
-         }
-      },
-      "jackalope/core/types/schema" : {
-         "id" : "jackalope/core/types/schema",
-         "title" : "The 'Schema' type schema",
-         "type" : "schema",
-         "description" : "This is a schema for the 'schema' type, it is\ncomposed entirely of turtles all the way down.\n",
-         "extends" : {
-            "$ref" : "jackalope/core/types/object"
-         },
-         "properties" : {
-            "type" : {
-               "literal" : "schema",
-               "type" : "string"
-            }
-         }
-      },
-      "jackalope/core/ref" : {
-         "id" : "jackalope/core/ref",
-         "title" : "The reference schema",
-         "type" : "object",
-         "description" : "This is an object to represent a 'reference'\nto another object. By convention, the value\nstored in $ref is the 'id' of another object.\nAdditionally the value of '#' is also\nacceptable to indicate a reference to\nthe containing schema.\nWhen a reference is encountered, it should\nbe resolved and replaced by the value it\nreferences. There are no explict dereferencing\noperations. The exact details of when a\nreference is resolved and how are an implemention\ndetail and out of the scope of this spec.\n",
-         "properties" : {
-            "$ref" : {
-               "format" : "uri",
+               "literal" : "array",
                "type" : "string"
             }
          }
@@ -157,6 +454,21 @@
             }
          }
       },
+      "jackalope/core/types/null" : {
+         "id" : "jackalope/core/types/null",
+         "title" : "The 'Null' type schema",
+         "type" : "schema",
+         "description" : "This is a schema for the 'null' type, it is not\nso much the absence of a value, but a value that\nexplicity represents no value.\n",
+         "extends" : {
+            "$ref" : "jackalope/core/types/any"
+         },
+         "properties" : {
+            "type" : {
+               "literal" : "null",
+               "type" : "string"
+            }
+         }
+      },
       "jackalope/core/types/any" : {
          "additional_properties" : {
             "id" : {
@@ -195,152 +507,25 @@
             }
          }
       },
-      "jackalope/core/spec" : {
-         "additional_properties" : {
-            "metadata" : {
-               "type" : "object",
-               "description" : "This is a free-form metadata object where extra\ninformation can be stored. None of the information\nthat is contained in here should be relied on, if\nand when we need to rely on it, we can promote it\nto a real property.\n"
-            }
-         },
-         "id" : "jackalope/core/spec",
-         "title" : "The spec schema",
+      "jackalope/core/ref" : {
+         "id" : "jackalope/core/ref",
+         "title" : "The reference schema",
          "type" : "object",
-         "description" : "This is a schema to describe the full spec",
+         "description" : "This is an object to represent a 'reference'\nto another object. By convention, the value\nstored in $ref is the 'id' of another object.\nAdditionally the value of '#' is also\nacceptable to indicate a reference to\nthe containing schema.\nWhen a reference is encountered, it should\nbe resolved and replaced by the value it\nreferences. There are no explict dereferencing\noperations. The exact details of when a\nreference is resolved and how are an implemention\ndetail and out of the scope of this spec.\n",
          "properties" : {
-            "schema_map" : {
-               "type" : "object",
-               "description" : "This is the mapping of schema ID to schema, it is used for schema lookup",
-               "items" : {
-                  "type" : "schema"
-               }
-            },
-            "typemap" : {
-               "type" : "object",
-               "description" : "This is a mapping of the core type names to thier schema IDs.",
-               "items" : {
-                  "format" : "uri",
-                  "type" : "string"
-               }
-            },
-            "version" : {
-               "type" : "number"
-            },
-            "authority" : {
+            "$ref" : {
+               "format" : "uri",
                "type" : "string"
             }
          }
       },
-      "jackalope/core/types/integer" : {
-         "additional_properties" : {
-            "greater_than" : {
-               "type" : "integer",
-               "description" : "A integer must be greater than this value"
-            },
-            "less_than_or_equal_to" : {
-               "type" : "integer",
-               "description" : "A integer must be less than or equal to this value"
-            },
-            "greater_than_or_equal_to" : {
-               "type" : "integer",
-               "description" : "A integer must be greater than or equal to this value"
-            },
-            "enum" : {
-               "is_unique" : true,
-               "type" : "array",
-               "description" : "This is an array of possible acceptable values, it should contain no duplicates",
-               "items" : {
-                  "type" : "integer"
-               }
-            },
-            "less_than" : {
-               "type" : "integer",
-               "description" : "A integer must be less than this value"
-            }
-         },
-         "id" : "jackalope/core/types/integer",
-         "title" : "The 'Integer' type schema",
-         "type" : "schema",
-         "description" : "This is a schema for the 'integer' type, which is\nan extension of the 'number' type to not include\nfloating point numbers. It handles all the same\nadditional properties, but overrides them here\nsuch that they will only operate on valid integer\nvalues.\n",
-         "extends" : {
-            "$ref" : "jackalope/core/types/number"
-         },
-         "properties" : {
-            "type" : {
-               "literal" : "integer",
-               "type" : "string"
-            }
-         }
-      },
-      "jackalope/core/linkrel" : {
-         "additional_properties" : {
-            "target_schema" : {
-               "type" : "schema",
-               "description" : "This is a schema (or a reference to a schema),\nof the resource being linked to. Typically this\nwill be just { '$ref' => '#' } to indicate that\nit refers to the schema it is contained within.\n"
-            },
-            "data_schema" : {
-               "type" : "schema",
-               "description" : "This is a schema (or a reference to a schema)\nof the submission data that will be accepted\nby this link. In the case of a POST or PUT\nmethod, the data is expected in the given\ntransport format. In the case of GET, this\nshould be an 'object' type schema and the\nquery string parameters should be checked\nagainst it.\n"
-            },
-            "uri_schema" : {
-               "type" : "object",
-               "description" : "This is a schema (or a reference to a schema)\nof the results of the mapping of the URI-template\nin the 'href' property. On the server side it\ncan be used to validate the value that we get,\nand on the client side it can be used to check\nto assure the URL being called is valid.\n",
-               "items" : {
-                  "type" : "schema"
-               }
-            },
-            "title" : {
-               "type" : "string",
-               "description" : "The human readable title of a given link"
-            },
-            "metadata" : {
-               "type" : "object",
-               "description" : "This is just a place for random additional metadata\nthat might be useful for your given implementation.\nThis is totally free form and can be anything you want.\n"
-            },
-            "description" : {
-               "type" : "string",
-               "description" : "A short human readable description of the link"
-            }
-         },
-         "id" : "jackalope/core/linkrel",
-         "title" : "The 'HyperLink' schema",
+      "jackalope/rest/service/discoverable" : {
+         "id" : "jackalope/rest/service/discoverable",
+         "title" : "This is a base discoverable REST enabled schema",
          "type" : "object",
-         "description" : "This is the 'link' type for the hyper schema\nwhich represents links for resources.\n",
-         "properties" : {
-            "rel" : {
-               "type" : "string",
-               "description" : "This string should in some way describe the relation\nof the link to the object instance. The validity of\nthe values is determined by the consumer of the\nlink data. By convention it should either be one\nof well-know link relations, which can be found here\nhttp://www.iana.org/assignments/link-relations/link-relations.xhtml,\nor a URI specific to the consumer of this link data.\n"
-            },
-            "href" : {
-               "format" : "uri_template",
-               "type" : "string",
-               "description" : "This is a URI for the resource, it may also\nbe a URI template containing variables (using the\nRoR style colon prefix). In the case of these\ntemplates the variables should be resolved in\nthe context of the object instance. This means\nthat a template like so:\n/product/:id/view\nshould be resolved to be this:\n/product/1234/view\ngiven an object with an 'id' property of 1234.\n"
-            },
-            "method" : {
-               "enum" : [
-                  "GET",
-                  "POST",
-                  "PUT",
-                  "DELETE",
-                  "HEAD",
-                  "OPTIONS"
-               ],
-               "type" : "string",
-               "description" : "The HTTP method expected by this link, if\nthis isn't included then GET is assumed.\n"
-            }
-         }
-      },
-      "jackalope/rest/service/non-editable" : {
-         "id" : "jackalope/rest/service/non-editable",
-         "title" : "This is a simple REST enabled schema",
-         "extends" : {
-            "$ref" : "jackalope/rest/service/read-only"
-         },
          "links" : {
-            "create" : {
-               "rel" : "create",
-               "data_schema" : {
-                  "$ref" : "#"
-               },
+            "describedby" : {
+               "rel" : "describedby",
                "target_schema" : {
                   "type" : "object",
                   "extends" : {
@@ -348,64 +533,15 @@
                   },
                   "properties" : {
                      "body" : {
-                        "$ref" : "#"
+                        "type" : "object",
+                        "items" : {
+                           "type" : "schema"
+                        }
                      }
                   }
                },
                "href" : "/",
-               "method" : "POST"
-            },
-            "delete" : {
-               "rel" : "delete",
-               "uri_schema" : {
-                  "id" : {
-                     "type" : "string"
-                  }
-               },
-               "href" : "/:id",
-               "method" : "DELETE"
-            }
-         }
-      },
-      "jackalope/rest/resource/ref" : {
-         "additional_properties" : {
-            "link" : {
-               "additional_properties" : {
-                  "method" : {
-                     "literal" : "GET",
-                     "type" : "string"
-                  }
-               },
-               "extends" : {
-                  "$ref" : "jackalope/core/hyperlink"
-               },
-               "description" : "This is an optional hyperlink to read the resource\ndescribed, it should only ever be GET since it\nis only for reading.\n",
-               "properties" : {
-                  "rel" : {
-                     "literal" : "read",
-                     "type" : "string"
-                  }
-               }
-            },
-            "version" : {
-               "format" : "digest",
-               "type" : "string",
-               "description" : "This is a digest string (SHA-256) representing the current\nversion of the resource being pointed to. This can be used\nto check to make sure that the resource has not changed\nsince it was last referred too.\n"
-            }
-         },
-         "id" : "jackalope/rest/resource/ref",
-         "title" : "The 'Resource Ref' schema",
-         "type" : "object",
-         "description" : "This is meant to be a way to represent\nreferences to resources, it can be a convient\nway to refer to a resource only by it's ID\nand therefore save bandwidth.\n",
-         "properties" : {
-            "type_of" : {
-               "format" : "uri",
-               "type" : "string",
-               "description" : "This is the schema URI for the type of\nresource that this refers too.\n"
-            },
-            "$id" : {
-               "type" : "string",
-               "description" : "This is the lookup ID which can be\nused to locate the resource.\n"
+               "method" : "OPTIONS"
             }
          }
       },
@@ -480,141 +616,44 @@
             }
          }
       },
-      "jackalope/core/types/array" : {
+      "jackalope/core/types/integer" : {
          "additional_properties" : {
-            "max_items" : {
+            "greater_than" : {
                "type" : "integer",
-               "description" : "The maximum number of items in the array"
+               "description" : "A integer must be greater than this value"
             },
-            "is_unique" : {
-               "type" : "boolean",
-               "description" : "A boolean to indicate of the list should contain no duplicates"
-            },
-            "min_items" : {
+            "less_than_or_equal_to" : {
                "type" : "integer",
-               "description" : "The minimum number of items in the array"
+               "description" : "A integer must be less than or equal to this value"
             },
-            "items" : {
-               "type" : "schema",
-               "description" : "This is a schema (or a reference to a schema)\nrepresented as an 'object' instance, which will\nbe used to validate all the elements in a list.\n"
+            "greater_than_or_equal_to" : {
+               "type" : "integer",
+               "description" : "A integer must be greater than or equal to this value"
+            },
+            "enum" : {
+               "is_unique" : true,
+               "type" : "array",
+               "description" : "This is an array of possible acceptable values, it should contain no duplicates",
+               "items" : {
+                  "type" : "integer"
+               }
+            },
+            "less_than" : {
+               "type" : "integer",
+               "description" : "A integer must be less than this value"
             }
          },
-         "id" : "jackalope/core/types/array",
-         "title" : "The 'Array' type schema",
+         "id" : "jackalope/core/types/integer",
+         "title" : "The 'Integer' type schema",
          "type" : "schema",
-         "description" : "This is a schema for the 'array' type, which is\nbasically just a list of other values. The list\nby default are heterogenous, but using the\noptional 'items' property it is possible to\nconstrain the list to be more homogenous.\n",
+         "description" : "This is a schema for the 'integer' type, which is\nan extension of the 'number' type to not include\nfloating point numbers. It handles all the same\nadditional properties, but overrides them here\nsuch that they will only operate on valid integer\nvalues.\n",
          "extends" : {
-            "$ref" : "jackalope/core/types/any"
+            "$ref" : "jackalope/core/types/number"
          },
          "properties" : {
             "type" : {
-               "literal" : "array",
+               "literal" : "integer",
                "type" : "string"
-            }
-         }
-      },
-      "jackalope/rest/service/crud" : {
-         "id" : "jackalope/rest/service/crud",
-         "title" : "This is a simple REST enabled schema",
-         "extends" : {
-            "$ref" : "jackalope/rest/service/non-editable"
-         },
-         "links" : {
-            "edit" : {
-               "rel" : "edit",
-               "data_schema" : {
-                  "type" : "object",
-                  "extends" : {
-                     "$ref" : "jackalope/rest/resource"
-                  },
-                  "properties" : {
-                     "body" : {
-                        "$ref" : "#"
-                     }
-                  }
-               },
-               "target_schema" : {
-                  "type" : "object",
-                  "extends" : {
-                     "$ref" : "jackalope/rest/resource"
-                  },
-                  "properties" : {
-                     "body" : {
-                        "$ref" : "#"
-                     }
-                  }
-               },
-               "uri_schema" : {
-                  "id" : {
-                     "type" : "string"
-                  }
-               },
-               "href" : "/:id",
-               "method" : "PUT"
-            }
-         }
-      },
-      "jackalope/core/types/object" : {
-         "additional_properties" : {
-            "additional_properties" : {
-               "type" : "object",
-               "description" : "This is a set of key/value pairs where the\nkey is a property name and the value is\na schema (or a reference to a schema)\nrepresented as an 'object' instance. These\nproperties however are optional and do not\nneed to exist in order to pass validation.\n",
-               "items" : {
-                  "type" : "schema"
-               }
-            },
-            "items" : {
-               "type" : "schema",
-               "description" : "This is a schema (or a reference to a schema)\nrepresented as an 'object' instance, which will\nbe used to validate all the values in the object.\n"
-            },
-            "properties" : {
-               "type" : "object",
-               "description" : "This is a set of key/value pairs where the\nkey is a property name and the value is\na schema (or a reference to a schema)\nrepresented as an 'object' instance. All\nthese properties are required and must be\npresent in order to pass validation.\n",
-               "items" : {
-                  "type" : "schema"
-               }
-            }
-         },
-         "id" : "jackalope/core/types/object",
-         "title" : "The 'Object' type schema",
-         "type" : "schema",
-         "description" : "This is a schema for the 'object' type, which is\na set of key/value pairs. The term 'object' is\nderived from Javascript, but this is the same as\na hash in Perl, a dictionary in Python, an\nassociative array in PHP, a Hashtable, a Map,\nall of which are essentially the same thing.\n",
-         "extends" : {
-            "$ref" : "jackalope/core/types/any"
-         },
-         "properties" : {
-            "type" : {
-               "literal" : "object",
-               "type" : "string"
-            }
-         }
-      },
-      "jackalope/core/hyperlink" : {
-         "id" : "jackalope/core/hyperlink",
-         "title" : "The 'XLink' schema",
-         "type" : "object",
-         "description" : "This is the 'link' type for the hyper schema\nwhich represents the concrete links that are\ndescribed with the linkrel schema.\n",
-         "properties" : {
-            "rel" : {
-               "type" : "string",
-               "description" : "This string describes the relation of the link\nto the actual resource it points to. For more\ndetails see the docs for the 'rel' element\nin the jackalope/core/linkrel schema.\n"
-            },
-            "href" : {
-               "format" : "uri",
-               "type" : "string",
-               "description" : "This is a URI of the resource the link is pointing to.\n"
-            },
-            "method" : {
-               "enum" : [
-                  "GET",
-                  "POST",
-                  "PUT",
-                  "DELETE",
-                  "HEAD",
-                  "OPTIONS"
-               ],
-               "type" : "string",
-               "description" : "The HTTP method expected by this link, if\nthis isn't included then GET is assumed.\n"
             }
          }
       }
