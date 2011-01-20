@@ -19,12 +19,6 @@
     - Media (binary data)
         - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#media-link-entries
 
-- Jackalope::REST::Resource::Repository
-    - &list should optionally take some parameters
-        - search term(s)
-        - start/end for paging of results
-        - add this to the corresponding jackalope/rest/service as well
-
 - Jackalope Auth Middleware
     - if we want to restrict people based on a given
       criteria, we can do that by having some kind of
