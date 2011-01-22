@@ -19,6 +19,12 @@ has 'fixture_manager' => (
     },
 );
 
+has 'fixture_set' => (
+    is      => 'ro',
+    isa     => 'Str',
+    default => 'Core',
+);
+
 has 'repo' => (
     is       => 'ro',
     isa      => 'Jackalope::Schema::Repository',
@@ -54,7 +60,9 @@ sub run_fixtures_for_type {
 sub _get_fixture {
     my ($self, $type) = @_;
 
-    my $file = $self->fixture_manager->fetch( 'Core/' . $type );
+    $type =~ s/\//_/g if $type =~ /\//;
+
+    my $file = $self->fixture_manager->fetch( $self->fixture_set )->fetch( $type );
 
     decode_json( scalar $file->install_from_absolute->slurp );
 }
