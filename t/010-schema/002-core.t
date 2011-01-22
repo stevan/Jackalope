@@ -2,7 +2,6 @@
 
 use strict;
 use warnings;
-use FindBin;
 
 use Test::More;
 use Test::Fatal;
@@ -16,10 +15,7 @@ BEGIN {
 my $repo = Jackalope->new->resolve( type => 'Jackalope::Schema::Repository' );
 isa_ok($repo, 'Jackalope::Schema::Repository');
 
-my $fixtures = Test::Jackalope::Fixtures->new(
-    fixture_dir => [ $FindBin::Bin, '..', '..', 'tests', 'fixtures' ],
-    repo        => $repo
-);
+my $fixtures = Test::Jackalope::Fixtures->new( repo => $repo );
 
 foreach my $type ( qw[ ref linkrel hyperlink ] ) {
     my $schema = $repo->get_compiled_schema_by_uri('jackalope/core/' . $type);
