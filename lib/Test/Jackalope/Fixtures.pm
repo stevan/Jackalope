@@ -7,13 +7,16 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 use Jackalope::Util;
 use Test::Jackalope;
+use Test::Jackalope::Fixtures::Manager;
 use Devel::PartialDump 'dump';
 
-has 'fixture_dir' => (
-    is       => 'ro',
-    isa      => 'Path::Class::Dir',
-    coerce   => 1,
-    required => 1
+has 'fixture_manager' => (
+    is      => 'ro',
+    isa     => 'Test::Jackalope::Fixtures::Manager',
+    lazy    => 1,
+    default => sub {
+        Test::Jackalope::Fixtures::Manager->new
+    },
 );
 
 has 'repo' => (
@@ -25,10 +28,8 @@ has 'repo' => (
 sub run_fixtures_for_type {
     my ($self, $type) = @_;
 
-    $type =~ s/\//_/g if $type =~ /\//;
-
     my $repo     = $self->repo;
-    my $fixtures = decode_json( scalar $self->fixture_dir->file( $type . '.json' )->slurp );
+    my $fixtures = $self->_get_fixture( $type );
 
     foreach my $fixture (@$fixtures) {
 
@@ -48,7 +49,14 @@ sub run_fixtures_for_type {
             );
         }
     }
+}
 
+sub _get_fixture {
+    my ($self, $type) = @_;
+
+    my $file = $self->fixture_manager->fetch( 'Core/' . $type );
+
+    decode_json( scalar $file->install_from_absolute->slurp );
 }
 
 
