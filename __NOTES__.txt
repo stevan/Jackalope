@@ -1,45 +1,6 @@
 
 = TODOS =
 
-- Low Hanging Fruit
-    - need to write a test for the CGI::Expand behavior in
-      Jackalope::REST::Service::Target::get_data_schema
-    - we should be doing content-length stuff everywhere too
-    - perhaps centralize all the content-type handling too
-    - perhaps put all this plack fiddling into Jackalope::Util (or Jackalope::REST::Util)
-
-- Jackalope::REST::Service
-    - this should check the result in to_app to
-      look for errors that are not ours and wrap
-      them up in our exception objects accordingly
-    - look into Plack::Middleware::MethodOverride
-    - might want to return 412 Precondition Failed when delete If-Matches fails
-    - Caching options
-        - we should support eTags
-    - Media (binary data)
-        - see: http://www.atomenabled.org/developers/protocol/atom-protocol-spec.php#media-link-entries
-
-- Jackalope Auth Middleware
-    - if we want to restrict people based on a given
-      criteria, we can do that by having some kind of
-      middleware prune both the schema instance and
-      the resources, so that only the correct
-      links are present.
-
-- Jackalope::REST::Service::Directory
-    - this should collect services and key them by schema->id
-      and then the services should have access to them, this
-      should simplify some of the 030-multi-schema-service.t stuff
-      by allowing the resource/ref stuff to find the correct
-      resource-repository for us
-
-- Jackalope::REST::Client
-    - write it
-    - should be possible to script one of these
-      objects, a Jackalope::REST::Client::Harness
-      of sorts, it could take a JSON state machine
-      as input.
-
 == KNOWN ISSUES ==
 
 - Jackalope::Schema::Respository
@@ -90,28 +51,6 @@
 - Jackalope::Serializer
     - Jackalope::Serializer::XML (TODO - perigrin)
     - Jackalope::Serializer::YAML (why??)
-
-== LINKS ==
-
-
-http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
-http://en.wikipedia.org/wiki/Representational_State_Transfer
-http://martinfowler.com/articles/richardsonMaturityModel.html
-http://code.msdn.microsoft.com/cannonicalRESTEntity
-http://www.w3.org/TR/xforms/
-http://thisweekinrest.wordpress.com/
-http://tools.ietf.org/html/rfc5988
-http://alexscordellis.blogspot.com/2010/11/restful-architecture-what-should-we-put.html
-http://restinpractice.com/default.aspx
-
-- ATOM
-    - http://www.atomenabled.org/
-
-- LINK relations
-    - http://www.iana.org/assignments/link-relations/link-relations.xhtml
-
-- HTTP status codes
-    - https://demo.staging.fellowshiponeapi.com/v1/Util/HttpStatusCodes.help
 
 
 
