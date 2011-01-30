@@ -69,7 +69,7 @@ sub _build_spec {
     my $typemap    = $self->typemap;
     my $schema_map = {};
 
-    foreach my $type ( $self->_all_spec_builder_methods ) {
+    foreach my $type ( $self->all_spec_builder_methods ) {
         my @schemas = ($self->$type());
         foreach my $schema ( @schemas ) {
             $schema_map->{ $schema->{'id'} } = $schema;
@@ -87,7 +87,7 @@ sub _build_spec {
     };
 }
 
-sub _all_spec_builder_methods {
+sub all_spec_builder_methods {
     my $self = shift;
     keys %{ $self->typemap }, qw[ ref spec linkrel hyperlink ]
 }
