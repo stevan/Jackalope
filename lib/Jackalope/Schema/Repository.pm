@@ -148,7 +148,7 @@ sub _validate_schema {
 
     return if $schema->is_validated;
 
-    my $schema_type = $schema->compiled->{'type'};
+    my $schema_type = $schema->type;
 
     (defined $schema_type)
         || confess "schema id(" . $schema->id . ") does not have a type specified";

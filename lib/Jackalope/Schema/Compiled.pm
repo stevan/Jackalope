@@ -12,14 +12,15 @@ has 'raw' => (
     required => 1,
 );
 
-sub id { (shift)->compiled->{'id'} }
-
 has 'compiled' => (
     is      => 'ro',
     isa     => 'HashRef',
     lazy    => 1,
     default => sub { clone( (shift)->raw ) }
 );
+
+sub id   { (shift)->compiled->{'id'} }
+sub type { (shift)->compiled->{'type'} }
 
 has 'is_compiled' => (
     traits  => [ 'Bool' ],
