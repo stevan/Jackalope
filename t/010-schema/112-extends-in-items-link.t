@@ -62,7 +62,7 @@ is(exception{
     )
 }, undef, '... did not die when registering this schema');
 
-my $doctor = $repo->get_compiled_schema_by_uri('/schemas/doctor');
+my $doctor = $repo->get_compiled_schema_by_uri('/schemas/doctor')->compiled;
 
 is_deeply(
     $doctor->{'links'}->{'doctor.open_slots'}->{'target_schema'}->{'items'},

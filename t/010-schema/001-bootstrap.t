@@ -16,7 +16,7 @@ isa_ok($repo, 'Jackalope::Schema::Repository');
 
 foreach my $type ( $repo->spec->valid_types ) {
 
-    my $schema = $repo->get_compiled_schema_for_type( $type );
+    my $schema = $repo->get_compiled_schema_for_type( $type )->compiled;
 
     validation_pass(
         $repo->validate(
@@ -30,7 +30,7 @@ foreach my $type ( $repo->spec->valid_types ) {
 validation_pass(
     $repo->validate(
         { '$ref' => 'jackalope/core/types/schema' },
-        $repo->get_compiled_schema_by_uri('jackalope/core/types/schema'),
+        $repo->get_compiled_schema_by_uri('jackalope/core/types/schema')->compiled,
     ),
     '... validate the compiled schema type with the schema type (bootstrappin)'
 );

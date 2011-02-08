@@ -52,8 +52,8 @@ is(exception{
     )
 }, undef, '... did not die when registering this schema');
 
-my $employee = $repo->get_compiled_schema_by_uri('simple/employee');
-my $manager  = $repo->get_compiled_schema_by_uri('simple/manager');
+my $employee = $repo->get_compiled_schema_by_uri('simple/employee')->compiled;
+my $manager  = $repo->get_compiled_schema_by_uri('simple/manager')->compiled;
 
 is_deeply(
     $manager,

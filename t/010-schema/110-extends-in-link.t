@@ -49,7 +49,7 @@ is(exception{
     )
 }, undef, '... did not die when registering this schema');
 
-my $person = $repo->get_compiled_schema_by_uri('simple/person');
+my $person = $repo->get_compiled_schema_by_uri('simple/person')->compiled;
 
 is_deeply(
     $person->{'links'}->{'create'}->{'data_schema'}->{'properties'},

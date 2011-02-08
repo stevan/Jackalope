@@ -18,7 +18,7 @@ isa_ok($repo, 'Jackalope::Schema::Repository');
 my $fixtures = Test::Jackalope::Fixtures->new( repo => $repo );
 
 foreach my $type ( qw[ ref linkrel hyperlink ] ) {
-    my $schema = $repo->get_compiled_schema_by_uri('jackalope/core/' . $type);
+    my $schema = $repo->get_compiled_schema_by_uri('jackalope/core/' . $type)->compiled;
     validation_pass(
         $repo->validate(
             { '$ref' => 'jackalope/core/types/object' },

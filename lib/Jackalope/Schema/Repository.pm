@@ -74,14 +74,14 @@ sub get_compiled_schema_by_uri {
     my ($self, $uri) = @_;
     my $schema = $self->_compiled_schemas->{ $uri }
         || confess "Could not find schema for $uri";
-    $schema->compiled;
+    $schema;
 }
 
 sub get_compiled_schema_for_type {
     my ($self, $type) = @_;
     my $schema = $self->_compiled_schemas->{ $self->spec->get_uri_for_type( $type ) }
         || confess "Could not find schema for $type";
-    $schema->compiled;
+    $schema;
 }
 
 sub get_compiled_schema_by_ref {
@@ -90,7 +90,7 @@ sub get_compiled_schema_by_ref {
         || confess "$ref is not a ref";
     my $schema = $self->_resolve_ref( $ref, $self->_compiled_schemas )
         || confess "Could not find schema for " . $ref->{'$ref'};
-    $schema->compiled;
+    $schema;
 }
 
 sub get_schema_compiled_for_transport {
@@ -119,7 +119,7 @@ sub register_schema {
     my $compiled_schema = $self->_compile_schema( $schema );
     $self->_validate_schema( $compiled_schema );
     $self->_insert_compiled_schema( $compiled_schema );
-    return $compiled_schema->compiled;
+    return $compiled_schema
 }
 
 sub register_schemas {
@@ -133,7 +133,7 @@ sub register_schemas {
         map {
             $self->_validate_schema( $_ );
             $self->_insert_compiled_schema( $_ );
-            $_->compiled;
+            $_;
         } @{ $schema_map }{ @schema_ids }
     ];
 }
