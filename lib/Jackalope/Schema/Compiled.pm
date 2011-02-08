@@ -46,6 +46,26 @@ has 'is_compiled_for_transport' => (
     }
 );
 
+has 'is_validated' => (
+    traits  => [ 'Bool' ],
+    is      => 'ro',
+    isa     => 'Bool',
+    default => 0,
+    handles => {
+        'mark_as_validated' => 'set',
+    }
+);
+
+has 'validator' => (
+    is       => 'ro',
+    isa      => 'Jackalope::Schema::Validator',
+    required => 1
+);
+
+sub validate {
+    my ($self, $data) = @_;
+    $self->validator->validate( $self->compiled, $data );
+}
 
 __PACKAGE__->meta->make_immutable;
 

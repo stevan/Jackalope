@@ -108,11 +108,8 @@ sub get_schema_compiled_for_transport {
 sub validate {
     my ($self, $schema, $data) = @_;
     my $compiled_schema = $self->_compile_schema( $schema );
-    $self->_validate_schema( $compiled_schema->compiled );
-    return $self->validator->validate(
-        $compiled_schema->compiled,
-        $data
-    );
+    $self->_validate_schema( $compiled_schema );
+    return $compiled_schema->validate( $data );
 }
 
 sub register_schema {
@@ -120,7 +117,7 @@ sub register_schema {
     (exists $schema->{id})
         || confess "Can only register schemas that have an 'id'";
     my $compiled_schema = $self->_compile_schema( $schema );
-    $self->_validate_schema( $compiled_schema->compiled );
+    $self->_validate_schema( $compiled_schema );
     $self->_insert_compiled_schema( $compiled_schema );
     return $compiled_schema->compiled;
 }
@@ -134,7 +131,7 @@ sub register_schemas {
     my $schema_map = $self->_compile_schemas( @$schemas );
     return [
         map {
-            $self->_validate_schema( $_->compiled );
+            $self->_validate_schema( $_ );
             $self->_insert_compiled_schema( $_ );
             $_->compiled;
         } @{ $schema_map }{ @schema_ids }
@@ -146,15 +143,18 @@ sub register_schemas {
 sub _validate_schema {
     my ($self, $schema) = @_;
 
-    my $schema_type = $schema->{'type'};
+    (blessed $schema && $schema->isa('Jackalope::Schema::Compiled'))
+        || confess "You can only pass in compiled schema objects here";
+
+    return if $schema->is_validated;
+
+    my $schema_type = $schema->compiled->{'type'};
 
     (defined $schema_type)
-        || confess "schema id(" . $schema->{'id'} . ") does not have a type specified";
+        || confess "schema id(" . $schema->compiled->{'id'} . ") does not have a type specified";
 
-    my $result = $self->validator->validate(
-        $self->get_compiled_schema_for_type( $schema_type ),
-        $schema
-    );
+    my $meta_schema = $self->_compiled_schemas->{ $self->spec->get_uri_for_type( $schema_type ) };
+    my $result      = $meta_schema->validate( $schema->compiled );
 
     if (exists $result->{error}) {
         require Data::Dumper;
@@ -163,11 +163,13 @@ sub _validate_schema {
             {
                 '001-error'       => "Invalid schema",
                 '002-result'      => $result,
-                '003-schema'      => $schema,
-                '004-meta_schema' => $self->get_compiled_schema_for_type( $schema_type )
+                '003-schema'      => $schema->compiled,
+                '004-meta_schema' => $meta_schema
             }
         );
     }
+
+    $schema->mark_as_validated;
 }
 
 # private compiled schema stuff
@@ -184,6 +186,7 @@ sub _compile_schema_for_tranport {
     $self->_flatten_extends( 'for_transport', $schema, $self->_compiled_schemas );
     $self->_resolve_embedded_extends( 'for_transport', $schema, $self->_compiled_schemas );
     $self->_prune_schema_for_transport( $schema->for_transport );
+    $schema->mark_as_compiled_for_transport;
     $schema;
 }
 
@@ -241,7 +244,10 @@ sub _compile_core_schemas {
 sub _prepare_schema_for_compiling {
     my ($self, $raw) = @_;
 
-    my $schema = Jackalope::Schema::Compiled->new( raw => $raw );
+    my $schema = Jackalope::Schema::Compiled->new(
+        raw       => $raw,
+        validator => $self->validator,
+    );
 
     # NOTE:
     # this might not be good idea
