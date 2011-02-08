@@ -151,7 +151,7 @@ sub _validate_schema {
     my $schema_type = $schema->compiled->{'type'};
 
     (defined $schema_type)
-        || confess "schema id(" . $schema->compiled->{'id'} . ") does not have a type specified";
+        || confess "schema id(" . $schema->id . ") does not have a type specified";
 
     my $meta_schema = $self->_compiled_schemas->{ $self->spec->get_uri_for_type( $schema_type ) };
     my $result      = $meta_schema->validate( $schema->compiled );
@@ -176,7 +176,7 @@ sub _validate_schema {
 
 sub _insert_compiled_schema {
     my ($self, $schema) = @_;
-    $self->_compiled_schemas->{ $schema->compiled->{'id'} } = $schema;
+    $self->_compiled_schemas->{ $schema->id } = $schema;
 }
 
 # Schema compilation
@@ -261,7 +261,7 @@ sub _generate_schema_map {
     my ($self, @schemas) = @_;
     return +{
         %{ $self->_compiled_schemas },
-        (map { $_->compiled->{'id'} => $_ } @schemas)
+        (map { $_->id => $_ } @schemas)
     }
 }
 
@@ -285,7 +285,7 @@ sub _create_transport_schema_map {
     my ($self, $schema, $transport_map) = @_;
 
     $transport_map ||= {
-        $schema->compiled->{'id'} => $schema->for_transport
+        $schema->id => $schema->for_transport
     };
 
     my $schema_map = $self->_compiled_schemas;
@@ -302,7 +302,7 @@ sub _create_transport_schema_map {
                         unless ( $s->is_compiled_for_transport ) {
                             $s = $self->_compile_schema_for_tranport( $s );
                         }
-                        $transport_map->{ $s->compiled->{'id'} } = $s->for_transport;
+                        $transport_map->{ $s->id } = $s->for_transport;
                         $self->_create_transport_schema_map( $s, $transport_map );
                     }
                 }

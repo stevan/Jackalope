@@ -12,6 +12,8 @@ has 'raw' => (
     required => 1,
 );
 
+sub id { (shift)->compiled->{'id'} }
+
 has 'compiled' => (
     is      => 'ro',
     isa     => 'HashRef',
