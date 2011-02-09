@@ -62,10 +62,10 @@ is(exception{
     )
 }, undef, '... did not die when registering this schema');
 
-my $doctor = $repo->get_compiled_schema_by_uri('/schemas/doctor')->compiled;
+my $doctor = $repo->get_compiled_schema_by_uri('/schemas/doctor');
 
 is_deeply(
-    $doctor->{'links'}->{'doctor.open_slots'}->{'target_schema'}->{'items'},
+    $doctor->links->{'doctor.open_slots'}->{'target_schema'}->{'items'},
     {
         'additional_properties' => {},
         'type' => 'object',

@@ -197,8 +197,7 @@ sub _compile_schema {
         $schema = $self->_resolve_ref( $schema, $self->_compiled_schemas )
             || confess "Could not find schema for " . $schema->{'$ref'};
     }
-
-    unless ( blessed $schema ) {
+    else {
         $schema = $self->_prepare_schema_for_compiling( $schema );
         $self->_flatten_extends( 'compiled', $schema, $self->_compiled_schemas );
         $self->_resolve_embedded_extends( 'compiled', $schema, $self->_compiled_schemas );
@@ -243,18 +242,10 @@ sub _compile_core_schemas {
 
 sub _prepare_schema_for_compiling {
     my ($self, $raw) = @_;
-
-    my $schema = Jackalope::Schema::Compiled->new(
-        raw       => $raw,
-        validator => $self->validator,
+    Jackalope::Schema::Compiled->new(
+        raw        => $raw,
+        repository => $self,
     );
-
-    # NOTE:
-    # this might not be good idea
-    # - SL
-    delete $schema->compiled->{'id'} unless $schema->compiled->{'id'};
-
-    return $schema;
 }
 
 sub _generate_schema_map {

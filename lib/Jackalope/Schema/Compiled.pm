@@ -5,6 +5,7 @@ our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use Clone 'clone';
+use Data::UUID;
 
 has 'raw' => (
     is       => 'ro',
@@ -19,8 +20,20 @@ has 'compiled' => (
     default => sub { clone( (shift)->raw ) }
 );
 
-sub id   { (shift)->compiled->{'id'} }
-sub type { (shift)->compiled->{'type'} }
+has 'id' => (
+    is      => 'ro',
+    isa     => 'Str',
+    lazy    => 1,
+    default => sub {
+        my $self = shift;
+        exists $self->raw->{'id'}
+            ? $self->raw->{'id'}
+            : Data::UUID->new->create_str
+    }
+);
+
+sub type  { (shift)->compiled->{'type'}  }
+sub links { (shift)->compiled->{'links'} }
 
 has 'is_compiled' => (
     traits  => [ 'Bool' ],
@@ -59,15 +72,17 @@ has 'is_validated' => (
     }
 );
 
-has 'validator' => (
+# link back to the repository that created it
+has 'repository' => (
     is       => 'ro',
-    isa      => 'Jackalope::Schema::Validator',
-    required => 1
+    isa      => 'Jackalope::Schema::Repository',
+    weak_ref => 1,
+    required => 1,
 );
 
 sub validate {
     my ($self, $data) = @_;
-    $self->validator->validate( $self->compiled, $data );
+    $self->repository->validator->validate( $self->compiled, $data );
 }
 
 __PACKAGE__->meta->make_immutable;
