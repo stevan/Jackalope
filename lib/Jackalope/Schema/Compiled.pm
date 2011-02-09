@@ -13,9 +13,9 @@ has 'id' => (
     lazy    => 1,
     default => sub {
         my $self = shift;
-        exists $self->raw->{'id'}
-            ? $self->raw->{'id'}
-            : Data::UUID->new->create_str
+        $self->raw->{'id'} = Data::UUID->new->create_str
+            unless exists $self->raw->{'id'};
+        $self->raw->{'id'}
     }
 );
 
