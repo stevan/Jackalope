@@ -7,6 +7,18 @@ our $AUTHORITY = 'cpan:STEVAN';
 use Clone 'clone';
 use Data::UUID;
 
+has 'id' => (
+    is      => 'ro',
+    isa     => 'Str',
+    lazy    => 1,
+    default => sub {
+        my $self = shift;
+        exists $self->raw->{'id'}
+            ? $self->raw->{'id'}
+            : Data::UUID->new->create_str
+    }
+);
+
 has 'raw' => (
     is       => 'ro',
     isa      => 'HashRef',
@@ -20,20 +32,9 @@ has 'compiled' => (
     default => sub { clone( (shift)->raw ) }
 );
 
-has 'id' => (
-    is      => 'ro',
-    isa     => 'Str',
-    lazy    => 1,
-    default => sub {
-        my $self = shift;
-        exists $self->raw->{'id'}
-            ? $self->raw->{'id'}
-            : Data::UUID->new->create_str
-    }
-);
-
-sub type  { (shift)->compiled->{'type'}  }
-sub links { (shift)->compiled->{'links'} }
+# common delegations ...
+sub type  { (shift)->compiled->{'type'} }
+sub links { (shift)->compiled->{'links'} || {} }
 
 has 'is_compiled' => (
     traits  => [ 'Bool' ],
