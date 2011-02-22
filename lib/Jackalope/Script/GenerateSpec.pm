@@ -6,7 +6,7 @@ use MooseX::Types::Path::Class;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use Class::Load 'load_class';
+use Jackalope::Util;
 use Data::Visitor::Callback;
 
 with 'MooseX::Getopt';
@@ -50,8 +50,7 @@ has '_serializer' => (
     lazy    => 1,
     default => sub {
         my $self  = shift;
-        my $class = 'Jackalope::Serializer::' . $self->format;
-        load_class($class);
+        my $class = load_prefixed_class( 'Jackalope::Serializer', $self->format );
         $class->new
     },
 );

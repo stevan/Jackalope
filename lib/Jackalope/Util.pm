@@ -6,7 +6,8 @@ use warnings;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use JSON::XS ();
+use JSON::XS    ();
+use Class::Load ();
 use Sub::Exporter;
 
 my @exports = qw/
@@ -14,6 +15,8 @@ my @exports = qw/
     false
     encode_json
     decode_json
+    load_class
+    load_prefixed_class
 /;
 
 Sub::Exporter::setup_exporter({
@@ -40,6 +43,24 @@ sub decode_json {
     do { $json->$_( $params->{ $_ } ) foreach keys %$params }
         if defined $params;
     $json->decode( $data )
+}
+
+sub load_class {
+    my $class = shift;
+    Class::Load::load_class( $class );
+    $class;
+}
+
+sub load_prefixed_class {
+    my ($prefix, $class) = @_;
+    # TODO:
+    # this should support +Name
+    # and other such variations
+    # like Catalyst plugins, etc.
+    # - SL
+    my $full_class = join '::' => $prefix, $class;
+    load_class( $full_class );
+    return $full_class;
 }
 
 1;

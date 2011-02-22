@@ -5,12 +5,13 @@ use Bread::Board;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use Class::Load 'load_class';
+use Jackalope::Util;
 
 use Jackalope::Schema::Validator::Core;
 use Jackalope::Schema::Validator;
 use Jackalope::Schema::Spec;
 use Jackalope::Schema::Repository;
+use Jackalope::Schema::Inspector;
 
 extends 'Bread::Board::Container';
 
@@ -25,8 +26,7 @@ sub BUILD {
         service 'Jackalope::Serializer' => (
             block => sub {
                 my $s = shift;
-                my $class = 'Jackalope::Serializer::' . $s->param('format');
-                load_class( $class );
+                my $class = load_prefixed_class( 'Jackalope::Serializer', $s->param('format') );
                 $class->new(
                     $s->param('default_params')
                         ? (default_params => $s->param('default_params'))
