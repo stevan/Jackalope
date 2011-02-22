@@ -11,7 +11,6 @@ use Jackalope::Schema::Validator::Core;
 use Jackalope::Schema::Validator;
 use Jackalope::Schema::Spec;
 use Jackalope::Schema::Repository;
-use Jackalope::Schema::Inspector;
 
 extends 'Bread::Board::Container';
 
