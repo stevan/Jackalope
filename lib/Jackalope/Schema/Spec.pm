@@ -378,6 +378,14 @@ sub any {
                     you can think of them as methods, while the schema
                     describes the instance structure.
                 ]
+            },
+            metadata => {
+                type        => 'object',
+                description => q[
+                    There is often times a need to add addtional stuff
+                    to a schema, random stuff that doesn't fit into
+                    anything else. This is the place to do that.
+                ]
             }
         }
     };
