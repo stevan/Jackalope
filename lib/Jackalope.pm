@@ -16,7 +16,9 @@ extends 'Bread::Board::Container';
 
 has '+name' => ( default => sub { (shift)->meta->name } );
 
-has 'schema_spec_class' => ( is => 'ro', isa => 'Str' );
+has 'schema_spec_class'    => ( is => 'ro', isa => 'Str' );
+has 'validator_class'      => ( is => 'ro', isa => 'Str' );
+has 'validator_core_class' => ( is => 'ro', isa => 'Str' );
 
 sub BUILD {
     my $self = shift;
@@ -41,6 +43,16 @@ sub BUILD {
         if (my $spec_class = $self->schema_spec_class) {
             load_class( $spec_class );
             typemap 'Jackalope::Schema::Spec' => infer( class => $spec_class );
+        }
+
+        if (my $validator_class = $self->validator_class) {
+            load_class( $validator_class );
+            typemap 'Jackalope::Schema::Validator' => infer( class => $validator_class );
+        }
+
+        if (my $validator_core_class = $self->validator_core_class) {
+            load_class( $validator_core_class );
+            typemap 'Jackalope::Schema::Validator::Core' => infer( class => $validator_core_class );
         }
 
         # schema repository, this infers
