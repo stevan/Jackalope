@@ -24,24 +24,26 @@ has 'typemap' => (
     traits  => [ 'Hash' ],
     is      => 'ro',
     isa     => 'HashRef',
-    default => sub {
-        +{
-            any             => 'jackalope/core/types/any',
-                null        => 'jackalope/core/types/null',
-                boolean     => 'jackalope/core/types/boolean',
-                number      => 'jackalope/core/types/number',
-                    integer => 'jackalope/core/types/integer',
-                string      => 'jackalope/core/types/string',
-                array       => 'jackalope/core/types/array',
-                object      => 'jackalope/core/types/object',
-                    schema  => 'jackalope/core/types/schema',
-        }
-    },
+    builder => 'build_typemap',
     handles => {
         'valid_types'      => 'keys',
         'get_uri_for_type' => 'get',
     }
 );
+
+sub build_typemap {
+    return +{
+        any             => 'jackalope/core/types/any',
+            null        => 'jackalope/core/types/null',
+            boolean     => 'jackalope/core/types/boolean',
+            number      => 'jackalope/core/types/number',
+                integer => 'jackalope/core/types/integer',
+            string      => 'jackalope/core/types/string',
+            array       => 'jackalope/core/types/array',
+            object      => 'jackalope/core/types/object',
+                schema  => 'jackalope/core/types/schema',
+    }
+}
 
 ## ------------------------------------------------------------------
 ## Jackalope Schema Spec
