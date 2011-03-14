@@ -18,6 +18,7 @@ requires 'Clone'                      => 0;
 requires 'List::AllUtils'             => 0;
 requires 'Data::Visitor::Callback'    => 0;
 requires 'Scalar::Util'               => 0;
+requires 'Data::UUID'                 => 0;
 requires 'Data::Peek'                 => 0;
 requires 'Data::Dumper'               => 0;
 requires 'Devel::PartialDump'         => 0;
