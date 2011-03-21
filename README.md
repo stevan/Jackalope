@@ -8,7 +8,7 @@ by Martin Fowler and the book [REST in Practice](http://restinpractice.com/defau
 ## Core Concepts
 
 Jackalope is built of a couple of different parts. The first part is the
-schema language, which describes the messages to be sent and recieved. The
+schema language, which describes the messages to be sent and received. The
 second part is the hypermedia controls, which are themselves described
 in the schema language. And the last part is the REST style web services which
 is found in Jackalope::REST.
@@ -19,7 +19,7 @@ The schema language is actually just Perl data structures, but it is simple enou
 that it could be written in most any simple data serialization language, like JSON,
 YAML or a dialect of XML. The schema language is also self-describing, meaning that
 each core element of the language is described with the language itself. There is
-support for a set of core types which are shown below in the type heirarchy.
+support for a set of core types which are shown below in the type hierarchy.
 
     Any
         Null
@@ -31,7 +31,7 @@ support for a set of core types which are shown below in the type heirarchy.
         Object[ String, T ]
           Schema
 
-Additionally the core schema language also supports references (using the JSPON
+Additionally the core schema language also supports references (using the JSON
 $ref syntax) and through the use of references it is also possible to 'extend'
 a schema, which is similar to object oriented inheritance, but different.
 
@@ -40,7 +40,7 @@ from [JSON-Schema](http://www.json-schema.org) however the underlying implementa
 and core philosophy differ greatly.
 
 The documentation for the schema types themselves is contained within the
-schema (see, like really self-decribing), take a look at Jackalope::Schema::Spec
+schema (see, like really self-describing), take a look at Jackalope::Schema::Spec
 to see this documentation. I recommend reading that document from top to bottom,
 after which you should have all the information to understand what you just read,
 so I recommend re-reading it then. Hopefully at that point, it will all make sense.
