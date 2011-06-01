@@ -237,7 +237,7 @@ sub object {
     return +{ pass => 1 };
 }
 
-*schema = \&object;
+sub schema { (shift)->object( @_ ) }
 
 # ...
 
