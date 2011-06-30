@@ -52,15 +52,14 @@ sub load_class {
 }
 
 sub load_prefixed_class {
-    my ($prefix, $class) = @_;
-    # TODO:
-    # this should support +Name
-    # and other such variations
-    # like Catalyst plugins, etc.
-    # - SL
-    my $full_class = join '::' => $prefix, $class;
-    load_class( $full_class );
-    return $full_class;
+    my ($class, $prefix) = @_;
+    if ($prefix) {
+        unless ($class =~ s/^\+// || $class =~ /^$prefix/) {
+            $class = "$prefix\::$class";
+        }
+    }
+    load_class( $class );
+    return $class;
 }
 
 1;
