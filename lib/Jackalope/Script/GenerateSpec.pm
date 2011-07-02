@@ -50,7 +50,7 @@ has '_serializer' => (
     lazy    => 1,
     default => sub {
         my $self  = shift;
-        my $class = load_prefixed_class( $self->format, 'Jackalope::Serializer' );
+        my $class = load_class( $self->format, 'Jackalope::Serializer' );
         $class->new
     },
 );

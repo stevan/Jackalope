@@ -16,7 +16,6 @@ my @exports = qw/
     encode_json
     decode_json
     load_class
-    load_prefixed_class
 /;
 
 Sub::Exporter::setup_exporter({
@@ -46,19 +45,13 @@ sub decode_json {
 }
 
 sub load_class {
-    my $class = shift;
-    Class::Load::load_class( $class );
-    $class;
-}
-
-sub load_prefixed_class {
     my ($class, $prefix) = @_;
     if ($prefix) {
         unless ($class =~ s/^\+// || $class =~ /^$prefix/) {
             $class = "$prefix\::$class";
         }
     }
-    load_class( $class );
+    Class::Load::load_class( $class );
     return $class;
 }
 

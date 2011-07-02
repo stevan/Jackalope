@@ -23,10 +23,10 @@ is(Jackalope::Util::is_bool(2), undef, 'Non-one/zero value is not boolean');
 
 
 isa_ok(Jackalope::Util::load_class('Jackalope'), 'Jackalope');
-isa_ok(Jackalope::Util::load_prefixed_class('Core', 'Jackalope::Schema::Validator'), 'Jackalope::Schema::Validator::Core');
-isa_ok(Jackalope::Util::load_prefixed_class('Jackalope::Schema::Validator::Core', 'Jackalope::Schema::Validator'), 'Jackalope::Schema::Validator::Core');
-isa_ok(Jackalope::Util::load_prefixed_class('+Jackalope::Schema::Validator::Core', "Foo::Bar"), 'Jackalope::Schema::Validator::Core');
-isa_ok(Jackalope::Util::load_prefixed_class('Jackalope::Schema::Validator::Core'), 'Jackalope::Schema::Validator::Core');
+isa_ok(Jackalope::Util::load_class('Core', 'Jackalope::Schema::Validator'), 'Jackalope::Schema::Validator::Core');
+isa_ok(Jackalope::Util::load_class('Jackalope::Schema::Validator::Core', 'Jackalope::Schema::Validator'), 'Jackalope::Schema::Validator::Core');
+isa_ok(Jackalope::Util::load_class('+Jackalope::Schema::Validator::Core', "Foo::Bar"), 'Jackalope::Schema::Validator::Core');
+isa_ok(Jackalope::Util::load_class('Jackalope::Schema::Validator::Core'), 'Jackalope::Schema::Validator::Core');
 
 
 
