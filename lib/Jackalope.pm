@@ -27,7 +27,7 @@ sub BUILD {
         service 'Jackalope::Serializer' => (
             block => sub {
                 my $s = shift;
-                my $class = load_prefixed_class( 'Jackalope::Serializer', $s->param('format') );
+                my $class = load_class( $s->param('format'), 'Jackalope::Serializer' );
                 $class->new(
                     $s->param('default_params')
                         ? (default_params => $s->param('default_params'))
