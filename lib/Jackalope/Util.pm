@@ -16,7 +16,6 @@ my @exports = qw/
     encode_json
     decode_json
     load_class
-    load_prefixed_class
 /;
 
 Sub::Exporter::setup_exporter({
@@ -24,11 +23,34 @@ Sub::Exporter::setup_exporter({
     groups  => { default => \@exports }
 });
 
+=item true
+
+Returns a JSON::XS::true value.
+
+=cut
 sub true  () { JSON::XS::true()  }
+
+=item false
+
+Returns a JSON::XS::false value.
+
+=cut
 sub false () { JSON::XS::false() }
 
+=item is_bool
+
+Returns a JSON::XS::true value if the argument is true, otherwise returns a
+JSON::XS::false value.
+
+=cut
 sub is_bool { JSON::XS::is_bool( shift ) }
 
+=item encode_json
+
+Encodes a hashref, using JSON::XS, returning a string of JSON-encoded data. An
+optional $params hashref can contain options to be passed directly to JSON::XS.
+
+=cut
 sub encode_json {
     my ($data, $params) = @_;
     my $json = JSON::XS->new;
@@ -37,6 +59,12 @@ sub encode_json {
     $json->encode( $data )
 }
 
+=item decode_json
+
+Decodes a string of JSON-encoded data using JSON::XS, returning a hashref. An
+optional $params hashref can contain options to be passed directly to JSON::XS.
+
+=cut
 sub decode_json {
     my ($data, $params) = @_;
     my $json = JSON::XS->new;
@@ -45,22 +73,21 @@ sub decode_json {
     $json->decode( $data )
 }
 
-sub load_class {
-    my $class = shift;
-    Class::Load::load_class( $class );
-    $class;
-}
+=item load_class
 
-sub load_prefixed_class {
-    my ($prefix, $class) = @_;
-    # TODO:
-    # this should support +Name
-    # and other such variations
-    # like Catalyst plugins, etc.
-    # - SL
-    my $full_class = join '::' => $prefix, $class;
-    load_class( $full_class );
-    return $full_class;
+Loads and returns the specified class. $prefix is optional, and will be ignored
+if $class is prepended with a +.
+
+=cut
+sub load_class {
+    my ($class, $prefix) = @_;
+    if ($prefix) {
+        unless ($class =~ s/^\+// || $class =~ /^$prefix/) {
+            $class = "$prefix\::$class";
+        }
+    }
+    Class::Load::load_class( $class );
+    return $class;
 }
 
 1;
