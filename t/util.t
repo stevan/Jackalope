@@ -1,5 +1,4 @@
 use Test::More;
-use Data::Dump;
 
 BEGIN { use_ok('Jackalope'); use_ok('JSON::XS'); }
 
