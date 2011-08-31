@@ -378,7 +378,7 @@ sub any {
                     of which is to provide a way to map services
                     to the objects described in a schema. In OOP terms,
                     you can think of them as methods, while the schema
-                    describes the instance structure.
+                    is a class describing the instance structure.
                 ]
             },
             metadata => {
