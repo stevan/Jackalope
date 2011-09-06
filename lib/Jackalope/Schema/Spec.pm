@@ -57,7 +57,7 @@ sub build_typemap {
 ## ------------------------------------------------------------------
 
 # this is essentially a cache
-# for the complied spec.
+# for the compiled spec.
 has '_spec' => (
     init_arg => undef,
     reader   => 'get_spec',
@@ -112,7 +112,7 @@ sub spec {
             typemap   => {
                 type        => "object",
                 items       => { type => "string", 'format' => "uri" },
-                description => "This is a mapping of the core type names to thier schema IDs."
+                description => "This is a mapping of the core type names to their schema IDs."
             },
             schema_map => {
                 type        => "object",
@@ -157,9 +157,9 @@ sub ref {
 
             When a reference is encountered, it should
             be resolved and replaced by the value it
-            references. There are no explict dereferencing
-            operations. The exact details of when a
-            reference is resolved and how are an implemention
+            references. There are no explicit dereferencing
+            operations. The exact details of when and how a
+            reference is resolved are an implementation
             detail and out of the scope of this spec.
         ],
         type        => "object",
@@ -194,7 +194,7 @@ sub linkrel {
                     of the link to the object instance. The validity of
                     the values is determined by the consumer of the
                     link data. By convention it should either be one
-                    of well-know link relations, which can be found here
+                    of well-known link relations, which can be found here
                     http://www.iana.org/assignments/link-relations/link-relations.xhtml,
                     or a URI specific to the consumer of this link data.
                 ]
@@ -235,7 +235,7 @@ sub linkrel {
                     This is a schema (or a reference to a schema),
                     of the resource being linked to. Typically this
                     will be just { '$ref' => '#' } to indicate that
-                    it refers to the schema it is contained within.
+                    it refers to the schema within which it is contained.
                 ]
             },
             data_schema  => {
@@ -378,13 +378,13 @@ sub any {
                     of which is to provide a way to map services
                     to the objects described in a schema. In OOP terms,
                     you can think of them as methods, while the schema
-                    describes the instance structure.
+                    is a class describing the instance structure.
                 ]
             },
             metadata => {
                 type        => 'object',
                 description => q[
-                    There is often times a need to add addtional stuff
+                    There is often times a need to add additional stuff
                     to a schema, random stuff that doesn't fit into
                     anything else. This is the place to do that.
                 ]
@@ -400,7 +400,7 @@ sub null {
         description => q[
             This is a schema for the 'null' type, it is not
             so much the absence of a value, but a value that
-            explicity represents no value.
+            explicitly represents no value.
         ],
         type        => "schema",
         extends     => { '$ref' => "jackalope/core/types/any" },
@@ -506,7 +506,7 @@ sub string {
         title       => "The 'String' type schema",
         description => q[
             This is a schema for the 'string' type, which is
-            any value that is explcitly cast as a string. This
+            any value that is explicitly cast as a string. This
             means that it can be an entirely numeric string,
             as long it is cast as a string based on the details
             of the implementation language. As with 'boolean'

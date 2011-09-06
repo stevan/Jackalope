@@ -30,6 +30,6 @@ build_requires 'Test::Moose'           => 0;
 build_requires 'Test::Fatal'           => 0;
 build_requires 'Test::Builder'         => 0;
 
-tests('t/*.t');
+tests('t/*.t t/*/*.t');
 
 WriteAll();
