@@ -20,7 +20,7 @@
                 bar => { $ref => "#" }
             }
           }
-      the solution is to make another schema for 'bar' excplictly, however
+      the solution is to make another schema for 'bar' explicitly, however
       we do not properly throw an error now, which is bad.
 
 == LOW PRIORITY ==

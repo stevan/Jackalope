@@ -35,7 +35,7 @@ Additionally the core schema language also supports references (using the JSON
 $ref syntax) and through the use of references it is also possible to 'extend'
 a schema, which is similar to object oriented inheritance, but different.
 
-It should be noted that the schema language draws much of it's syntactic inspiration
+It should be noted that the schema language draws much of its syntactic inspiration
 from [JSON-Schema](http://www.json-schema.org) however the underlying implementation
 and core philosophy differ greatly.
 
