@@ -32,13 +32,13 @@ is(exception{
                     rel           => 'self',
                     href          => '/:id/read',
                     method        => 'GET',
-                    target_schema => { '$ref' => '#' }
+                    target_schema => { '__ref__' => '#' }
                 },
                 "edit" => {
                     rel           => 'edit',
                     href          => '/:id/update',
                     method        => 'GET',
-                    target_schema => { '$ref' => '#' }
+                    target_schema => { '__ref__' => '#' }
                 }
             }
         }
@@ -50,17 +50,17 @@ is(exception{
         {
             id         => 'simple/employee',
             title      => 'This is a simple employee schema',
-            extends    => { '$ref' => 'simple/person' },
+            extends    => { '__ref__' => 'simple/person' },
             properties => {
                 title   => { type => 'string' },
-                manager => { '$ref' => '#' }
+                manager => { '__ref__' => '#' }
             },
             links => {
                 "self" => {
                     rel           => 'self',
                     href          => '/:id',
                     method        => 'GET',
-                    target_schema => { '$ref' => '#' }
+                    target_schema => { '__ref__' => '#' }
                 }
             }
         }

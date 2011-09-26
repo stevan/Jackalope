@@ -187,7 +187,7 @@ sub object {
         error => (Devel::PartialDump::dump $data) . ' is not an object'
     } unless ref $data eq 'HASH';
 
-    my %all_props = map { $_ => undef } grep { !/^__/ } keys %$data;
+    my %all_props = map { $_ => undef } keys %$data;
 
     my $has_properties = exists $schema->{properties} && scalar keys %{ $schema->{properties} };
     my $has_additional_properties = exists $schema->{additional_properties}
@@ -244,7 +244,6 @@ sub schema { (shift)->object( @_ ) }
 sub _check_properties {
     my ($self, $props, $data, $all_props) = @_;
     foreach my $k (keys %$props) {
-        next if $k =~ /^__/;
 
         my $schema = $props->{ $k };
 
@@ -273,7 +272,6 @@ sub _check_properties {
 sub _check_additional_properties {
     my ($self, $props, $data, $all_props) = @_;
     foreach my $k (keys %$props) {
-        next if $k =~ /^__/;
 
         my $schema = $props->{ $k };
 

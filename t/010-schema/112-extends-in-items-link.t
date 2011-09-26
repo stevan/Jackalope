@@ -32,9 +32,9 @@ is(exception{
                         target_schema => {
                             type  => 'array',
                             items => {
-                                extends    => { '$ref' => '/schemas/slot/wrapper' },
+                                extends    => { '__ref__' => '/schemas/slot/wrapper' },
                                 properties => {
-                                    body => { '$ref' => '/schemas/slot' }
+                                    body => { '__ref__' => '/schemas/slot' }
                                 }
                             }
                         },

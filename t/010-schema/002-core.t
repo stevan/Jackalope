@@ -21,7 +21,7 @@ foreach my $type ( qw[ ref linkrel hyperlink ] ) {
     my $schema = $repo->get_compiled_schema_by_uri('jackalope/core/' . $type)->compiled;
     validation_pass(
         $repo->validate(
-            { '$ref' => 'jackalope/core/types/object' },
+            { '__ref__' => 'jackalope/core/types/object' },
             $schema,
         ),
         '... validate the compiled ' . $type . ' type with the schema type'
@@ -31,7 +31,7 @@ foreach my $type ( qw[ ref linkrel hyperlink ] ) {
 
 validation_pass(
     $repo->validate(
-        { '$ref' => 'jackalope/core/spec' },
+        { '__ref__' => 'jackalope/core/spec' },
         $repo->spec->get_spec,
     ),
     '... validate the spec with the spec schema'

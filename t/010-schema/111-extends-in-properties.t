@@ -37,12 +37,12 @@ is(exception{
         {
             id         => 'simple/manager',
             title      => 'This is a simple manager schema',
-            extends    => { '$ref' => 'simple/employee' },
+            extends    => { '__ref__' => 'simple/employee' },
             properties => {
                 title     => { type => 'string' },
                 pay_scale => { type => 'string', literal => 'high' },
                 assistant => {
-                    extends    => { '$ref' => 'simple/employee' },
+                    extends    => { '__ref__' => 'simple/employee' },
                     properties => {
                         pay_scale => { type => 'string', literal => 'medium' },
                     }

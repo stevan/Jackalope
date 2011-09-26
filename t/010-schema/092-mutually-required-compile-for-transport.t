@@ -16,14 +16,14 @@ my @schemas = (
         id         => 'simple/foo',
         type       => 'object',
         properties => {
-            bar => { '$ref' => 'simple/bar' }
+            bar => { '__ref__' => 'simple/bar' }
         }
     },
     {
         id         => 'simple/bar',
         type       => 'object',
         properties => {
-            foo => { '$ref' => 'simple/foo' }
+            foo => { '__ref__' => 'simple/foo' }
         }
     }
 );
@@ -45,14 +45,14 @@ is_deeply(
             id         => 'simple/foo',
             type       => 'object',
             properties => {
-                bar => { '$ref' => 'simple/bar' }
+                bar => { '__ref__' => 'simple/bar' }
             }
         },
         'simple/bar' => {
             id         => 'simple/bar',
             type       => 'object',
             properties => {
-                foo => { '$ref' => 'simple/foo' }
+                foo => { '__ref__' => 'simple/foo' }
             }
         }
     },

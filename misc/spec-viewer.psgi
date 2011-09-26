@@ -21,7 +21,6 @@ sub { [ 200, [], [ $output ]] };
 
 __DATA__
 [%
-    SET ref_marker = '$ref';
     MACRO process_property ( prop ) BLOCK;
         %]<table cellpadding="3" cellspacing="5" border="0" style="border:1px solid #888888">[%
             FOREACH key IN prop.keys.sort.reverse;
@@ -86,7 +85,7 @@ function show_schema_desc (name) {
             <tr>
                 <td>Extends</td>
                 <td>
-                    <a href="javascript:void(0)" onclick="show_schema_desc('[% schema.extends.$ref_marker %]')">[% schema.extends.$ref_marker %]</a>
+                    <a href="javascript:void(0)" onclick="show_schema_desc('[% schema.extends.__ref__ %]')">[% schema.extends.__ref__ %]</a>
                 </td>
             </tr>
         [% END %]

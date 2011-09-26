@@ -20,7 +20,7 @@ foreach my $type ( $repo->spec->valid_types ) {
 
     validation_pass(
         $repo->validate(
-            { '$ref' => 'jackalope/core/types/schema' },
+            { '__ref__' => 'jackalope/core/types/schema' },
             $schema,
         ),
         '... validate the compiled ' . $type . ' schema with the schema type'
@@ -29,7 +29,7 @@ foreach my $type ( $repo->spec->valid_types ) {
 
 validation_pass(
     $repo->validate(
-        { '$ref' => 'jackalope/core/types/schema' },
+        { '__ref__' => 'jackalope/core/types/schema' },
         $repo->get_compiled_schema_by_uri('jackalope/core/types/schema')->compiled,
     ),
     '... validate the compiled schema type with the schema type (bootstrappin)'

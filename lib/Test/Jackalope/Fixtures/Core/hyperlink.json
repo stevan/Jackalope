@@ -1,6 +1,6 @@
 [
     {
-        "schema" : { "$ref" : "jackalope/core/hyperlink" },
+        "schema" : { "__ref__" : "jackalope/core/hyperlink" },
         "pass" : [
             { "method" : "GET", "rel" : "list", "href" : "/" },
             { "method" : "POST", "rel" : "create", "href" : "/" },
