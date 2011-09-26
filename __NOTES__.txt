@@ -9,7 +9,7 @@
           {
             id => "foo/schema",
             properties => {
-                bar => { extends => { $ref => "#" } }
+                bar => { extends => { __ref__ => "#" } }
             }
           }
       will not work correctly because it would lead to a circular loop.
@@ -17,7 +17,7 @@
           {
             id => "foo/schema",
             properties => {
-                bar => { $ref => "#" }
+                bar => { __ref__ => "#" }
             }
           }
       the solution is to make another schema for 'bar' explicitly, however

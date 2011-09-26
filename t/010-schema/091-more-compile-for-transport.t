@@ -44,7 +44,7 @@ my @schemas = (
                 # OUTPUT: a list of slot objects
                 target_schema => {
                     type  => 'array',
-                    items => { '$ref' => '/schemas/slot' }
+                    items => { '__ref__' => '/schemas/slot' }
                 },
             }
         }
@@ -57,7 +57,7 @@ my @schemas = (
             date   => { type => 'number' },
             start  => { type => 'number' },
             end    => { type => 'number' },
-            doctor => { '$ref' => '/schemas/doctor' },
+            doctor => { '__ref__' => '/schemas/doctor' },
         },
         links => {
             # link to book an appointment
@@ -66,8 +66,8 @@ my @schemas = (
                 href          => 'slots/:id',
                 method        => 'POST',
                 uri_schema    => { id => { type => 'number' } },
-                data_schema   => { '$ref' => '/schemas/patient' },    # INPUT : patient object
-                target_schema => { '$ref' => '/schemas/appointment' } # OUTPUT : appointment object
+                data_schema   => { '__ref__' => '/schemas/patient' },    # INPUT : patient object
+                target_schema => { '__ref__' => '/schemas/appointment' } # OUTPUT : appointment object
             }
         }
     },
@@ -76,8 +76,8 @@ my @schemas = (
         id         => '/schemas/appointment',
         type       => 'object',
         properties => {
-            slot    => { '$ref' => '/schemas/slot' },
-            patient => { '$ref' => '/schemas/patient' },
+            slot    => { '__ref__' => '/schemas/slot' },
+            patient => { '__ref__' => '/schemas/patient' },
         },
         links => {
             # way to just view the appointment ...
@@ -86,7 +86,7 @@ my @schemas = (
                 href          => 'appointment/:id',
                 method        => 'GET',
                 uri_schema    => { id => { type => 'number' } },
-                target_schema => { '$ref' => '#' }
+                target_schema => { '__ref__' => '#' }
             },
             # method to cancel the appointment (note the DELETE)
             'appointment.cancel' => {
@@ -160,7 +160,7 @@ is_deeply(
                     },
                     target_schema => {
                         type  => 'array',
-                        items => { '$ref' => '/schemas/slot' }
+                        items => { '__ref__' => '/schemas/slot' }
                     },
                 }
             }
@@ -172,7 +172,7 @@ is_deeply(
                 date   => { type => 'number' },
                 start  => { type => 'number' },
                 end    => { type => 'number' },
-                doctor => { '$ref' => '/schemas/doctor' },
+                doctor => { '__ref__' => '/schemas/doctor' },
             },
             links => {
                 'slot.book' => {
@@ -180,8 +180,8 @@ is_deeply(
                     href          => 'slots/:id',
                     method        => 'POST',
                     uri_schema    => { id => { type => 'number' } },
-                    data_schema   => { '$ref' => '/schemas/patient' },
-                    target_schema => { '$ref' => '/schemas/appointment' }
+                    data_schema   => { '__ref__' => '/schemas/patient' },
+                    target_schema => { '__ref__' => '/schemas/appointment' }
                 }
             }
         },
@@ -189,8 +189,8 @@ is_deeply(
             id         => '/schemas/appointment',
             type       => 'object',
             properties => {
-                slot    => { '$ref' => '/schemas/slot' },
-                patient => { '$ref' => '/schemas/patient' },
+                slot    => { '__ref__' => '/schemas/slot' },
+                patient => { '__ref__' => '/schemas/patient' },
             },
             links => {
                 'appointment.read' => {
@@ -198,7 +198,7 @@ is_deeply(
                     href          => 'appointment/:id',
                     method        => 'GET',
                     uri_schema    => { id => { type => 'number' } },
-                    target_schema => { '$ref' => '#' }
+                    target_schema => { '__ref__' => '#' }
                 },
                 'appointment.cancel' => {
                     rel          => 'appointment.cancel',
@@ -248,7 +248,7 @@ is_deeply(
                     },
                     target_schema => {
                         type  => 'array',
-                        items => { '$ref' => '/schemas/slot' }
+                        items => { '__ref__' => '/schemas/slot' }
                     },
                 }
             }
@@ -260,7 +260,7 @@ is_deeply(
                 date   => { type => 'number' },
                 start  => { type => 'number' },
                 end    => { type => 'number' },
-                doctor => { '$ref' => '/schemas/doctor' },
+                doctor => { '__ref__' => '/schemas/doctor' },
             },
             links => {
                 'slot.book' => {
@@ -268,8 +268,8 @@ is_deeply(
                     href          => 'slots/:id',
                     method        => 'POST',
                     uri_schema    => { id => { type => 'number' } },
-                    data_schema   => { '$ref' => '/schemas/patient' },
-                    target_schema => { '$ref' => '/schemas/appointment' }
+                    data_schema   => { '__ref__' => '/schemas/patient' },
+                    target_schema => { '__ref__' => '/schemas/appointment' }
                 }
             }
         },
@@ -277,8 +277,8 @@ is_deeply(
             id         => '/schemas/appointment',
             type       => 'object',
             properties => {
-                slot    => { '$ref' => '/schemas/slot' },
-                patient => { '$ref' => '/schemas/patient' },
+                slot    => { '__ref__' => '/schemas/slot' },
+                patient => { '__ref__' => '/schemas/patient' },
             },
             links => {
                 'appointment.read' => {
@@ -286,7 +286,7 @@ is_deeply(
                     href          => 'appointment/:id',
                     method        => 'GET',
                     uri_schema    => { id => { type => 'number' } },
-                    target_schema => { '$ref' => '#' }
+                    target_schema => { '__ref__' => '#' }
                 },
                 'appointment.cancel' => {
                     rel          => 'appointment.cancel',
@@ -336,7 +336,7 @@ is_deeply(
                     },
                     target_schema => {
                         type  => 'array',
-                        items => { '$ref' => '/schemas/slot' }
+                        items => { '__ref__' => '/schemas/slot' }
                     },
                 }
             }
@@ -348,7 +348,7 @@ is_deeply(
                 date   => { type => 'number' },
                 start  => { type => 'number' },
                 end    => { type => 'number' },
-                doctor => { '$ref' => '/schemas/doctor' },
+                doctor => { '__ref__' => '/schemas/doctor' },
             },
             links => {
                 'slot.book' => {
@@ -356,8 +356,8 @@ is_deeply(
                     href          => 'slots/:id',
                     method        => 'POST',
                     uri_schema    => { id => { type => 'number' } },
-                    data_schema   => { '$ref' => '/schemas/patient' },
-                    target_schema => { '$ref' => '/schemas/appointment' }
+                    data_schema   => { '__ref__' => '/schemas/patient' },
+                    target_schema => { '__ref__' => '/schemas/appointment' }
                 }
             }
         },
@@ -365,8 +365,8 @@ is_deeply(
             id         => '/schemas/appointment',
             type       => 'object',
             properties => {
-                slot    => { '$ref' => '/schemas/slot' },
-                patient => { '$ref' => '/schemas/patient' },
+                slot    => { '__ref__' => '/schemas/slot' },
+                patient => { '__ref__' => '/schemas/patient' },
             },
             links => {
                 'appointment.read' => {
@@ -374,7 +374,7 @@ is_deeply(
                     href          => 'appointment/:id',
                     method        => 'GET',
                     uri_schema    => { id => { type => 'number' } },
-                    target_schema => { '$ref' => '#' }
+                    target_schema => { '__ref__' => '#' }
                 },
                 'appointment.cancel' => {
                     rel          => 'appointment.cancel',

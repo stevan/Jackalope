@@ -89,7 +89,7 @@ sub get_compiled_schema_by_ref {
     ($self->_is_ref( $ref ))
         || confess "$ref is not a ref";
     my $schema = $self->_resolve_ref( $ref, $self->_compiled_schemas )
-        || confess "Could not find schema for " . $ref->{'$ref'};
+        || confess "Could not find schema for " . $ref->{'__ref__'};
     $schema;
 }
 
@@ -195,7 +195,7 @@ sub _compile_schema {
 
     if ($self->_is_ref( $schema )) {
         $schema = $self->_resolve_ref( $schema, $self->_compiled_schemas )
-            || confess "Could not find schema for " . $schema->{'$ref'};
+            || confess "Could not find schema for " . $schema->{'__ref__'};
     }
     else {
         $schema = $self->_prepare_schema_for_compiling( $schema );
@@ -284,12 +284,12 @@ sub _create_transport_schema_map {
         ignore_return_values => 1,
         hash => sub {
             my ($v, $data) = @_;
-            if (exists $data->{'$ref'} && $self->_is_ref( $data )) {
+            if (exists $data->{'__ref__'} && $self->_is_ref( $data )) {
                 unless ($self->_is_self_ref( $data )) {
-                    unless ( exists $transport_map->{ $data->{'$ref'} } ) {
+                    unless ( exists $transport_map->{ $data->{'__ref__'} } ) {
                         my $s = $self->_resolve_ref( $data, $schema_map );
                         (defined $s)
-                            || confess "Could not find schema for " . $data->{'$ref'};
+                            || confess "Could not find schema for " . $data->{'__ref__'};
                         unless ( $s->is_compiled_for_transport ) {
                             $s = $self->_compile_schema_for_tranport( $s );
                         }
@@ -314,7 +314,7 @@ sub _flatten_extends {
     if ( exists $schema->raw->{'extends'} && $self->_is_ref( $schema->raw->{'extends'} ) ) {
         my $super_schema = $self->_resolve_ref( $schema->raw->{'extends'}, $schema_map );
         (defined $super_schema)
-            || confess "Could not find '" . $schema->raw->{'extends'}->{'$ref'} . "' schema to extend";
+            || confess "Could not find '" . $schema->raw->{'extends'}->{'__ref__'} . "' schema to extend";
         $self->_merge_schema(
             $which,
             $schema,
@@ -344,7 +344,7 @@ sub _merge_schema {
     if ( $super->raw->{'extends'} && $self->_is_ref( $super->raw->{'extends'} ) ) {
         my $super_schema = $self->_resolve_ref( $super->raw->{'extends'}, $schema_map );
         (defined $super_schema)
-            || confess "Could not find '" . $super->raw->{'extends'}->{'$ref'} . "' schema to extend";
+            || confess "Could not find '" . $super->raw->{'extends'}->{'__ref__'} . "' schema to extend";
         $self->_merge_schema(
             $which,
             $schema,
@@ -378,14 +378,14 @@ sub _resolve_refs {
         ignore_return_values => 1,
         hash => sub {
             my ($v, $data) = @_;
-            if (exists $data->{'$ref'} && $self->_is_ref( $data )) {
+            if (exists $data->{'__ref__'} && $self->_is_ref( $data )) {
                 if ($self->_is_self_ref( $data )) {
                     $_ = $schema->$which();
                 }
                 else {
                     my $s = $self->_resolve_ref( $data, $schema_map );
                     (defined $s)
-                        || confess "Could not find schema for " . $data->{'$ref'};
+                        || confess "Could not find schema for " . $data->{'__ref__'};
                     $_ = $s->$which();
                 }
             }
@@ -406,7 +406,7 @@ sub _resolve_embedded_extends {
                 my $new_schema_map  = { %$schema_map, '#' => $schema };
                 my $super_schema    = $self->_resolve_ref( $data->{'extends'}, $new_schema_map );
                 (defined $super_schema)
-                    || confess "Could not find '" . $data->{'extends'}->{'$ref'} . "' schema to extend";
+                    || confess "Could not find '" . $data->{'extends'}->{'__ref__'} . "' schema to extend";
                 $self->_merge_schema(
                     $which,
                     $embedded_schema,
@@ -429,17 +429,17 @@ sub _resolve_embedded_extends {
 
 sub _resolve_ref {
     my ($self, $ref, $schema_map) = @_;
-    return $schema_map->{ $ref->{'$ref'} };
+    return $schema_map->{ $ref->{'__ref__'} };
 }
 
 sub _is_ref {
     my ($self, $ref) = @_;
-    return (exists $ref->{'$ref'} && ((scalar keys %$ref) == 1) && not ref $ref->{'$ref'}) ? 1 : 0;
+    return (exists $ref->{'__ref__'} && ((scalar keys %$ref) == 1) && not ref $ref->{'__ref__'}) ? 1 : 0;
 }
 
 sub _is_self_ref {
     my ($self, $ref) = @_;
-    return ($self->_is_ref( $ref ) && $ref->{'$ref'} eq '#') ? 1 : 0;
+    return ($self->_is_ref( $ref ) && $ref->{'__ref__'} eq '#') ? 1 : 0;
 }
 
 

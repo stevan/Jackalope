@@ -32,7 +32,7 @@ support for a set of core types which are shown below in the type hierarchy.
           Schema
 
 Additionally the core schema language also supports references (using the JSON
-$ref syntax) and through the use of references it is also possible to 'extend'
+__ref__ syntax) and through the use of references it is also possible to 'extend'
 a schema, which is similar to object oriented inheritance, but different.
 
 It should be noted that the schema language draws much of its syntactic inspiration

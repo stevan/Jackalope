@@ -33,7 +33,7 @@ is(exception{
                     href        => '/create',
                     method      => 'PUT',
                     data_schema => {
-                        extends    => { '$ref' => '#' },
+                        extends    => { '__ref__' => '#' },
                         properties => {
                             id => { type => 'null' }
                         },

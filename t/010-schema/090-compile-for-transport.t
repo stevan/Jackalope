@@ -28,30 +28,30 @@ my @schemas = (
                 rel           => 'self',
                 href          => '/:id/read',
                 method        => 'GET',
-                target_schema => { '$ref' => '#' }
+                target_schema => { '__ref__' => '#' }
             },
             "edit" => {
                 rel           => 'edit',
                 href          => '/:id/update',
                 method        => 'GET',
-                target_schema => { '$ref' => '#' }
+                target_schema => { '__ref__' => '#' }
             }
         }
     },
     {
         id         => 'simple/employee',
         title      => 'This is a simple employee schema',
-        extends    => { '$ref' => 'simple/person' },
+        extends    => { '__ref__' => 'simple/person' },
         properties => {
             title   => { type => 'string' },
-            manager => { '$ref' => '#' }
+            manager => { '__ref__' => '#' }
         },
         links => {
             "self" => {
                 rel           => 'self',
                 href          => '/:id',
                 method        => 'GET',
-                target_schema => { '$ref' => '#' }
+                target_schema => { '__ref__' => '#' }
             }
         }
     }
@@ -80,7 +80,7 @@ is_deeply(
                 age        => { type => 'integer', greater_than => 0 },
                 sex        => { type => 'string', enum => [qw[ male female ]] },
                 title      => { type => 'string' },
-                manager    => { '$ref' => '#' }
+                manager    => { '__ref__' => '#' }
             },
             additional_properties => {},
             links => {
@@ -88,13 +88,13 @@ is_deeply(
                     rel           => 'self',
                     href          => '/:id',
                     method        => 'GET',
-                    target_schema => { '$ref' => '#' }
+                    target_schema => { '__ref__' => '#' }
                 },
                 "edit" => {
                     rel           => 'edit',
                     href          => '/:id/update',
                     method        => 'GET',
-                    target_schema => { '$ref' => '#' }
+                    target_schema => { '__ref__' => '#' }
                 }
             }
         }

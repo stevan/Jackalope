@@ -150,7 +150,7 @@ sub ref {
         description => q[
             This is an object to represent a 'reference'
             to another object. By convention, the value
-            stored in $ref is the 'id' of another object.
+            stored in __ref__ is the 'id' of another object.
             Additionally the value of '#' is also
             acceptable to indicate a reference to
             the containing schema.
@@ -164,7 +164,7 @@ sub ref {
         ],
         type        => "object",
         properties  => {
-            '$ref' => { type => "string", 'format' => "uri" }
+            '__ref__' => { type => "string", 'format' => "uri" }
         }
     };
 }
@@ -234,7 +234,7 @@ sub linkrel {
                 description => q[
                     This is a schema (or a reference to a schema),
                     of the resource being linked to. Typically this
-                    will be just { '$ref' => '#' } to indicate that
+                    will be just { '__ref__' => '#' } to indicate that
                     it refers to the schema within which it is contained.
                 ]
             },
@@ -372,7 +372,7 @@ sub any {
             },
             links => {
                 type        => "object",
-                items       => { '$ref' => "jackalope/core/linkrel" },
+                items       => { '__ref__' => "jackalope/core/linkrel" },
                 description => q[
                     This is an object of 'linkrel' objects, the purpose
                     of which is to provide a way to map services
@@ -403,7 +403,7 @@ sub null {
             explicitly represents no value.
         ],
         type        => "schema",
-        extends     => { '$ref' => "jackalope/core/types/any" },
+        extends     => { '__ref__' => "jackalope/core/types/any" },
         properties  => {
             type => { type => "string", literal => "null" }
         }
@@ -426,7 +426,7 @@ sub boolean {
             so as to remove those language specific quirks.
         ],
         type        => "schema",
-        extends     => { '$ref' => "jackalope/core/types/any" },
+        extends     => { '__ref__' => "jackalope/core/types/any" },
         properties  => {
             type => { type => "string", literal => "boolean" }
         }
@@ -448,7 +448,7 @@ sub number {
             to help improve interoperability.
         ],
         type        => "schema",
-        extends     => { '$ref' => "jackalope/core/types/any" },
+        extends     => { '__ref__' => "jackalope/core/types/any" },
         properties  => {
             type => { type => "string", literal => "number" },
         },
@@ -480,7 +480,7 @@ sub integer {
             values.
         ],
         type        => "schema",
-        extends     => { '$ref' => "jackalope/core/types/number" },
+        extends     => { '__ref__' => "jackalope/core/types/number" },
         properties  => {
             type => { type => "string", literal => "integer" },
         },
@@ -516,7 +516,7 @@ sub string {
             for better interoperability.
         ],
         type        => "schema",
-        extends     => { '$ref' => "jackalope/core/types/any" },
+        extends     => { '__ref__' => "jackalope/core/types/any" },
         properties  => {
             type => { type => "string", literal => "string" },
         },
@@ -552,7 +552,7 @@ sub array {
             constrain the list to be more homogenous.
         ],
         type        => "schema",
-        extends     => { '$ref' => "jackalope/core/types/any" },
+        extends     => { '__ref__' => "jackalope/core/types/any" },
         properties  => {
             type => { type => "string", literal => "array" },
         },
@@ -585,7 +585,7 @@ sub object {
             all of which are essentially the same thing.
         ],
         type        => "schema",
-        extends     => { '$ref' => "jackalope/core/types/any" },
+        extends     => { '__ref__' => "jackalope/core/types/any" },
         properties  => {
             type => { type => "string", literal => "object" },
         },
@@ -639,7 +639,7 @@ sub schema {
             composed entirely of turtles all the way down.
         ],
         type        => "schema",
-        extends     => { '$ref' => "jackalope/core/types/object" },
+        extends     => { '__ref__' => "jackalope/core/types/object" },
         properties  => {
             type => { type => "string", literal => "schema" },
         },

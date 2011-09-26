@@ -1,6 +1,6 @@
 [
     {
-        "schema" : { "$ref" : "jackalope/core/linkrel" },
+        "schema" : { "__ref__" : "jackalope/core/linkrel" },
         "pass" : [
             {
                 "rel"    : "self",
@@ -16,19 +16,19 @@
                 "rel"           : "self",
                 "method"        : "GET",
                 "href"          : "product/:id/view",
-                "target_schema" : { "$ref" : "#" }
+                "target_schema" : { "__ref__" : "#" }
             },
             {
                 "rel"         : "edit",
                 "href"        : "product/:id/update",
                 "method"      : "POST",
-                "data_schema" : { "$ref" : "#" }
+                "data_schema" : { "__ref__" : "#" }
             },
             {
                 "rel"         : "create",
                 "href"        : "product/create",
                 "method"      : "POST",
-                "data_schema" : { "$ref" : "/my_schemas/product" },
+                "data_schema" : { "__ref__" : "/my_schemas/product" },
                 "title"       : "Create Product",
                 "description" : "Create a product resource with this",
                 "metadata"    : {
@@ -46,8 +46,8 @@
             }
         ],
         "fail" : [
-            { "$ref" : [] },
-            { "$ref" : "test", "foo" : "bar" },
+            { "__ref__" : [] },
+            { "__ref__" : "test", "foo" : "bar" },
             { "rel" : "self" },
             { "href" : ":id" }
         ]

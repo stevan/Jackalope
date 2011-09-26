@@ -1,12 +1,12 @@
 [
     {
-        "schema" : { "$ref" : "jackalope/core/ref" },
+        "schema" : { "__ref__" : "jackalope/core/ref" },
         "pass" : [
-            { "$ref" : "jackalope/core/ref" }
+            { "__ref__" : "jackalope/core/ref" }
         ],
         "fail" : [
-            { "$ref" : [] },
-            { "$ref" : "test", "foo" : "bar" }
+            { "__ref__" : [] },
+            { "__ref__" : "test", "foo" : "bar" }
         ]
     }
 ]
