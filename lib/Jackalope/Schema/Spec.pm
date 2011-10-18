@@ -79,6 +79,7 @@ sub _build_spec {
     }
 
     return +{
+        name       => $self->meta->name,
         version    => ${ $self->meta->get_package_symbol('$VERSION') } + 0,
         authority  => ${ $self->meta->get_package_symbol('$AUTHORITY') },
         typemap    => $typemap,
@@ -107,6 +108,7 @@ sub spec {
         description => "This is a schema to describe the full spec",
         type        => "object",
         properties  => {
+            name      => { type => 'string' },
             version   => { type => 'number' },
             authority => { type => 'string' },
             typemap   => {
