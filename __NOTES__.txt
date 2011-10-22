@@ -1,4 +1,6 @@
 
+http://www.infoq.com/presentations/Hypermedia-Services-for-Systems-Integration
+
 = TODOS =
 
 == KNOWN ISSUES ==
