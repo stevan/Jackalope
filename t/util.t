@@ -2,13 +2,13 @@ use Test::More;
 
 BEGIN { use_ok('Jackalope'); use_ok('JSON::XS'); }
 
-isa_ok(Jackalope::Util::true, JSON::XS::Boolean);
+isa_ok(Jackalope::Util::true, 'JSON::XS::Boolean');
 is(Jackalope::Util::true, JSON::XS::true, 'True value is true');
 isnt(Jackalope::Util::true, JSON::XS::false, 'True value is not false');
 is(Jackalope::Util::true, 1, 'One value coerces to boolean true');
 isnt(Jackalope::Util::true, 0, 'Zero value is not true');
 
-isa_ok(Jackalope::Util::false, JSON::XS::Boolean);
+isa_ok(Jackalope::Util::false, 'JSON::XS::Boolean');
 is(Jackalope::Util::false, JSON::XS::false, 'False value is false');
 isnt(Jackalope::Util::false, JSON::XS::true, 'False value is not true');
 is(Jackalope::Util::false, 0, 'Zero value coerces to boolean false');
