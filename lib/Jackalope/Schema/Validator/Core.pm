@@ -18,15 +18,18 @@ has 'formatters' => (
     lazy    => 1,
     default => sub {
         +{
-            uri          => 1,
-            uri_template => 1,
-            regex        => 1,
-            uuid         => 1,
-            digest       => 1,
+            uri          => qr/.*/, # let anything through for now
+            uri_template => qr/.*/, # same here, perhaps do more later on
+            regex        => qr/.*/, # pretty much let anything pass
+            # we are checking the string format of UUIDs
+            uuid         => qr/[0-9A-Z]{8}-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{12}/i,
+            # we are checking against a hex digest here
+            digest       => qr/[0-9a-z]{64}/,
         }
     },
     handles => {
-        'is_valid_formatter' => 'exists'
+        'is_valid_formatter' => 'exists',
+        'get_formatter_for'  => 'get'
     }
 );
 
@@ -130,6 +133,11 @@ sub string {
         return {
             error => $schema->{format} . ' is not one of the built-in formats ' . (Devel::PartialDump::dump $self->formatters)
         } unless $self->is_valid_formatter( $schema->{format} );
+
+        my $formatter = $self->get_formatter_for( $schema->{format} );
+        return {
+            error => $data . ' does not match the format (' . $schema->{format} . ')'
+        } if $data !~ /$formatter/;
     }
     if (exists $schema->{enum}) {
         return {
