@@ -6,7 +6,7 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 use Jackalope::Util;
 
-has 'valid_formatters' => (
+has 'valid_formats' => (
     is      => 'ro',
     isa     => 'ArrayRef',
     default => sub {
@@ -85,7 +85,7 @@ sub _build_spec {
         typemap    => $typemap,
         schema_map => $schema_map,
         metadata   => {
-            valid_formatters => $self->valid_formatters,
+            valid_formats => $self->valid_formats,
         }
     };
 }
@@ -529,8 +529,8 @@ sub string {
             pattern    => { type => "string", 'format' => "regex", description => "A regular expression that can be checked against the string" },
             'format'   => {
                 type        => "string",
-                enum        => [ @{ $self->valid_formatters } ],
-                description => "This is one of a set of built-in formatters",
+                enum        => [ @{ $self->valid_formats } ],
+                description => "This is one of a set of built-in formats",
             },
             enum       => {
                 type        => "array",

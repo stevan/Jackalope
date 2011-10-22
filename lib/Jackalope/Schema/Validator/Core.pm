@@ -11,7 +11,7 @@ use List::AllUtils     ();
 use Devel::PartialDump ();
 use Data::Peek         ();
 
-has 'formatters' => (
+has 'formats' => (
     traits  => [ 'Hash' ],
     is      => 'ro',
     isa     => 'HashRef',
@@ -28,8 +28,8 @@ has 'formatters' => (
         }
     },
     handles => {
-        'is_valid_formatter' => 'exists',
-        'get_formatter_for'  => 'get'
+        'is_valid_format'     => 'exists',
+        'get_format_verifier' => 'get'
     }
 );
 
@@ -131,10 +131,10 @@ sub string {
     }
     if (exists $schema->{format}) {
         return {
-            error => $schema->{format} . ' is not one of the built-in formats ' . (Devel::PartialDump::dump $self->formatters)
-        } unless $self->is_valid_formatter( $schema->{format} );
+            error => $schema->{format} . ' is not one of the built-in formats ' . (Devel::PartialDump::dump $self->formats)
+        } unless $self->is_valid_format( $schema->{format} );
 
-        my $formatter = $self->get_formatter_for( $schema->{format} );
+        my $formatter = $self->get_format_verifier( $schema->{format} );
         return {
             error => $data . ' does not match the format (' . $schema->{format} . ')'
         } if $data !~ /$formatter/;
