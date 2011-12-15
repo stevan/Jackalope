@@ -29,6 +29,7 @@ build_requires 'Test::More'            => 0;
 build_requires 'Test::Moose'           => 0;
 build_requires 'Test::Fatal'           => 0;
 build_requires 'Test::Builder'         => 0;
+build_requires 'Resource::Pack'        => 0;
 
 tests('t/*.t t/*/*.t');
 
